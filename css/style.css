@@ -26,12 +26,6 @@
   --seg-on-shadow: none;
   --tseg-on: #3a3632;
   --tseg-on-text: #ede8e1;
-  --overlay: rgba(24, 22, 20, 0.82);
-  --overlay-text: #d4cec6;
-  --overlay-off: #8c857c;
-  --overlay-on: #ede8e1;
-  --overlay-on-text: #1d1b19;
-  --overlay-toggle: rgba(237, 232, 225, 0.14);
   --track: #34302c;
   --track-done: #7c756d;
   --track-tail: #262421;
@@ -72,12 +66,6 @@
   --seg-on-shadow: 0 1px 2px rgba(30, 29, 27, 0.14);
   --tseg-on: #1e1d1b;
   --tseg-on-text: #ffffff;
-  --overlay: rgba(255, 255, 255, 0.9);
-  --overlay-text: #3a3835;
-  --overlay-off: #6f6b65;
-  --overlay-on: #1e1d1b;
-  --overlay-on-text: #ffffff;
-  --overlay-toggle: #ebe9e5;
   --track: #e3e1dd;
   --track-done: #8e8a84;
   --track-tail: #eceae7;
@@ -120,7 +108,7 @@ kbd {
 
 #app {
   display: grid;
-  grid-template-columns: 264px minmax(0, 1fr) 372px;
+  grid-template-columns: 256px minmax(0, 1fr) 360px;
   gap: 12px;
   padding: 12px;
   height: 100vh;
@@ -136,7 +124,7 @@ kbd {
   white-space: nowrap; transition: background-color 150ms var(--ease), color 150ms var(--ease);
 }
 .seg button:hover { color: var(--text); }
-.seg button.on { background: var(--seg-on); color: var(--seg-on-text); box-shadow: var(--seg-on-shadow); }
+.seg button.on, .seg button[aria-pressed="true"] { background: var(--seg-on); color: var(--seg-on-text); box-shadow: var(--seg-on-shadow); }
 
 .round-btn {
   display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 50%;
@@ -185,35 +173,25 @@ kbd {
 #stage { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; }
 
 .toolbar {
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
-  padding: 6px 8px 2px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 16px;
+  padding: 0 4px 0 8px;
 }
 .play-head { min-width: 0; }
-.play-meta { margin: 0; font-size: 13.5px; color: var(--text-3); }
-.play-head h2 { margin: 2px 0 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; }
+.play-meta { margin: 0; font-size: 13px; line-height: 1.4; color: var(--text-3); }
+.play-head h2 { margin: 1px 0 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tool-right { display: flex; align-items: center; gap: 8px; }
 .toolbar .seg { padding: 4px; background: var(--panel); }
 .toolbar .seg button { min-height: 36px; min-width: 44px; padding: 0 12px; }
 .toolbar .seg button.on { background: var(--tseg-on); color: var(--tseg-on-text); box-shadow: none; }
 
-/* 3D 뷰 카드: 위쪽 띠에 카메라 / 표시 옵션, 그 아래 캔버스.
-   띠와 캔버스 배경이 같은 색이라 버튼이 코트 위에 떠 있는 것처럼 보이지만 선수를 가리지 않는다. */
+/* 3D 뷰 카드: 코트 위에는 아무 컨트롤도 올리지 않는다 (모서리 선수를 가리지 않도록) */
 .view {
-  flex: 1; min-height: 0; display: flex; flex-direction: column;
+  position: relative; flex: 1; min-height: 0;
   border-radius: var(--r-xl); overflow: hidden; background: var(--scene);
   transition: background-color 250ms var(--ease);
 }
-#viewport { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--scene); }
-#viewport canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; }
-.view-tools { order: -1; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; padding: 12px 12px 4px; }
-.view-tools .seg { padding: 4px; background: var(--overlay); }
-.view-tools .seg button { min-height: 36px; padding: 0 14px; color: var(--overlay-text); }
-.view-tools .seg button:hover { color: var(--text); }
-.cam-bar button.on { background: var(--overlay-on); color: var(--overlay-on-text); box-shadow: none; }
-.cam-bar button.on:hover { color: var(--overlay-on-text); }
-.toggles { margin-left: auto; }
-.toggles button[aria-pressed="true"] { background: var(--overlay-toggle); color: var(--text); }
-.toggles button[aria-pressed="false"] { color: var(--overlay-off); text-decoration: line-through; text-decoration-thickness: 1px; }
+#viewport { position: absolute; inset: 0; overflow: hidden; }
+#viewport canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
 #score-pop {
   position: absolute; left: 50%; top: 36%; transform: translate(-50%, -50%) scale(0.7);
@@ -230,7 +208,7 @@ kbd {
 #loading.hide { opacity: 0; pointer-events: none; }
 
 /* 설명(캡션) */
-#caption { padding: 18px 22px 20px; min-height: 132px; }
+#caption { padding: 14px 22px 16px; min-height: 112px; }
 .cap-top { display: flex; align-items: center; gap: 12px; min-height: 36px; flex-wrap: wrap; }
 .cap-step {
   flex: none; padding: 3px 11px; border-radius: 999px; background: var(--accent-soft);
@@ -253,7 +231,7 @@ kbd {
 }
 #btn-skip:hover { filter: brightness(1.12); }
 #btn-skip kbd { background: var(--panel); }
-#cap-text { margin: 12px 0 0; color: var(--text-body); font-size: 16px; line-height: 1.85; max-width: 68ch; }
+#cap-text { margin: 8px 0 0; color: var(--text-body); font-size: 15.5px; line-height: 1.75; max-width: 72ch; }
 #cap-text b, .summary b, .block b, .bullets b { color: var(--text); font-weight: 600; }
 
 /* 문장 속 선수 칩 */
@@ -265,7 +243,7 @@ kbd {
 .pc.d { background: var(--def); color: #fff; border-radius: 7px; min-width: 26px; }
 
 /* 재생 컨트롤 */
-.controls { display: flex; flex-direction: column; gap: 12px; padding: 14px 18px; }
+.controls { display: flex; flex-direction: column; gap: 10px; padding: 10px 18px 12px; }
 #transport { display: flex; align-items: center; gap: 16px; }
 .t-buttons { display: flex; gap: 4px; align-items: center; }
 .icon {
@@ -276,6 +254,8 @@ kbd {
 .icon:hover { background: var(--raised); color: var(--text); }
 .icon.play { width: 52px; height: 52px; background: var(--accent); color: var(--on-accent); margin: 0 4px; }
 .icon.play:hover { background: var(--accent); color: var(--on-accent); transform: scale(1.04); }
+.icon.loop svg { width: 18px; height: 18px; }
+.icon.loop[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); }
 
 .timeline { position: relative; flex: 1; min-width: 160px; height: 40px; cursor: pointer; touch-action: none; }
 .tl-segs { position: absolute; inset: 0; display: flex; gap: 6px; }
@@ -302,18 +282,13 @@ kbd {
 /* 재생 설정 */
 #settings {
   display: flex; align-items: center; gap: 10px 20px; flex-wrap: wrap;
-  padding-top: 12px; border-top: 1px solid var(--line);
+  padding-top: 10px; border-top: 1px solid var(--line);
 }
+#settings .seg button { padding: 0 11px; }
+.toggles { margin-left: auto; }
+.toggles button[aria-pressed="false"] { color: var(--text-3); text-decoration: line-through; text-decoration-thickness: 1px; }
 .set-group { display: flex; align-items: center; gap: 10px; }
 .set-label { font-size: 13px; color: var(--text-3); white-space: nowrap; }
-.loop-btn {
-  margin-left: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px;
-  border-radius: 999px; background: var(--seg); color: var(--text-2); font-size: 13px; font-weight: 500;
-  transition: background-color 150ms var(--ease), color 150ms var(--ease);
-}
-.loop-btn svg { width: 16px; height: 16px; }
-.loop-btn:hover { color: var(--text); }
-.loop-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); }
 
 /* ───────── Info panel ───────── */
 #info { overflow-y: auto; padding: 24px 24px 28px; min-height: 0; }
@@ -372,9 +347,13 @@ kbd {
 .keys-list dd { margin: 0; font-size: 14px; color: var(--text-sub); }
 
 /* ───────── Responsive ───────── */
-@media (max-width: 1360px) {
-  #app { grid-template-columns: 240px minmax(0, 1fr) 340px; }
-  .view-tools .seg button { padding: 0 11px; }
+@media (max-width: 1440px) {
+  #app { grid-template-columns: 236px minmax(0, 1fr) 328px; }
+  .toolbar .cam-bar button { padding: 0 10px; }
+}
+@media (max-width: 1280px) {
+  .play-meta { display: none; }
+  .play-head h2 { font-size: 22px; }
 }
 @media (max-width: 1100px) {
   #app { display: flex; flex-direction: column; height: auto; }
@@ -394,25 +373,23 @@ kbd {
   .play-item:hover { background: var(--raised-2); }
   .play-item.active, .play-item.active:hover { background: var(--text); color: var(--bg); font-weight: 500; }
   .view { flex: none; height: 60vh; min-height: 320px; }
+  .toolbar { padding: 0 4px; }
+  .play-meta { display: block; }
   #info { overflow: visible; padding: 22px 18px 28px; }
 }
 @media (max-width: 680px) {
   #app { gap: 10px; }
   .brand-sub { display: none; }
   .brand-mark { width: 34px; height: 34px; }
-  .toolbar { padding: 2px 4px 0; align-items: center; }
-  .play-head h2 { font-size: 22px; }
-  .view { height: auto; min-height: 0; gap: 8px; overflow: visible; border-radius: 0; background: none; }
-  #viewport { flex: none; height: 60vw; min-height: 220px; border-radius: 18px; }
-  .view-tools {
-    order: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
-    margin: 0 -12px; padding: 0 12px;
-  }
-  .view-tools::-webkit-scrollbar { display: none; }
-  .view-tools .seg { flex: none; background: var(--panel); }
+  .toolbar { flex-wrap: wrap; }
+  .play-head { flex: 1; }
+  .play-head h2 { font-size: 22px; white-space: normal; }
+  .tool-right { display: contents; }
+  .toolbar .cam-bar { order: 3; flex: 1 0 100%; overflow-x: auto; scrollbar-width: none; }
+  .toolbar .cam-bar::-webkit-scrollbar { display: none; }
+  .toolbar .cam-bar button { flex: 1 0 auto; padding: 0 10px; }
+  .view { height: 52vh; min-height: 300px; border-radius: 18px; }
   .toggles { margin-left: 0; }
-  .toggles button[aria-pressed="true"] { background: var(--raised-2); }
-  .cam-bar button.on { background: var(--tseg-on); color: var(--tseg-on-text); }
   #caption { padding: 14px 16px 16px; border-radius: 18px; }
   #cap-title { font-size: 16.5px; }
   #cap-text { font-size: 15px; line-height: 1.75; }
@@ -426,7 +403,6 @@ kbd {
   .time { min-width: 0; }
   #settings { gap: 10px 16px; }
   .set-group { width: 100%; justify-content: space-between; }
-  .loop-btn { margin-left: 0; }
   #score-pop { font-size: 64px; }
 }
 @media (prefers-reduced-motion: reduce) {
