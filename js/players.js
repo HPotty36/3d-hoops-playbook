@@ -2,8 +2,8 @@
 import * as THREE from 'three';
 
 export const TEAM = {
-  off: { jersey: 0xf97316, shorts: 0xc2410c, css: '#f97316', text: '#1a0a00' },   // orange-500 / 700
-  def: { jersey: 0x3b82f6, shorts: 0x1d4ed8, css: '#3b82f6', text: '#ffffff' },   // blue-500 / 700
+  off: { jersey: 0xee7a3a, shorts: 0xc2501c, css: '#ee7a3a', text: '#2a1608' },   // UI 강조색과 같은 주황
+  def: { jersey: 0x3a6fd8, shorts: 0x1f4bb0, css: '#3a6fd8', text: '#ffffff' },   // UI 수비 칩과 같은 파랑
 };
 const MANNEQUIN = 0x4a4f57;   // 그래파이트 톤 마네킹
 const SHOE = 0x111214;
@@ -16,18 +16,18 @@ function labelTexture(id) {
   const off = id[0] === 'o';
   const team = off ? TEAM.off : TEAM.def;
   g.fillStyle = team.css;
-  g.strokeStyle = '#0a0b0d';
+  g.strokeStyle = '#1d1b19';
   g.lineWidth = 6;
   g.beginPath();
   if (off) g.arc(64, 64, 52, 0, Math.PI * 2);
-  else g.roundRect(14, 14, 100, 100, 20);
+  else g.roundRect(14, 14, 100, 100, 30);
   g.fill();
   g.stroke();
   g.fillStyle = team.text;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.font = `700 ${off ? 76 : 60}px "Barlow Condensed", sans-serif`;
-  g.fillText(off ? id[1] : `X${id[1]}`, 64, 68);
+  g.font = `600 ${off ? 68 : 50}px "Rubik", sans-serif`;
+  g.fillText(off ? id[1] : `X${id[1]}`, 64, 67);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;

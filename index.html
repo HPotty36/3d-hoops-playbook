@@ -5,11 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>3D Hoops Playbook</title>
   <meta name="description" content="Interactive 3D playbook of common pro-basketball offensive sets, replayed step by step. 프로 농구 공격 작전을 3D로 단계별 재생하는 비공식 교육용 플레이북." />
-  <meta name="theme-color" content="#0a0b0d" />
+  <meta name="theme-color" content="#141311" />
+  <script>
+    // 저장된 테마(없으면 시스템 설정)를 첫 화면부터 적용해 깜빡임을 막는다
+    (function () {
+      var t;
+      try { t = (JSON.parse(localStorage.getItem('hoops-playbook:prefs')) || {}).theme; } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
   <link rel="icon" type="image/svg+xml" href="assets/logo-mark.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <link rel="stylesheet" href="css/style.css" />
   <script type="importmap">
@@ -25,36 +34,44 @@
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <symbol id="i-mark" viewBox="0 0 48 48">
-        <rect width="48" height="48" rx="11" fill="#F97316" />
-        <rect x="11" y="10" width="7" height="28" rx="2.5" fill="#0B0C0E" />
-        <rect x="30" y="10" width="7" height="28" rx="2.5" fill="#0B0C0E" />
-        <path d="M17.6 30.4 L25 23.3" stroke="#0B0C0E" stroke-width="5.4" />
-        <path d="M30.6 18 L28.4 27.3 L21.2 19.8 Z" fill="#0B0C0E" />
+        <rect width="48" height="48" rx="14" fill="#EE7A3A" />
+        <rect x="11" y="10" width="7.5" height="28" rx="3.75" fill="#1D1B19" />
+        <rect x="29.5" y="10" width="7.5" height="28" rx="3.75" fill="#1D1B19" />
+        <path d="M18.2 30.2 L25.6 23.2" stroke="#1D1B19" stroke-width="5" stroke-linecap="round" />
+        <path d="M30.6 18 L28.4 27.3 L21.2 19.8 Z" fill="#1D1B19" stroke="#1D1B19" stroke-width="2.4" stroke-linejoin="round" />
       </symbol>
-      <symbol id="i-restart" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /><path d="M3 3.5v4.7h4.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
-      <symbol id="i-prev" viewBox="0 0 24 24"><path d="M18 5.5v13a.8.8 0 0 1-1.2.7L7.5 12.7a.8.8 0 0 1 0-1.4l9.3-6.5a.8.8 0 0 1 1.2.7Z" fill="currentColor" /><rect x="4.5" y="5" width="2.2" height="14" rx="1.1" fill="currentColor" /></symbol>
-      <symbol id="i-next" viewBox="0 0 24 24"><path d="M6 5.5v13a.8.8 0 0 0 1.2.7l9.3-6.5a.8.8 0 0 0 0-1.4L7.2 4.8A.8.8 0 0 0 6 5.5Z" fill="currentColor" /><rect x="17.3" y="5" width="2.2" height="14" rx="1.1" fill="currentColor" /></symbol>
-      <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 4.9v14.2a1 1 0 0 0 1.5.86l11.6-7.1a1 1 0 0 0 0-1.72L9 4.04a1 1 0 0 0-1.5.86Z" fill="currentColor" /></symbol>
-      <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor" /><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor" /></symbol>
+      <symbol id="i-restart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8" /><path d="M4 4.5V9h4.5" /></g></symbol>
+      <symbol id="i-prev" viewBox="0 0 24 24"><path d="M18 6.5v11a1 1 0 0 1-1.6.8L9 12.8a1 1 0 0 1 0-1.6l7.4-5.5a1 1 0 0 1 1.6.8Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /><path d="M6 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></symbol>
+      <symbol id="i-next" viewBox="0 0 24 24"><path d="M6 6.5v11a1 1 0 0 0 1.6.8L15 12.8a1 1 0 0 0 0-1.6L7.6 5.7A1 1 0 0 0 6 6.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /><path d="M18 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.6v12.8a1.1 1.1 0 0 0 1.7.94l10.2-6.4a1.1 1.1 0 0 0 0-1.88L9.7 4.66A1.1 1.1 0 0 0 8 5.6Z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round" /></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.6" fill="currentColor" /><rect x="13.5" y="5" width="4" height="14" rx="1.6" fill="currentColor" /></symbol>
+      <symbol id="i-loop" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l3 3-3 3" /><path d="M4 11V9.5A3.5 3.5 0 0 1 7.5 6H20" /><path d="M7 21l-3-3 3-3" /><path d="M20 13v1.5a3.5 3.5 0 0 1-3.5 3.5H4" /></g></symbol>
+      <symbol id="i-keyboard" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="3" /><path d="M7 10h.01M10.5 10h.01M14 10h.01M17 10h.01M8 14h8" /></g></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4" /></g></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.2A8 8 0 1 1 9.8 4a6.5 6.5 0 0 0 10.2 10.2Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" /></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></symbol>
     </defs>
   </svg>
 
   <div id="app">
     <!-- 작전 목록 -->
-    <aside id="sidebar" data-i18n-aria="aria.plays">
+    <aside id="sidebar" class="panel" data-i18n-aria="aria.plays">
       <header class="brand">
         <a class="brand-link" href="./" data-i18n-aria="brand.home">
           <svg class="brand-mark" aria-hidden="true"><use href="#i-mark" /></svg>
-          <span class="wordmark"><b>3D HOOPS</b> <span>PLAYBOOK</span></span>
+          <span class="brand-text">
+            <span class="wordmark">3D Hoops Playbook</span>
+            <span class="brand-sub" data-i18n="brand.sub"></span>
+          </span>
         </a>
-        <p class="brand-sub" data-i18n="brand.sub"></p>
       </header>
       <nav id="play-list"></nav>
       <footer class="side-foot">
-        <span><kbd>Space</kbd> <span data-i18n="hint.play"></span></span>
-        <span><kbd>←</kbd><kbd>→</kbd> <span data-i18n="hint.steps"></span></span>
-        <span><kbd>Enter</kbd> <span data-i18n="hint.now"></span></span>
-        <span><kbd>1</kbd>–<kbd>5</kbd> <span data-i18n="hint.camera"></span></span>
+        <button id="btn-keys" class="keys-btn" type="button" popovertarget="keys-pop">
+          <svg aria-hidden="true"><use href="#i-keyboard" /></svg>
+          <span data-i18n="keys.open"></span>
+          <kbd>?</kbd>
+        </button>
       </footer>
     </aside>
 
@@ -62,7 +79,7 @@
     <main id="stage">
       <header class="toolbar">
         <div class="play-head">
-          <span id="hud-cat" class="eyebrow"></span>
+          <p id="hud-cat" class="play-meta"></p>
           <h2 id="hud-title"></h2>
         </div>
         <div class="tool-right">
@@ -70,6 +87,16 @@
             <button data-lang="ko" title="한국어" lang="ko">KO</button>
             <button data-lang="en" title="English" lang="en">EN</button>
           </div>
+          <button id="btn-theme" class="round-btn" type="button"><svg aria-hidden="true"><use href="#i-sun" /></svg></button>
+        </div>
+      </header>
+
+      <div class="view">
+        <div id="viewport">
+          <div id="score-pop" aria-live="polite"></div>
+          <div id="loading" data-i18n="loading"></div>
+        </div>
+        <div class="view-tools">
           <div class="seg cam-bar" role="group" data-i18n-aria="aria.camera">
             <button data-cam="coach" class="on" data-i18n="cam.coach" data-i18n-title="cam.coach.t"></button>
             <button data-cam="broadcast" data-i18n="cam.broadcast" data-i18n-title="cam.broadcast.t"></button>
@@ -77,78 +104,81 @@
             <button data-cam="baseline" data-i18n="cam.baseline" data-i18n-title="cam.baseline.t"></button>
             <button data-cam="follow" data-i18n="cam.follow" data-i18n-title="cam.follow.t"></button>
           </div>
+          <div class="seg toggles" role="group" data-i18n-aria="aria.display">
+            <button id="tg-def" aria-pressed="true" data-i18n="tg.def" data-i18n-title="tg.def.t"></button>
+            <button id="tg-notes" aria-pressed="true" data-i18n="tg.notes" data-i18n-title="tg.notes.t"></button>
+            <button id="tg-labels" aria-pressed="true" data-i18n="tg.labels" data-i18n-title="tg.labels.t"></button>
+          </div>
         </div>
-      </header>
-
-      <div id="viewport">
-        <div id="score-pop" aria-live="polite"></div>
-        <div id="loading" data-i18n="loading"></div>
       </div>
 
-      <section id="caption" aria-live="polite">
+      <section id="caption" class="panel" aria-live="polite">
         <div class="cap-top">
           <span id="cap-step" class="cap-step"></span>
           <strong id="cap-title"></strong>
           <div id="cap-status" class="cap-status" hidden>
+            <svg class="cap-ring" viewBox="0 0 20 20" aria-hidden="true">
+              <circle cx="10" cy="10" r="8" />
+              <circle id="cap-ring-fill" cx="10" cy="10" r="8" transform="rotate(-90 10 10)" />
+            </svg>
             <span id="cap-status-text"></span>
             <button id="btn-skip" type="button"><span data-i18n="btn.skip"></span> <kbd>Enter</kbd></button>
           </div>
         </div>
         <p id="cap-text"></p>
-        <div class="cap-bar" aria-hidden="true"><i id="cap-bar-fill"></i></div>
       </section>
 
-      <section id="transport" data-i18n-aria="aria.controls">
-        <div class="t-buttons">
-          <button id="btn-restart" class="icon" data-i18n-title="btn.restart.t" data-i18n-aria="aria.restart"><svg><use href="#i-restart" /></svg></button>
-          <button id="btn-prev" class="icon" data-i18n-title="btn.prev.t" data-i18n-aria="aria.prev"><svg><use href="#i-prev" /></svg></button>
-          <button id="btn-play" class="icon play" data-i18n-title="btn.play.t"><svg><use href="#i-play" /></svg></button>
-          <button id="btn-next" class="icon" data-i18n-title="btn.next.t" data-i18n-aria="aria.next"><svg><use href="#i-next" /></svg></button>
-        </div>
-        <div id="timeline" class="timeline" role="slider" tabindex="0" data-i18n-aria="aria.timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div id="tl-segs" class="tl-segs"></div>
-          <i id="tl-head" class="tl-head"></i>
-        </div>
-        <div class="time"><span id="time-cur">0.0</span><span class="sep">/</span><span id="time-total">0.0</span></div>
-      </section>
+      <div class="controls panel">
+        <section id="transport" data-i18n-aria="aria.controls">
+          <div class="t-buttons">
+            <button id="btn-restart" class="icon" data-i18n-title="btn.restart.t" data-i18n-aria="aria.restart"><svg><use href="#i-restart" /></svg></button>
+            <button id="btn-prev" class="icon" data-i18n-title="btn.prev.t" data-i18n-aria="aria.prev"><svg><use href="#i-prev" /></svg></button>
+            <button id="btn-play" class="icon play" data-i18n-title="btn.play.t"><svg><use href="#i-play" /></svg></button>
+            <button id="btn-next" class="icon" data-i18n-title="btn.next.t" data-i18n-aria="aria.next"><svg><use href="#i-next" /></svg></button>
+          </div>
+          <div id="timeline" class="timeline" role="slider" tabindex="0" data-i18n-aria="aria.timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="tl-segs" class="tl-segs"></div>
+            <i id="tl-head" class="tl-head"></i>
+          </div>
+          <div class="time"><span id="time-cur">0.0</span><span class="sep">/</span><span id="time-total">0.0</span></div>
+        </section>
 
-      <section id="settings" data-i18n-aria="aria.settings">
-        <div class="set-group">
-          <span class="set-label" data-i18n="set.read"></span>
-          <div class="seg" id="read-mode" role="group" data-i18n-aria="set.read">
-            <button data-v="auto" data-i18n="read.auto" data-i18n-title="read.auto.t"></button>
-            <button data-v="relaxed" data-i18n="read.relaxed" data-i18n-title="read.relaxed.t"></button>
-            <button data-v="step" data-i18n="read.step" data-i18n-title="read.step.t"></button>
-            <button data-v="off" data-i18n="read.off" data-i18n-title="read.off.t"></button>
+        <section id="settings" data-i18n-aria="aria.settings">
+          <div class="set-group">
+            <span class="set-label" data-i18n="set.read"></span>
+            <div class="seg" id="read-mode" role="group" data-i18n-aria="set.read">
+              <button data-v="auto" data-i18n="read.auto" data-i18n-title="read.auto.t"></button>
+              <button data-v="relaxed" data-i18n="read.relaxed" data-i18n-title="read.relaxed.t"></button>
+              <button data-v="step" data-i18n="read.step" data-i18n-title="read.step.t"></button>
+              <button data-v="off" data-i18n="read.off" data-i18n-title="read.off.t"></button>
+            </div>
           </div>
-        </div>
-        <div class="set-group">
-          <span class="set-label" data-i18n="set.speed"></span>
-          <div class="seg" id="speed" role="group" data-i18n-aria="set.speed">
-            <button data-v="0.5">0.5×</button>
-            <button data-v="0.75">0.75×</button>
-            <button data-v="1">1×</button>
-            <button data-v="1.5">1.5×</button>
+          <div class="set-group">
+            <span class="set-label" data-i18n="set.speed"></span>
+            <div class="seg" id="speed" role="group" data-i18n-aria="set.speed">
+              <button data-v="0.5">0.5×</button>
+              <button data-v="0.75">0.75×</button>
+              <button data-v="1">1×</button>
+              <button data-v="1.5">1.5×</button>
+            </div>
           </div>
-        </div>
-        <div class="set-group toggles" role="group" data-i18n-aria="aria.display">
-          <button id="tg-def" class="chip" aria-pressed="true" data-i18n="tg.def" data-i18n-title="tg.def.t"></button>
-          <button id="tg-notes" class="chip" aria-pressed="true" data-i18n="tg.notes" data-i18n-title="tg.notes.t"></button>
-          <button id="tg-labels" class="chip" aria-pressed="true" data-i18n="tg.labels" data-i18n-title="tg.labels.t"></button>
-          <button id="tg-loop" class="chip" aria-pressed="false" data-i18n="tg.loop" data-i18n-title="tg.loop.t"></button>
-        </div>
-      </section>
+          <button id="tg-loop" class="loop-btn" aria-pressed="false" data-i18n-title="tg.loop.t">
+            <svg aria-hidden="true"><use href="#i-loop" /></svg>
+            <span data-i18n="tg.loop"></span>
+          </button>
+        </section>
+      </div>
     </main>
 
     <!-- 작전 설명 -->
-    <section id="info" data-i18n-aria="aria.info">
+    <section id="info" class="panel" data-i18n-aria="aria.info">
       <p id="info-summary" class="summary"></p>
       <div class="legend" data-i18n-aria="aria.legend">
-        <span><svg viewBox="0 0 28 8"><path d="M1 4h20" stroke="#fff" stroke-width="2.2"/><path d="M27 4l-6-3.5v7z" fill="#fff"/></svg><span data-i18n="lg.cut"></span></span>
-        <span><svg viewBox="0 0 28 8"><path d="M1 4l3-3 3 6 3-6 3 6 3-6 3 6 2-3" fill="none" stroke="#fcd34d" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-i18n="lg.dribble"></span></span>
-        <span><svg viewBox="0 0 28 8"><path d="M1 4h22" stroke="#fb923c" stroke-width="2.2" stroke-dasharray="4 3"/></svg><span data-i18n="lg.pass"></span></span>
-        <span><svg viewBox="0 0 28 8"><path d="M1 4h23" stroke="#67e8f9" stroke-width="2.2"/><path d="M25 0v8" stroke="#67e8f9" stroke-width="2.6"/></svg><span data-i18n="lg.screen"></span></span>
-        <span><svg viewBox="0 0 28 8"><path d="M1 4h24" stroke="#fb7185" stroke-width="2.2" stroke-dasharray="1.5 2.5"/></svg><span data-i18n="lg.shot"></span></span>
+        <span><svg viewBox="0 0 26 10"><path d="M2 5h16" stroke="#EDE8E1" stroke-width="2.2" stroke-linecap="round"/><path d="M24 5l-6-3.6v7.2z" fill="#EDE8E1" stroke="#EDE8E1" stroke-width="1.2" stroke-linejoin="round"/></svg><span data-i18n="lg.cut"></span></span>
+        <span><svg viewBox="0 0 26 10"><path d="M2 5l3-3 3.5 6 3.5-6 3.5 6 3.5-6 3 3" fill="none" stroke="#fcd34d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="lg.dribble"></span></span>
+        <span><svg viewBox="0 0 26 10"><path d="M2 5h22" stroke="#fb923c" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 4"/></svg><span data-i18n="lg.pass"></span></span>
+        <span><svg viewBox="0 0 26 10"><path d="M2 5h20" stroke="#67e8f9" stroke-width="2.2" stroke-linecap="round"/><path d="M23 1v8" stroke="#67e8f9" stroke-width="2.6" stroke-linecap="round"/></svg><span data-i18n="lg.screen"></span></span>
+        <span><svg viewBox="0 0 26 10"><path d="M2 5h22" stroke="#fb7185" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.1 4.5"/></svg><span data-i18n="lg.shot"></span></span>
       </div>
       <div class="block">
         <h3 data-i18n="h.when"></h3>
@@ -172,6 +202,25 @@
       </div>
       <p class="disclaimer" data-i18n="disclaimer"></p>
     </section>
+  </div>
+
+  <!-- 단축키 안내 (? 키 또는 사이드바 버튼) -->
+  <div id="keys-pop" class="keys-pop" popover data-i18n-aria="keys.title">
+    <div class="keys-head">
+      <h3 data-i18n="keys.title"></h3>
+      <button class="round-btn" type="button" popovertarget="keys-pop" popovertargetaction="hide" data-i18n-aria="keys.close"><svg aria-hidden="true"><use href="#i-close" /></svg></button>
+    </div>
+    <dl class="keys-list">
+      <div><dt><kbd>Space</kbd></dt><dd data-i18n="keys.play"></dd></div>
+      <div><dt><kbd>Enter</kbd></dt><dd data-i18n="keys.now"></dd></div>
+      <div><dt><kbd>←</kbd><kbd>→</kbd></dt><dd data-i18n="keys.steps"></dd></div>
+      <div><dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd data-i18n="keys.plays"></dd></div>
+      <div><dt><kbd>1</kbd>–<kbd>5</kbd></dt><dd data-i18n="keys.camera"></dd></div>
+      <div><dt><kbd>D</kbd><kbd>N</kbd><kbd>L</kbd></dt><dd data-i18n="keys.toggles"></dd></div>
+      <div><dt><kbd>R</kbd></dt><dd data-i18n="keys.restart"></dd></div>
+      <div><dt><kbd>T</kbd></dt><dd data-i18n="keys.theme"></dd></div>
+      <div><dt><kbd>?</kbd></dt><dd data-i18n="keys.help"></dd></div>
+    </dl>
   </div>
 
   <script type="module" src="js/main.js"></script>

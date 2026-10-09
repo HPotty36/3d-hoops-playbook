@@ -38,10 +38,16 @@
 
 ## Visual design
 
-- References: Linear (neutral near-black surfaces, hairline borders, restrained gray text), Hudl (Barlow-family condensed type, bold/light weight contrast, orange accent), FastModel Sports (geometric monogram + condensed wordmark).
-- Tokens follow the Tailwind scale: 4 px spacing grid, 6/8/12 px radii, a single accent (`orange-500`), offense `orange-500`, defense `blue-500`, notation in white / `amber-300` / `orange-400` / `cyan-300` / `rose-400`.
-- Type: Pretendard (Korean UI, `word-break: keep-all`) and Barlow Condensed (labels, numbers, wordmark).
-- Logo: two screens (vertical bars) with a cutter's route arrow slipping between them, forming an "H".
+- Direction: soft and warm rather than sharp. Rounded panels float on the page with 12 px gaps instead of a flush three-column grid split by hairlines; controls are pill-shaped; there are no "01" numbers, accent eyebrows, left accent bars, or dotted chips.
+- Two themes, switched with the sun/moon button in the toolbar or `T`:
+  - Dark (default when the system is dark): warm charcoal page `#141311`, panels `#1d1b19`, ivory text `#ede8e1`.
+  - Light: warm gray page `#f1f0ee`, white panels, ink text `#1e1d1b`. The notation legend stays on a dark tile so its colors read the same as on the floor.
+  - Without a saved choice the theme follows `prefers-color-scheme` (and updates live). An inline script in `index.html` applies the saved theme before first paint.
+  - The 3D scene follows the theme too: background/fog, the apron around the court, the outer floor, and the floor lettering are redrawn from `SCENE_THEMES` in `court.js`.
+- Tokens live as CSS custom properties on `:root` and `:root[data-theme="light"]`. Radii: panels 20 px, inner blocks 14 px, controls 999 px. One accent (`#ee7a3a`) shared by offense chips, the play button, and the 3D jerseys; defense is `#3a6fd8` (`#2f64cf` in light).
+- Type: Rubik (rounded corners, used for Latin text and numbers, the wordmark, and canvas labels) with Pretendard for Korean (`word-break: keep-all`). Weights stay at 400–600.
+- Layout notes: camera and display toggles float over the court; the step list in the info panel shows titles only (the caption carries the full text); timeline segments are labeled with step names; the reading pause shows a ring countdown; keyboard shortcuts live in a popover (`?`).
+- Logo: two screens (vertical bars) with a cutter's route arrow slipping between them, forming an "H", on a rounded orange tile.
 
 ## Localization
 
@@ -54,4 +60,4 @@
 ## Verification
 
 - Every play was sampled at 0.05 s intervals to check for NaN values, peak player speed (kept at or under a sprint of roughly 25 ft/s), and that shot distance matches the points scored (2 vs 3).
-- Desktop (1440×900) and mobile (375×812) layouts were checked to show the whole half court without horizontal scrolling.
+- Desktop (1440×900), tablet (1024 wide) and mobile (390×844) layouts were checked in both themes to show the whole half court without horizontal page scrolling.
