@@ -108,7 +108,7 @@ function drawCourt(size) {
   g.font = `700 ${2.6 * k}px Oswald, "Noto Sans KR", sans-serif`;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.fillText('NBA 3D PLAYBOOK', X(0), Z(-3.4));
+  g.fillText('3D HOOPS PLAYBOOK', X(0), Z(-3.4));
   g.font = `700 ${1.6 * k}px "Noto Sans KR", sans-serif`;
   g.save();
   g.translate(X(-28), Z(23.5));

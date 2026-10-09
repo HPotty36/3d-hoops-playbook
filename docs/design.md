@@ -1,36 +1,36 @@
-# 설계 메모
+# Design notes
 
-## 목표
+## Goals
 
-- NBA에서 자주 쓰는 공격 작전을 3D로 재현하고, 진행 과정을 단계별로 설명한다.
-- 설치나 빌드 없이 브라우저에서 바로 열리고 GitHub Pages로 배포할 수 있다.
-- 작전은 데이터(파일 하나)로만 정의해서 쉽게 추가할 수 있어야 한다.
+- Recreate common pro-basketball offensive sets in 3D and explain each phase step by step.
+- Open instantly in a browser with no install or build step, and deploy as a static site (GitHub Pages).
+- Define each play purely as data (one file per play) so new plays are easy to add.
 
-## 구성
+## Modules
 
-| 모듈 | 역할 | 의존 |
+| Module | Responsibility | Depends on |
 |------|------|------|
-| `engine.js` | 작전 정의를 컴파일해 `t → 위치` 함수를 만든다. 공격 경로, 공 궤적, 자동 수비, 전술판 표기 데이터 | three (곡선 계산) |
-| `court.js` | 하프코트 텍스처와 골대 메시 | engine (림 좌표) |
-| `players.js` | 선수 모델·포즈, 공 모델 | three |
-| `notation.js` | 표기 데이터 → 바닥 리본 메시, 단계별 투명도 | engine |
-| `camera.js` | 카메라 프리셋, 화면 비율 보정, 공 추적 | OrbitControls |
-| `main.js` | 장면 조립, 재생 루프, UI | 위 전부 |
+| `engine.js` | Compiles a play definition into `t → position` functions: offense paths, ball flight, automatic defense, notation data | three (curve math) |
+| `court.js` | Half-court texture and hoop meshes | engine (rim position) |
+| `players.js` | Player model and poses, ball model | three |
+| `notation.js` | Turns notation data into floor ribbon meshes with per-step opacity | engine |
+| `camera.js` | Camera presets, aspect-ratio fitting, ball follow | OrbitControls |
+| `main.js` | Scene assembly, playback loop, UI | all of the above |
 
-## 시간 모델
+## Time model
 
-- 단계(step)는 순서대로 이어지고 각자 `dur`(초)를 가진다. 전체 길이는 합계에 슛 이후 여유 시간을 더한 값.
-- 공격 선수의 위치는 단계별 경로(Catmull-Rom 곡선, 사인 이징)를 이어 붙인 **순수 함수**다.
-- 공은 `hold → flight → hold … → shot → drop` 구간 목록. 패스 도착 지점은 받는 선수의 도착 시점 위치로 계산한다.
-- 수비는 기본적으로 자동이다.
-  - 공을 가진 선수 수비: 선수와 림 사이 약 3ft.
-  - 그 외: 선수와 림 사이에 서되, 공에서 멀수록 페인트 쪽 도움 위치로 처진다(`sag`).
-  - `lag`(반응 지연)로 스크린에 걸린 느낌을 만든다.
-  - 수비가 공격 선수와 2ft 안으로 겹치면 밀어낸다. 스크린에 막히는 효과가 여기서 자연스럽게 생긴다.
-  - 단계가 바뀔 때는 0.5초 동안 이전 위치에서 새 목표로 섞어 끊김을 없앤다.
-- 모든 계산이 t에 대한 함수라서 타임라인 스크럽과 단계 점프가 정확히 맞아떨어진다.
+- Steps run back to back, each with its own `dur` (seconds). Total length is the sum plus a short tail after the shot.
+- Each offensive player's position is a **pure function** built by chaining per-step paths (centripetal Catmull-Rom curves with sine easing).
+- The ball is a list of segments: `hold → flight → hold … → shot → drop`. A pass lands where the receiver will be at arrival time.
+- Defense is automatic by default:
+  - On-ball defender: about 3 ft between the ball handler and the rim.
+  - Off-ball defenders: between their man and the rim, sagging toward a help spot in the paint the farther they are from the ball (`sag`).
+  - `lag` (reaction delay) makes a defender look caught on a screen.
+  - Defenders closer than 2 ft to an offensive player are pushed out, so screens naturally impede them.
+  - At step boundaries, positions are blended over 0.5 s from the previous spot to the new target to avoid jumps.
+- Because everything is a function of `t`, timeline scrubbing and step jumps always land on exactly the same frame.
 
-## 검증
+## Verification
 
-- 모든 작전을 0.05초 간격으로 샘플링해 NaN 여부, 선수 최고 속도(전력 질주 약 25ft/s 이하), 슛 거리와 득점(2점·3점)이 맞는지 확인했다.
-- 데스크톱(1440×900)과 모바일(375×812) 레이아웃에서 코트 전체가 보이고 가로 스크롤이 생기지 않는지 확인했다.
+- Every play was sampled at 0.05 s intervals to check for NaN values, peak player speed (kept at or under a sprint of roughly 25 ft/s), and that shot distance matches the points scored (2 vs 3).
+- Desktop (1440×900) and mobile (375×812) layouts were checked to show the whole half court without horizontal scrolling.

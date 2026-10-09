@@ -118,7 +118,7 @@ function renderInfo() {
   ticks.innerHTML = state.cp.steps.slice(1).map((st) => `<i style="left:${(st.s0 / state.cp.end) * 100}%"></i>`).join('');
   $('#time-total').textContent = state.cp.end.toFixed(1);
   document.querySelectorAll('.play-item').forEach((b) => b.classList.toggle('active', +b.dataset.idx === state.idx));
-  document.title = `${p.name} · NBA 3D Playbook`;
+  document.title = `${p.name} · 3D Hoops Playbook`;
   state.stepShown = -1;
 }
 
