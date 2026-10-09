@@ -40,11 +40,14 @@ Each play comes with **step-by-step breakdown · when to use it · key teaching 
 | `1`–`5` | Camera: Coach · Broadcast · Top-down board · Baseline · Ball follow |
 | `D` `N` `L` | Toggle defense · floor notation · number labels |
 | `R` | Restart |
+| `T` | Switch between light and dark mode |
+| `?` | Show the keyboard shortcuts |
 | Mouse drag / wheel | Orbit and zoom freely |
 
 - Drag the timeline to freeze any moment; click a step in the right panel to jump to it.
 - Deep links: `#hammer` opens a play directly, and `?cam=top&t=3.5#hammer` opens it paused at 3.5 s from the top-down camera.
 - Language: the `KO | EN` toggle switches every label, caption, and play note without restarting playback. `?lang=en` or `?lang=ko` forces a language; otherwise your last choice (or the browser language) is used.
+- Theme: the sun/moon button next to the language toggle switches between dark and light mode, including the 3D scene. Until you pick one, it follows your system setting.
 
 ### Reading mode
 
@@ -57,7 +60,7 @@ Each play comes with **step-by-step breakdown · when to use it · key teaching 
 | Step-by-step | Stops at every step until you press Play, `Space`, or `Enter` |
 | Off | Continuous playback |
 
-The countdown and a **Play now** button appear next to the caption. Your reading mode, speed, and display toggles are remembered in the browser.
+A ring countdown and a **Play now** button appear next to the caption. Your reading mode, speed, display toggles, language, and theme are remembered in the browser.
 
 ### Floor notation
 
@@ -87,7 +90,7 @@ Then open `http://localhost:8000`.
 
 ```
 index.html            Layout and the Three.js import map
-css/style.css         UI styles (3-column desktop / stacked mobile)
+css/style.css         UI styles and light/dark theme tokens (3-column desktop / stacked mobile)
 js/main.js            Entry point: scene setup, playback loop, UI wiring
 js/engine.js          Compiles a play into a deterministic timeline (players, defense, ball)
 js/court.js           Regulation half court (canvas texture) and the hoop
@@ -155,7 +158,7 @@ Any field missing from the `en` block falls back to Korean. Unless you script th
 
 - [Three.js](https://threejs.org/) r160 via CDN and an import map. No bundler or build tools
 - Court lines and hardwood are a canvas-drawn texture; players are built from primitive shapes
-- Type: [Pretendard](https://github.com/orioncactus/pretendard) for Korean UI text, [Barlow Condensed](https://fonts.google.com/specimen/Barlow+Condensed) for labels and numbers
+- Type: [Rubik](https://fonts.google.com/specimen/Rubik) for Latin text, numbers, and court labels; [Pretendard](https://github.com/orioncactus/pretendard) for Korean
 - Every position is a pure function of time `t`, so you can scrub the timeline back and forth precisely
 
 ## License & disclaimer
@@ -206,11 +209,14 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | `1`–`5` | 카메라: 코치 · 중계 · 전술판(탑뷰) · 엔드라인 · 공 추적 |
 | `D` `N` `L` | 수비 · 전술판 표기 · 번호 라벨 켜고 끄기 |
 | `R` | 처음부터 다시 |
+| `T` | 라이트 / 다크 모드 전환 |
+| `?` | 단축키 안내 열기 |
 | 마우스 드래그 / 휠 | 자유롭게 회전 · 확대 |
 
 - 타임라인을 드래그하면 원하는 순간에 멈춰서 볼 수 있고, 오른쪽 패널의 단계를 누르면 그 단계로 바로 이동합니다.
 - 주소 뒤에 `#hammer`처럼 작전 id를 붙이면 그 작전이 바로 열리고, `?cam=top&t=3.5#hammer`처럼 붙이면 그 장면에서 멈춘 채로 열립니다.
 - 오른쪽 위 `KO | EN` 토글로 언어를 바꿀 수 있습니다. 재생은 멈추지 않고 모든 문구와 설명이 바로 바뀝니다. `?lang=ko` / `?lang=en`으로 언어를 지정해 열 수도 있습니다.
+- 언어 토글 옆 해/달 버튼으로 다크 모드와 라이트 모드를 바꿀 수 있습니다(3D 코트 배경까지 함께 바뀜). 직접 고르기 전에는 시스템 설정을 따릅니다.
 
 ### 읽기 모드
 
@@ -223,7 +229,7 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | 단계별 | 단계마다 멈추고 재생(`Space`/`Enter`)을 누를 때까지 기다림 |
 | 끄기 | 멈추지 않고 이어서 재생 |
 
-설명 옆에 남은 시간과 **바로 재생** 버튼이 나타납니다. 읽기 모드, 속도, 표시 옵션은 브라우저에 저장됩니다.
+설명 옆에 원형 카운트다운과 **바로 재생** 버튼이 나타납니다. 읽기 모드, 속도, 표시 옵션, 언어, 테마는 브라우저에 저장됩니다.
 
 ### 전술판 표기
 

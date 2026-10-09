@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { compilePlay, ballAir, OFF, DEF, BASKET, dist2 } from './engine.js';
-import { buildCourt } from './court.js';
+import { buildCourt, SCENE_THEMES } from './court.js';
 import { createPlayer, posePlayer, handPoint, createBall } from './players.js';
 import { Notation } from './notation.js';
 import { CameraRig } from './camera.js';
@@ -25,8 +25,8 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 viewport.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0b0d);
-scene.fog = new THREE.Fog(0x0a0b0d, 120, 260);
+scene.background = new THREE.Color(SCENE_THEMES.dark.bg);   // 실제 색은 applyTheme()에서 맞춘다
+scene.fog = new THREE.Fog(SCENE_THEMES.dark.bg, 120, 260);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
@@ -77,10 +77,43 @@ function savePrefs() {
   try {
     localStorage.setItem(PREF_KEY, JSON.stringify({
       speed: state.speed, loop: state.loop, showDef: state.showDef, showLabels: state.showLabels,
-      showNotes: notation.visible, readMode: state.readMode, lang: getLang(),
+      showNotes: notation.visible, readMode: state.readMode, lang: getLang(), theme: themePref || undefined,
     }));
   } catch { /* 저장소를 못 쓰는 환경이면 무시 */ }
 }
+
+// ── 테마 (다크 / 라이트) ─────────────────────────────────────
+// 직접 고른 적이 없으면 시스템 설정을 따른다. 첫 화면 색은 index.html의 인라인 스크립트가 먼저 맞춰 둔다.
+const systemLight = window.matchMedia('(prefers-color-scheme: light)');
+let themePref = ['light', 'dark'].includes(prefs.theme) ? prefs.theme : null;
+const currentTheme = () => themePref ?? (systemLight.matches ? 'light' : 'dark');
+const PAGE_BG = { dark: '#141311', light: '#f1f0ee' };
+
+function applyTheme() {
+  const theme = currentTheme();
+  document.documentElement.dataset.theme = theme;
+  $('meta[name="theme-color"]').setAttribute('content', PAGE_BG[theme]);
+  scene.background.set(SCENE_THEMES[theme].bg);
+  scene.fog.color.set(SCENE_THEMES[theme].bg);
+  court?.setTheme(theme);
+  syncThemeBtn();
+}
+
+function syncThemeBtn() {
+  const light = currentTheme() === 'light';
+  const b = $('#btn-theme');
+  b.querySelector('use').setAttribute('href', light ? '#i-moon' : '#i-sun');
+  const label = tr(light ? 'theme.toDark' : 'theme.toLight');
+  b.setAttribute('aria-label', label);
+  b.title = label;
+}
+
+function toggleTheme() {
+  themePref = currentTheme() === 'light' ? 'dark' : 'light';
+  applyTheme();
+  savePrefs();
+}
+systemLight.addEventListener('change', () => { if (!themePref) applyTheme(); });
 
 // ── 읽기 모드 ─────────────────────────────────────────────────
 // 1배속은 실제 경기 속도로 두고, 단계가 시작될 때 설명을 읽을 시간을 따로 준다.
@@ -128,7 +161,6 @@ function renderList() {
   const nav = $('#play-list');
   nav.innerHTML = '';
   nav.setAttribute('aria-label', tr('aria.plays'));
-  let n = 0;
   for (const cat of CATEGORIES) {
     const h = document.createElement('div');
     h.className = 'cat-title';
@@ -136,13 +168,12 @@ function renderList() {
     nav.append(h);
     PLAYS.forEach((p, i) => {
       if (p.category !== cat) return;
-      n++;
       const b = document.createElement('button');
+      const diff = tr('diff', { n: p.difficulty });
       b.className = 'play-item';
       b.dataset.idx = i;
-      b.innerHTML = `<span class="num">${String(n).padStart(2, '0')}</span>
-        <span class="nm">${esc(localize(p).name)}</span>
-        <span class="diff" title="${tr('diff', { n: p.difficulty })}">${[1, 2, 3].map((d) => `<i class="${d <= p.difficulty ? 'on' : ''}"></i>`).join('')}</span>`;
+      b.innerHTML = `<span class="nm">${esc(localize(p).name)}</span>
+        <span class="diff" title="${diff}">${[1, 2, 3].map((d) => `<i class="${d <= p.difficulty ? 'on' : ''}"></i>`).join('')}<span class="sr-only">${diff}</span></span>`;
       b.addEventListener('click', () => selectPlay(i, true));
       nav.append(b);
     });
@@ -153,7 +184,7 @@ function renderList() {
 function renderInfo() {
   const p = state.cp.play;
   const c = content();
-  $('#hud-cat').textContent = tr(`cat.${p.category}`);
+  $('#hud-cat').textContent = tr('hud.meta', { cat: tr(`cat.${p.category}`), level: tr(`level.${p.difficulty}`) });
   $('#hud-title').textContent = c.name;
   $('#info-summary').innerHTML = fmt(c.summary);
   $('#info-when').innerHTML = fmt(c.when);
@@ -164,13 +195,18 @@ function renderInfo() {
   ol.innerHTML = '';
   c.steps.forEach((st, k) => {
     const li = document.createElement('li');
-    li.innerHTML = `<button><span class="n">${k + 1}</span><span class="st">${esc(st.title)}</span><span class="sx">${fmt(st.text)}</span></button>`;
+    li.innerHTML = `<button><span class="n">${k + 1}</span><span class="st">${esc(st.title)}</span><span class="now">${tr('step.now')}</span></button>`;
     li.querySelector('button').addEventListener('click', () => seekStep(k, true));
     ol.append(li);
   });
   buildTimeline();
   $('#time-total').textContent = state.cp.end.toFixed(1);
-  $$('.play-item').forEach((b) => b.classList.toggle('active', +b.dataset.idx === state.idx));
+  $$('.play-item').forEach((b) => {
+    const on = +b.dataset.idx === state.idx;
+    b.classList.toggle('active', on);
+    if (on) b.setAttribute('aria-current', 'true');
+    else b.removeAttribute('aria-current');
+  });
   // 모바일 가로 목록에서는 선택한 작전을 가운데로 (페이지 자체는 스크롤하지 않음)
   const active = $('.play-item.active');
   const nav = $('#play-list');
@@ -189,6 +225,8 @@ function showCaption(k) {
   $$('#info-steps li').forEach((li, i) => {
     li.classList.toggle('active', i === k);
     li.classList.toggle('done', i < k);
+    if (i === k) li.firstChild.setAttribute('aria-current', 'step');
+    else li.firstChild.removeAttribute('aria-current');
   });
 }
 
@@ -198,13 +236,16 @@ function buildTimeline() {
   const cp = state.cp;
   const wrap = $('#tl-segs');
   wrap.innerHTML = '';
-  const parts = cp.steps.map((st) => ({ s0: st.s0, dur: st.dur, tail: false }));
+  const titles = content().steps.map((st) => st.title);
+  const parts = cp.steps.map((st, k) => ({ s0: st.s0, dur: st.dur, tail: false, label: `${k + 1} ${titles[k]}` }));
   if (cp.end - cp.total > 0.01) parts.push({ s0: cp.total, dur: cp.end - cp.total, tail: true });
+  // 각 구간 아래에 단계 이름을 붙인다 (마지막 슛 이후 구간은 이름 없음)
   segEls = parts.map((part) => {
     const el = document.createElement('div');
     el.className = `tl-seg${part.tail ? ' tail' : ''}`;
     el.style.flex = `${part.dur} 1 0`;
-    el.innerHTML = '<i></i>';
+    el.innerHTML = `<div class="tl-bar"><i></i></div>${part.tail ? '' : `<span class="tl-label">${esc(part.label)}</span>`}`;
+    el._fill = el.querySelector('i');
     el._part = part;
     wrap.append(el);
     return el;
@@ -228,7 +269,7 @@ function updateTimeline(t) {
   segEls.forEach((el, i) => {
     const { s0, dur } = el._part;
     const f = clamp((t - s0) / dur, 0, 1);
-    el.firstChild.style.width = `${f * 100}%`;
+    el._fill.style.width = `${f * 100}%`;
     el.classList.toggle('done', f >= 1);
     el.classList.toggle('cur', i === k && t < state.cp.total);
     if (t >= s0 && (t < s0 + dur || i === segEls.length - 1)) headX = el.offsetLeft + f * el.offsetWidth;
@@ -406,6 +447,7 @@ function checkScore(prev, t) {
 
 // ── UI 갱신 ───────────────────────────────────────────────────
 const ui = { status: null, statusText: '', bar: -1, time: '' };
+const RING = 2 * Math.PI * 8;   // 캡션 옆 원형 카운트다운의 둘레 (r = 8)
 function updateUI() {
   const cp = state.cp;
   const t = Math.max(0, state.t);
@@ -425,9 +467,13 @@ function updateUI() {
     status = 'wait';
     text = tr('status.wait');
   }
-  if (status !== ui.status) { $('#cap-status').hidden = !status; ui.status = status; }
+  if (status !== ui.status) {
+    $('#cap-status').hidden = !status;
+    $('#cap-status').classList.toggle('wait', status === 'wait');
+    ui.status = status;
+  }
   if (text !== ui.statusText) { $('#cap-status-text').textContent = text; ui.statusText = text; }
-  if (Math.abs(bar - ui.bar) > 0.002) { $('#cap-bar-fill').style.width = `${bar * 100}%`; ui.bar = bar; }
+  if (Math.abs(bar - ui.bar) > 0.002) { $('#cap-ring-fill').style.strokeDashoffset = `${RING * (1 - bar)}`; ui.bar = bar; }
 }
 
 // ── 이벤트 ───────────────────────────────────────────────────
@@ -439,6 +485,7 @@ function setLanguage(l) {
   renderList();
   renderInfo();
   syncPlayBtn();
+  syncThemeBtn();
   ui.statusText = null;
   const params = new URLSearchParams(location.search);
   if (params.has('lang')) {
@@ -479,6 +526,7 @@ function bindUI() {
   $('#btn-prev').addEventListener('click', prevStep);
   $('#btn-next').addEventListener('click', nextStep);
   $('#btn-skip').addEventListener('click', skipWait);
+  $('#btn-theme').addEventListener('click', toggleTheme);
 
   // 타임라인 드래그
   const tl = $('#timeline');
@@ -528,6 +576,8 @@ function bindUI() {
     else if (e.key === 'd' || e.key === 'D') $('#tg-def').click();
     else if (e.key === 'n' || e.key === 'N') $('#tg-notes').click();
     else if (e.key === 'l' || e.key === 'L') $('#tg-labels').click();
+    else if (e.key === 't' || e.key === 'T') toggleTheme();
+    else if (e.key === '?') $('#keys-pop').togglePopover?.();
     else if (cams[+e.key - 1]) setCam(cams[+e.key - 1]);
   });
 
@@ -585,24 +635,26 @@ function frame(now) {
 
 // 캔버스 텍스처(바닥 로고, 번호 라벨)에 쓰는 웹폰트가 실제로 로드될 때까지 기다린다.
 // 스타일시트가 늦게 파싱되면 fonts.load()가 빈 결과로 바로 끝나므로, 로드된 FontFace를 직접 확인한다.
+const CANVAS_WEIGHTS = [400, 500, 600];
 async function waitForFonts(timeout = 3000) {
-  const loaded = (w) => [...document.fonts].some((f) =>
-    f.family.replace(/["']/g, '') === 'Barlow Condensed' && String(f.weight) === w && f.status === 'loaded');
+  const loaded = (w) => [...document.fonts].some((f) => {
+    if (f.family.replace(/["']/g, '') !== 'Rubik' || f.status !== 'loaded') return false;
+    const [lo, hi = lo] = String(f.weight).split(' ').map(Number);   // '600' 또는 '300 900'
+    return lo <= w && w <= hi;
+  });
   const deadline = performance.now() + timeout;
   while (performance.now() < deadline) {
     try {
-      await Promise.all([
-        document.fonts.load('700 40px "Barlow Condensed"', 'HOOPS X1'),
-        document.fonts.load('300 40px "Barlow Condensed"', 'PLAYBOOK'),
-      ]);
+      await Promise.all(CANVAS_WEIGHTS.map((w) => document.fonts.load(`${w} 40px "Rubik"`, '3D Hoops Playbook X1')));
     } catch { /* 무시하고 재시도 */ }
-    if (loaded('700') && loaded('300')) return;
+    if (CANVAS_WEIGHTS.every(loaded)) return;
     await new Promise((r) => setTimeout(r, 120));
   }
 }
 
 async function init() {
   applyStatic();
+  applyTheme();
   $$('.lang-bar button').forEach((b) => b.classList.toggle('on', b.dataset.lang === getLang()));
   await waitForFonts();
   for (const id of [...OFF, ...DEF]) {
@@ -610,7 +662,7 @@ async function init() {
     players[id] = p;
     scene.add(p.root, p.wall);
   }
-  court = buildCourt(scene, renderer, { hiRes: !isSmall });
+  court = buildCourt(scene, renderer, { hiRes: !isSmall, theme: currentTheme() });
   renderList();
   bindUI();
   setSeg('#speed', state.speed);
@@ -642,7 +694,7 @@ async function init() {
 
   // 디버깅용: 탭이 백그라운드여도 특정 시점을 강제로 그려 볼 수 있다
   window.__playbook = {
-    state, rig, camera, selectPlay, setCam, advance, readTime,
+    state, rig, camera, selectPlay, setCam, advance, readTime, toggleTheme,
     renderNow(frames = 12) {
       for (let i = 0; i < frames; i++) { applyState(state.t, 1 / 30); rig.update(1 / 30, ball.position); }
       renderer.render(scene, camera);

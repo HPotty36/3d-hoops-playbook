@@ -7,8 +7,19 @@ const X0 = -31, Z0 = -8, SPAN = 62;
 
 const COLORS = {
   paint: 'rgba(62, 30, 10, 0.6)',   // 페인트존: 진한 월넛 스테인 (나뭇결이 비치도록 반투명)
-  apron: '#15171a',                // 코트 밖: UI와 같은 차콜
   line: '#f4f1ea',
+};
+
+// 테마별 장면 색: 배경(=안개), 코트 밖 바닥(에이프런), 바깥 바닥, 바닥에 새긴 글자
+export const SCENE_THEMES = {
+  dark: {
+    bg: '#1c1a18', apron: '#2a2622', outer: '#1c1a18',
+    ink: 'rgba(241, 236, 229, 1)', inkSoft: 'rgba(241, 236, 229, 0.62)', inkFaint: 'rgba(241, 236, 229, 0.36)',
+  },
+  light: {
+    bg: '#e4e1dc', apron: '#cfcac3', outer: '#bdb8b1',
+    ink: 'rgba(42, 39, 36, 0.92)', inkSoft: 'rgba(42, 39, 36, 0.58)', inkFaint: 'rgba(42, 39, 36, 0.4)',
+  },
 };
 
 // 로고 마크(assets/logo-mark.svg)를 캔버스에 그린다. (cx, cy) 중심, size px
@@ -17,18 +28,21 @@ export function drawMark(g, cx, cy, size) {
   g.save();
   g.translate(cx - size / 2, cy - size / 2);
   g.scale(k, k);
-  g.fillStyle = '#F97316';
-  g.beginPath(); g.roundRect(0, 0, 48, 48, 11); g.fill();
-  g.fillStyle = '#0B0C0E';
-  g.beginPath(); g.roundRect(11, 10, 7, 28, 2.5); g.fill();
-  g.beginPath(); g.roundRect(30, 10, 7, 28, 2.5); g.fill();
-  g.strokeStyle = '#0B0C0E'; g.lineWidth = 5.4;
-  g.beginPath(); g.moveTo(17.6, 30.4); g.lineTo(25, 23.3); g.stroke();
-  g.beginPath(); g.moveTo(30.6, 18); g.lineTo(28.4, 27.3); g.lineTo(21.2, 19.8); g.closePath(); g.fill();
+  g.fillStyle = '#EE7A3A';
+  g.beginPath(); g.roundRect(0, 0, 48, 48, 14); g.fill();
+  g.fillStyle = g.strokeStyle = '#1D1B19';
+  g.beginPath(); g.roundRect(11, 10, 7.5, 28, 3.75); g.fill();
+  g.beginPath(); g.roundRect(29.5, 10, 7.5, 28, 3.75); g.fill();
+  g.lineCap = g.lineJoin = 'round';
+  g.lineWidth = 5;
+  g.beginPath(); g.moveTo(18.2, 30.2); g.lineTo(25.6, 23.2); g.stroke();
+  g.lineWidth = 2.4;
+  g.beginPath(); g.moveTo(30.6, 18); g.lineTo(28.4, 27.3); g.lineTo(21.2, 19.8); g.closePath(); g.fill(); g.stroke();
   g.restore();
 }
 
-function drawCourt(size) {
+function drawCourt(size, theme) {
+  const tc = SCENE_THEMES[theme] ?? SCENE_THEMES.dark;
   const c = document.createElement('canvas');
   c.width = c.height = size;
   const g = c.getContext('2d');
@@ -70,7 +84,7 @@ function drawCourt(size) {
   g.globalAlpha = 1;
 
   // ─ 코트 밖(에이프런) ─
-  g.fillStyle = COLORS.apron;
+  g.fillStyle = tc.apron;
   g.fillRect(0, 0, size, Z(0));                // 베이스라인 뒤
   g.fillRect(0, 0, X(-25), size);              // 왼쪽
   g.fillRect(X(25), 0, size - X(25), size);    // 오른쪽
@@ -120,31 +134,31 @@ function drawCourt(size) {
     g.fillRect(X(-8.67), Z(z), 0.67 * k, w * k);
     g.fillRect(X(8), Z(z), 0.67 * k, w * k);
   }
-  // 베이스라인 밖 로고 (마크 + 굵기 대비 워드마크)
-  const fs = 2.7 * k;
+  // 베이스라인 밖 로고 (마크 + 워드마크)
+  const fs = 2.3 * k;
   g.textBaseline = 'middle';
   g.textAlign = 'left';
-  g.font = `700 ${fs}px "Barlow Condensed", sans-serif`;
-  const w1 = g.measureText('3D HOOPS ').width;
-  g.font = `300 ${fs}px "Barlow Condensed", sans-serif`;
-  const w2 = g.measureText('PLAYBOOK').width;
+  g.font = `600 ${fs}px "Rubik", sans-serif`;
+  const w1 = g.measureText('3D Hoops ').width;
+  g.font = `400 ${fs}px "Rubik", sans-serif`;
+  const w2 = g.measureText('Playbook').width;
   const markS = 3.2 * k, gap = 1.0 * k;
   const x0 = X(0) - (markS + gap + w1 + w2) / 2, cy = Z(-3.6);
   drawMark(g, x0 + markS / 2, cy, markS);
-  g.fillStyle = '#f4f5f6';
-  g.font = `700 ${fs}px "Barlow Condensed", sans-serif`;
-  g.fillText('3D HOOPS ', x0 + markS + gap, cy + 0.08 * k);
-  g.fillStyle = 'rgba(244,245,246,0.62)';
-  g.font = `300 ${fs}px "Barlow Condensed", sans-serif`;
-  g.fillText('PLAYBOOK', x0 + markS + gap + w1, cy + 0.08 * k);
+  g.fillStyle = tc.ink;
+  g.font = `600 ${fs}px "Rubik", sans-serif`;
+  g.fillText('3D Hoops ', x0 + markS + gap, cy + 0.06 * k);
+  g.fillStyle = tc.inkSoft;
+  g.font = `400 ${fs}px "Rubik", sans-serif`;
+  g.fillText('Playbook', x0 + markS + gap + w1, cy + 0.06 * k);
   // 사이드라인 밖 문구
   g.textAlign = 'center';
-  g.fillStyle = 'rgba(244,245,246,0.38)';
-  g.font = `600 ${1.5 * k}px "Barlow Condensed", sans-serif`;
+  g.fillStyle = tc.inkFaint;
+  g.font = `500 ${1.3 * k}px "Rubik", sans-serif`;
   g.save();
   g.translate(X(-28), Z(23.5));
   g.rotate(-Math.PI / 2);
-  g.fillText('H A L F - C O U R T   S E T S', 0, 0);
+  g.fillText('Half-court sets', 0, 0);
   g.restore();
   // 센터서클 안 마크
   g.globalAlpha = 0.92;
@@ -154,9 +168,9 @@ function drawCourt(size) {
   return c;
 }
 
-export function buildCourt(scene, renderer, { hiRes = true } = {}) {
+export function buildCourt(scene, renderer, { hiRes = true, theme = 'dark' } = {}) {
   const size = hiRes ? 4096 : 2048;
-  const tex = new THREE.CanvasTexture(drawCourt(size));
+  const tex = new THREE.CanvasTexture(drawCourt(size, theme));
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
@@ -172,14 +186,24 @@ export function buildCourt(scene, renderer, { hiRes = true } = {}) {
   // 코트 바깥의 어두운 바닥
   const outer = new THREE.Mesh(
     new THREE.CircleGeometry(220, 64),
-    new THREE.MeshStandardMaterial({ color: 0x0a0b0d, roughness: 1 })
+    new THREE.MeshStandardMaterial({ color: SCENE_THEMES[theme].outer, roughness: 1 })
   );
   outer.rotation.x = -Math.PI / 2;
   outer.position.set(0, -0.03, 23);
   outer.receiveShadow = true;
   scene.add(outer);
 
-  return { floor, ...buildHoop(scene) };
+  // 테마가 바뀌면 바닥 텍스처(에이프런·글자 색)를 다시 그리고 바깥 바닥 색을 맞춘다
+  let current = theme;
+  const setTheme = (next) => {
+    if (next === current || !SCENE_THEMES[next]) return;
+    current = next;
+    tex.image = drawCourt(size, next);
+    tex.needsUpdate = true;
+    outer.material.color.set(SCENE_THEMES[next].outer);
+  };
+
+  return { floor, setTheme, ...buildHoop(scene) };
 }
 
 function buildHoop(scene) {
