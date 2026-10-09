@@ -2,11 +2,10 @@
 export default {
   id: 'pick-and-roll',
   name: '픽 앤 롤',
-  en: 'Pick and Roll',
-  category: '온볼 스크린',
+  category: 'onball',
   difficulty: 1,
   summary:
-    'NBA에서 가장 많이 쓰는 2인 공격입니다. 빅맨이 볼 핸들러의 수비수에게 스크린을 걸고, 핸들러는 그 스크린을 타고 돌파하며, 스크리너는 림으로 굴러(roll) 들어갑니다. 수비 두 명이 공격 두 명을 동시에 막아야 하는 **2대2 딜레마**를 만드는 것이 핵심입니다.',
+    'NBA에서 가장 많이 쓰는 2인 공격입니다. 빅맨이 볼 핸들러의 수비수에게 스크린을 걸고, 핸들러는 그 스크린을 타고 돌파하며, 스크리너는 림으로 굴러 들어갑니다. 수비 두 명이 공격 두 명을 동시에 막아야 하는 **2대2 딜레마**를 만드는 것이 핵심입니다.',
   when:
     '볼 핸들링과 패스가 좋은 가드와 림을 위협하는 빅맨이 있으면 언제든 쓸 수 있습니다. 샷클락이 얼마 남지 않았을 때 가장 먼저 꺼내는 카드이고, 상대 빅맨의 발이 느릴수록 위력이 커집니다.',
   keys: [
@@ -16,14 +15,42 @@ export default {
     '나머지 세 명은 코너와 윙에 넓게 서서(스페이싱) 도움 수비가 멀리서 오게 만듭니다.',
   ],
   counters: [
-    { name: '드롭 (Drop)', desc: '빅맨이 페인트 쪽으로 물러나 롤과 레이업을 막는 대신 미드레인지 풀업을 내줍니다.' },
-    { name: '헤지 / 쇼 (Hedge)', desc: '빅맨이 순간적으로 튀어나와 핸들러를 멈춰 세운 뒤 자기 선수에게 돌아갑니다.' },
-    { name: '스위치 (Switch)', desc: '두 수비가 마크를 바꿉니다. 틈은 없지만 가드가 빅맨을 막는 미스매치가 생깁니다.' },
-    { name: '아이스 (ICE)', desc: '사이드 픽앤롤에서 핸들러를 사이드라인과 베이스라인 쪽으로 몰아 중앙 진입을 막습니다.' },
-    { name: '블리츠 (Blitz)', desc: '두 명이 핸들러를 더블팀합니다. 공을 빼게 만들 수 있지만 롤맨이 4대3을 만들면 위험합니다.' },
+    { name: '드롭', desc: '빅맨이 페인트 쪽으로 물러나 롤과 레이업을 막는 대신 미드레인지 풀업을 내줍니다.' },
+    { name: '헤지 / 쇼', desc: '빅맨이 순간적으로 튀어나와 핸들러를 멈춰 세운 뒤 자기 선수에게 돌아갑니다.' },
+    { name: '스위치', desc: '두 수비가 마크를 바꿉니다. 틈은 없지만 가드가 빅맨을 막는 미스매치가 생깁니다.' },
+    { name: '아이스', desc: '사이드 픽앤롤에서 핸들러를 사이드라인과 베이스라인 쪽으로 몰아 중앙 진입을 막습니다.' },
+    { name: '블리츠', desc: '두 명이 핸들러를 더블팀합니다. 공을 빼게 만들 수 있지만 롤맨이 4대3을 만들면 위험합니다.' },
   ],
   famous:
     '존 스탁턴–칼 말론(유타 재즈), 스티브 내시–아마레 스터드마이어(피닉스 선즈), 크리스 폴, 루카 돈치치(댈러스 매버릭스) 등. 현대 NBA 하프코트 공격의 상당수가 픽앤롤에서 출발합니다.',
+
+  en: {
+    name: 'Pick and Roll',
+    summary:
+      'The most common two-man action in the NBA. A big sets a screen on the ball handler\'s defender, the handler drives off the screen, and the screener rolls hard to the rim. The whole point is the **2-on-2 dilemma**: two defenders have to stop two attackers at once.',
+    when:
+      'Any time you have a guard who can handle and pass and a big who threatens the rim. It is the first thing teams reach for late in the shot clock, and it hurts most against slow-footed bigs.',
+    keys: [
+      'The screener angles toward the defender\'s hip, and the handler comes off **shoulder to shoulder** so the defender can\'t slip through.',
+      'Before the screen, the handler jabs the other way to steer the defender into it (setting up the screen).',
+      'Roll timing: go once the handler clears the screen and both defenders are looking at the ball.',
+      'The other three space the floor in the corners and on the wings so help has to come from far away.',
+    ],
+    counters: [
+      { name: 'Drop', desc: 'The big sinks toward the paint to take away the roll and the layup, conceding the mid-range pull-up.' },
+      { name: 'Hedge / Show', desc: 'The big jumps out to stop the handler for a beat, then recovers to the roller.' },
+      { name: 'Switch', desc: 'The two defenders trade assignments. No gap opens, but a guard ends up on a big.' },
+      { name: 'ICE', desc: 'On a side pick and roll, the defense forces the handler toward the sideline and baseline, keeping the ball out of the middle.' },
+      { name: 'Blitz', desc: 'Both defenders trap the handler. It can force the ball out, but it is risky if the roller gets a 4-on-3.' },
+    ],
+    famous:
+      'John Stockton and Karl Malone (Utah Jazz), Steve Nash and Amar\'e Stoudemire (Phoenix Suns), Chris Paul, Luka Dončić (Dallas Mavericks), and many more. A huge share of modern NBA half-court offense starts with a pick and roll.',
+    steps: [
+      { title: 'Set the screen', text: '[5] comes up from the elbow and sets a screen on the right side of [x1]. [1] jabs the other way first to steer [x1] into the screen.' },
+      { title: 'Use the screen & roll', text: '[1] comes off the screen shoulder to shoulder and dribbles right. [x1] gets caught on the screen and trails, while [5] **rolls** to the rim. [x5] plays **drop** coverage, sinking toward the paint to try to guard both.' },
+      { title: 'Pass & finish', text: 'The moment [x5] steps up to stop the dribble, [1] hits the rolling [5] with a bounce pass and [5] finishes with a dunk. If [x4] rotates over late to help (the tag), [4] and [2] on the left are open for a **kick-out**.' },
+    ],
+  },
 
   start: { o1: [0, 32], o2: [-23, 3.5], o3: [23, 3.5], o4: [-19, 22], o5: [8, 18] },
   ball: 'o1',

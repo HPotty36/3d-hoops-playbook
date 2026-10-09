@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>3D Hoops Playbook</title>
-  <meta name="description" content="프로 농구(NBA)에서 자주 쓰이는 공격 작전을 3D 코트 위에서 단계별로 재생하며 배우는 비공식 교육용 플레이북" />
+  <meta name="description" content="Interactive 3D playbook of common pro-basketball offensive sets, replayed step by step. 프로 농구 공격 작전을 3D로 단계별 재생하는 비공식 교육용 플레이북." />
   <meta name="theme-color" content="#0a0b0d" />
   <link rel="icon" type="image/svg+xml" href="assets/logo-mark.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -41,20 +41,20 @@
 
   <div id="app">
     <!-- 작전 목록 -->
-    <aside id="sidebar" aria-label="작전 목록">
+    <aside id="sidebar" data-i18n-aria="aria.plays">
       <header class="brand">
-        <a class="brand-link" href="./" aria-label="3D Hoops Playbook 처음으로">
+        <a class="brand-link" href="./" data-i18n-aria="brand.home">
           <svg class="brand-mark" aria-hidden="true"><use href="#i-mark" /></svg>
           <span class="wordmark"><b>3D HOOPS</b> <span>PLAYBOOK</span></span>
         </a>
-        <p class="brand-sub">3D로 보는 농구 작전 교과서</p>
+        <p class="brand-sub" data-i18n="brand.sub"></p>
       </header>
       <nav id="play-list"></nav>
       <footer class="side-foot">
-        <span><kbd>Space</kbd> 재생</span>
-        <span><kbd>←</kbd><kbd>→</kbd> 단계</span>
-        <span><kbd>Enter</kbd> 바로 재생</span>
-        <span><kbd>1</kbd>–<kbd>5</kbd> 카메라</span>
+        <span><kbd>Space</kbd> <span data-i18n="hint.play"></span></span>
+        <span><kbd>←</kbd><kbd>→</kbd> <span data-i18n="hint.steps"></span></span>
+        <span><kbd>Enter</kbd> <span data-i18n="hint.now"></span></span>
+        <span><kbd>1</kbd>–<kbd>5</kbd> <span data-i18n="hint.camera"></span></span>
       </footer>
     </aside>
 
@@ -63,23 +63,26 @@
       <header class="toolbar">
         <div class="play-head">
           <span id="hud-cat" class="eyebrow"></span>
-          <div class="play-names">
-            <h2 id="hud-title"></h2>
-            <span id="hud-en"></span>
-          </div>
+          <h2 id="hud-title"></h2>
         </div>
-        <div class="seg cam-bar" role="group" aria-label="카메라 시점">
-          <button data-cam="coach" class="on" title="코치 뷰 (1)">코치</button>
-          <button data-cam="broadcast" title="중계 화면 (2)">중계</button>
-          <button data-cam="top" title="전술판 탑뷰 (3)">전술판</button>
-          <button data-cam="baseline" title="엔드라인 (4)">엔드라인</button>
-          <button data-cam="follow" title="공 추적 (5)">공 추적</button>
+        <div class="tool-right">
+          <div class="seg lang-bar" role="group" data-i18n-aria="aria.lang">
+            <button data-lang="ko" title="한국어" lang="ko">KO</button>
+            <button data-lang="en" title="English" lang="en">EN</button>
+          </div>
+          <div class="seg cam-bar" role="group" data-i18n-aria="aria.camera">
+            <button data-cam="coach" class="on" data-i18n="cam.coach" data-i18n-title="cam.coach.t"></button>
+            <button data-cam="broadcast" data-i18n="cam.broadcast" data-i18n-title="cam.broadcast.t"></button>
+            <button data-cam="top" data-i18n="cam.top" data-i18n-title="cam.top.t"></button>
+            <button data-cam="baseline" data-i18n="cam.baseline" data-i18n-title="cam.baseline.t"></button>
+            <button data-cam="follow" data-i18n="cam.follow" data-i18n-title="cam.follow.t"></button>
+          </div>
         </div>
       </header>
 
       <div id="viewport">
         <div id="score-pop" aria-live="polite"></div>
-        <div id="loading">코트를 준비하는 중</div>
+        <div id="loading" data-i18n="loading"></div>
       </div>
 
       <section id="caption" aria-live="polite">
@@ -88,89 +91,86 @@
           <strong id="cap-title"></strong>
           <div id="cap-status" class="cap-status" hidden>
             <span id="cap-status-text"></span>
-            <button id="btn-skip" type="button">바로 재생 <kbd>Enter</kbd></button>
+            <button id="btn-skip" type="button"><span data-i18n="btn.skip"></span> <kbd>Enter</kbd></button>
           </div>
         </div>
         <p id="cap-text"></p>
         <div class="cap-bar" aria-hidden="true"><i id="cap-bar-fill"></i></div>
       </section>
 
-      <section id="transport" aria-label="재생 컨트롤">
+      <section id="transport" data-i18n-aria="aria.controls">
         <div class="t-buttons">
-          <button id="btn-restart" class="icon" title="처음부터 (R)" aria-label="처음부터"><svg><use href="#i-restart" /></svg></button>
-          <button id="btn-prev" class="icon" title="이전 단계 (←)" aria-label="이전 단계"><svg><use href="#i-prev" /></svg></button>
-          <button id="btn-play" class="icon play" title="재생/일시정지 (Space)" aria-label="재생"><svg><use href="#i-play" /></svg></button>
-          <button id="btn-next" class="icon" title="다음 단계 (→)" aria-label="다음 단계"><svg><use href="#i-next" /></svg></button>
+          <button id="btn-restart" class="icon" data-i18n-title="btn.restart.t" data-i18n-aria="aria.restart"><svg><use href="#i-restart" /></svg></button>
+          <button id="btn-prev" class="icon" data-i18n-title="btn.prev.t" data-i18n-aria="aria.prev"><svg><use href="#i-prev" /></svg></button>
+          <button id="btn-play" class="icon play" data-i18n-title="btn.play.t"><svg><use href="#i-play" /></svg></button>
+          <button id="btn-next" class="icon" data-i18n-title="btn.next.t" data-i18n-aria="aria.next"><svg><use href="#i-next" /></svg></button>
         </div>
-        <div id="timeline" class="timeline" role="slider" tabindex="0" aria-label="타임라인" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="timeline" class="timeline" role="slider" tabindex="0" data-i18n-aria="aria.timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div id="tl-segs" class="tl-segs"></div>
           <i id="tl-head" class="tl-head"></i>
         </div>
         <div class="time"><span id="time-cur">0.0</span><span class="sep">/</span><span id="time-total">0.0</span></div>
       </section>
 
-      <section id="settings" aria-label="재생 설정">
+      <section id="settings" data-i18n-aria="aria.settings">
         <div class="set-group">
-          <span class="set-label">읽기 모드</span>
-          <div class="seg" id="read-mode" role="group" aria-label="읽기 모드">
-            <button data-v="auto" title="단계마다 글 길이에 맞춰 잠깐 멈춘 뒤 재생">자동</button>
-            <button data-v="relaxed" title="자동보다 더 오래 멈춤">넉넉히</button>
-            <button data-v="step" title="단계마다 멈추고 재생 버튼을 기다림">단계별</button>
-            <button data-v="off" title="멈추지 않고 이어서 재생">끄기</button>
+          <span class="set-label" data-i18n="set.read"></span>
+          <div class="seg" id="read-mode" role="group" data-i18n-aria="set.read">
+            <button data-v="auto" data-i18n="read.auto" data-i18n-title="read.auto.t"></button>
+            <button data-v="relaxed" data-i18n="read.relaxed" data-i18n-title="read.relaxed.t"></button>
+            <button data-v="step" data-i18n="read.step" data-i18n-title="read.step.t"></button>
+            <button data-v="off" data-i18n="read.off" data-i18n-title="read.off.t"></button>
           </div>
         </div>
         <div class="set-group">
-          <span class="set-label">속도</span>
-          <div class="seg" id="speed" role="group" aria-label="재생 속도">
+          <span class="set-label" data-i18n="set.speed"></span>
+          <div class="seg" id="speed" role="group" data-i18n-aria="set.speed">
             <button data-v="0.5">0.5×</button>
             <button data-v="0.75">0.75×</button>
             <button data-v="1">1×</button>
             <button data-v="1.5">1.5×</button>
           </div>
         </div>
-        <div class="set-group toggles" role="group" aria-label="표시 옵션">
-          <button id="tg-def" class="chip" aria-pressed="true" title="수비 표시 (D)">수비</button>
-          <button id="tg-notes" class="chip" aria-pressed="true" title="전술판 표기 (N)">표기</button>
-          <button id="tg-labels" class="chip" aria-pressed="true" title="번호 라벨 (L)">라벨</button>
-          <button id="tg-loop" class="chip" aria-pressed="false" title="반복 재생">반복</button>
+        <div class="set-group toggles" role="group" data-i18n-aria="aria.display">
+          <button id="tg-def" class="chip" aria-pressed="true" data-i18n="tg.def" data-i18n-title="tg.def.t"></button>
+          <button id="tg-notes" class="chip" aria-pressed="true" data-i18n="tg.notes" data-i18n-title="tg.notes.t"></button>
+          <button id="tg-labels" class="chip" aria-pressed="true" data-i18n="tg.labels" data-i18n-title="tg.labels.t"></button>
+          <button id="tg-loop" class="chip" aria-pressed="false" data-i18n="tg.loop" data-i18n-title="tg.loop.t"></button>
         </div>
       </section>
     </main>
 
     <!-- 작전 설명 -->
-    <section id="info" aria-label="작전 설명">
+    <section id="info" data-i18n-aria="aria.info">
       <p id="info-summary" class="summary"></p>
-      <div class="legend" aria-label="전술판 표기 범례">
-        <span><svg viewBox="0 0 28 8"><path d="M1 4h20" stroke="#fff" stroke-width="2.2"/><path d="M27 4l-6-3.5v7z" fill="#fff"/></svg>컷</span>
-        <span><svg viewBox="0 0 28 8"><path d="M1 4l3-3 3 6 3-6 3 6 3-6 3 6 2-3" fill="none" stroke="#fcd34d" stroke-width="1.8" stroke-linejoin="round"/></svg>드리블</span>
-        <span><svg viewBox="0 0 28 8"><path d="M1 4h22" stroke="#fb923c" stroke-width="2.2" stroke-dasharray="4 3"/></svg>패스</span>
-        <span><svg viewBox="0 0 28 8"><path d="M1 4h23" stroke="#67e8f9" stroke-width="2.2"/><path d="M25 0v8" stroke="#67e8f9" stroke-width="2.6"/></svg>스크린</span>
-        <span><svg viewBox="0 0 28 8"><path d="M1 4h24" stroke="#fb7185" stroke-width="2.2" stroke-dasharray="1.5 2.5"/></svg>슛</span>
+      <div class="legend" data-i18n-aria="aria.legend">
+        <span><svg viewBox="0 0 28 8"><path d="M1 4h20" stroke="#fff" stroke-width="2.2"/><path d="M27 4l-6-3.5v7z" fill="#fff"/></svg><span data-i18n="lg.cut"></span></span>
+        <span><svg viewBox="0 0 28 8"><path d="M1 4l3-3 3 6 3-6 3 6 3-6 3 6 2-3" fill="none" stroke="#fcd34d" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-i18n="lg.dribble"></span></span>
+        <span><svg viewBox="0 0 28 8"><path d="M1 4h22" stroke="#fb923c" stroke-width="2.2" stroke-dasharray="4 3"/></svg><span data-i18n="lg.pass"></span></span>
+        <span><svg viewBox="0 0 28 8"><path d="M1 4h23" stroke="#67e8f9" stroke-width="2.2"/><path d="M25 0v8" stroke="#67e8f9" stroke-width="2.6"/></svg><span data-i18n="lg.screen"></span></span>
+        <span><svg viewBox="0 0 28 8"><path d="M1 4h24" stroke="#fb7185" stroke-width="2.2" stroke-dasharray="1.5 2.5"/></svg><span data-i18n="lg.shot"></span></span>
       </div>
       <div class="block">
-        <h3>이럴 때 쓴다</h3>
+        <h3 data-i18n="h.when"></h3>
         <p id="info-when"></p>
       </div>
       <div class="block">
-        <h3>단계별 진행</h3>
+        <h3 data-i18n="h.steps"></h3>
         <ol id="info-steps"></ol>
       </div>
       <div class="block">
-        <h3>핵심 포인트</h3>
+        <h3 data-i18n="h.keys"></h3>
         <ul id="info-keys" class="bullets"></ul>
       </div>
       <div class="block">
-        <h3>수비는 어떻게 막나</h3>
+        <h3 data-i18n="h.counters"></h3>
         <dl id="info-counters" class="counters"></dl>
       </div>
       <div class="block">
-        <h3>대표 사례</h3>
+        <h3 data-i18n="h.famous"></h3>
         <p id="info-famous"></p>
       </div>
-      <p class="disclaimer">
-        이 프로젝트는 NBA 및 각 구단과 관련이 없는 비공식 교육용 자료입니다. 작전 설명은 공개적으로 알려진 농구 전술을 정리한 것입니다.<br />
-        Unofficial educational project. Not affiliated with, endorsed by, or sponsored by the NBA or any of its teams.
-      </p>
+      <p class="disclaimer" data-i18n="disclaimer"></p>
     </section>
   </div>
 

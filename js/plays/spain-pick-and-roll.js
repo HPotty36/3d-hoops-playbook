@@ -2,8 +2,7 @@
 export default {
   id: 'spain-pick-and-roll',
   name: '스페인 픽앤롤',
-  en: 'Spain Pick and Roll',
-  category: '온볼 스크린',
+  category: 'onball',
   difficulty: 3,
   summary:
     '픽앤롤에 세 번째 선수를 더한 작전입니다. 볼 스크린 직후 슈터가 롤맨의 수비수(빅맨)에게 **백스크린**을 걸어 롤맨을 자유롭게 하고, 백스크린을 건 슈터는 곧바로 3점 라인으로 빠집니다. 수비 세 명이 동시에 딜레마에 빠집니다.',
@@ -16,12 +15,39 @@ export default {
     '볼 핸들러는 [x2]의 선택을 보고 롤맨(롭 패스)과 슈터(킥아웃) 중 하나를 고릅니다.',
   ],
   counters: [
-    { name: '올 스위치 (All Switch)', desc: '모든 스크린에 스위치해서 엇갈림을 없앱니다. 소통이 늦으면 더 큰 구멍이 생깁니다.' },
+    { name: '올 스위치', desc: '모든 스크린에 스위치해서 엇갈림을 없앱니다. 소통이 늦으면 더 큰 구멍이 생깁니다.' },
     { name: '백스크린 피하기', desc: '[x5]가 백스크린을 예상하고 미리 아래로 물러납니다. 대신 핸들러의 풀업 슛을 내줍니다.' },
     { name: '슈터 고정', desc: '[x2]가 끝까지 슈터를 따라가고, 롤맨은 약한 쪽 수비가 막습니다.' },
   ],
   famous:
     '스페인 대표팀과 유로리그에서 유행해 이런 이름이 붙었고, 2010년대 후반부터 NBA 팀들이 본격적으로 도입했습니다. 포틀랜드(데미안 릴라드–유서프 너키치), 토론토 랩터스 등이 자주 썼습니다.',
+
+  en: {
+    name: 'Spain Pick and Roll',
+    summary:
+      'A pick and roll with a third player added. Right after the ball screen, a shooter sets a **back screen** on the roller\'s defender (the big) to free the roller, then immediately pops to the three-point line. Three defenders face a dilemma at once.',
+    when:
+      'Against teams whose drop coverage shuts down a normal pick and roll, or teams that communicate poorly on switches.',
+    keys: [
+      'The back-screener hides just below the ball screen, behind the defending big, and screens right as the roll starts.',
+      'Thanks to the back screen, the roller runs to the rim with no defender attached.',
+      'Right after screening, the back-screener **pops** beyond the arc. If that defender helps on the roller, the three is wide open.',
+      'The handler reads the choice [x2] makes and picks between the roller (lob) and the shooter (kick-out).',
+    ],
+    counters: [
+      { name: 'All switch', desc: 'Switch every screen to remove the confusion. If the communication is a beat late, the hole gets even bigger.' },
+      { name: 'Avoid the back screen', desc: '[x5] anticipates the back screen and sinks early, conceding a pull-up to the handler.' },
+      { name: 'Stay with the shooter', desc: '[x2] stays glued to the shooter, and a weak-side defender handles the roller.' },
+    ],
+    famous:
+      'It caught on with the Spanish national team and in the EuroLeague, hence the name, and NBA teams adopted it widely in the late 2010s. The Portland Trail Blazers (Damian Lillard and Jusuf Nurkić) and the Toronto Raptors ran it often.',
+    steps: [
+      { title: 'Spain setup', text: '[5] comes up to set a high screen for [1], while shooter [2] drifts up from the paint and settles in **behind** [x5]. So far it looks like an ordinary pick and roll.' },
+      { title: 'Back screen', text: 'As [1] comes off the screen to the right, [2] sets a **back screen** on [x5]. [x5] is watching the ball and never sees the screen coming from behind.' },
+      { title: 'Roll & pop', text: 'With [x5] caught on the screen, [5] rolls to the rim and [2], who just set the back screen, **pops** to the top. If [x2] drops to stop the roller, [2] is open; if [x2] stays with [2], [5] is open.' },
+      { title: 'Kick-out three', text: '[x2] gets pulled down by the roller, so [1] passes to [2] at the top for an open three. Had the defense stayed with [2], the right answer would have been a **lob** to [5].' },
+    ],
+  },
 
   start: { o1: [0, 33], o5: [7, 19], o2: [-2, 15.5], o3: [-23, 3.5], o4: [23, 3.5] },
   ball: 'o1',

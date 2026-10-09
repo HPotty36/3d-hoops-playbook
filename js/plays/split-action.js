@@ -2,11 +2,10 @@
 export default {
   id: 'split-action',
   name: '스플릿 액션',
-  en: 'Split Action',
-  category: '모션 & 드라이브',
+  category: 'motion',
   difficulty: 3,
   summary:
-    '공이 포스트에 들어가면, 공 없는 두 선수가 서로 스크린을 걸며 갈라지는(split) 작전입니다. 수비가 컷하는 선수에게 신경 쓰는 사이 **스크린을 건 선수**가 오픈 3점을 얻습니다. 골든스테이트 모션 오펜스의 상징입니다.',
+    '공이 포스트에 들어가면, 공 없는 두 선수가 서로 스크린을 걸며 갈라지는 작전입니다. 수비가 컷하는 선수에게 신경 쓰는 사이 **스크린을 건 선수**가 오픈 3점을 얻습니다. 골든스테이트 모션 오펜스의 상징입니다.',
   when:
     '패스 좋은 빅맨이 포스트나 엘보에서 공을 잡을 수 있고, 외곽에 슈터가 둘 이상 있을 때 씁니다.',
   keys: [
@@ -17,11 +16,38 @@ export default {
   ],
   counters: [
     { name: '스위치', desc: '두 수비가 즉시 마크를 바꿉니다. 소통이 한 박자만 늦어도 둘 다 놓칩니다.' },
-    { name: '스크리너 고정 (Stay Home)', desc: '슈터 스크리너에게서 절대 떨어지지 않고, 커터는 포스트 쪽 수비가 견제합니다.' },
+    { name: '스크리너 고정', desc: '슈터 스크리너에게서 절대 떨어지지 않고, 커터는 포스트 쪽 수비가 견제합니다.' },
     { name: '포스트 도움 금지', desc: '포스트에 더블팀을 가지 않아 외곽 찬스 자체를 줄입니다.' },
   ],
   famous:
     '스티브 커 감독의 골든스테이트 워리어스(2015~2022) 모션 오펜스의 핵심입니다. 드레이먼드 그린이나 앤드루 보거트가 포스트·엘보에서 공을 잡고 스테픈 커리와 클레이 탐슨이 스플릿을 했습니다.',
+
+  en: {
+    name: 'Split Action',
+    summary:
+      'Once the ball goes into the post, the two players without the ball screen for each other and split apart. While the defense worries about the cutter, **the screener** gets an open three. It is the signature of Golden State\'s motion offense.',
+    when:
+      'When a passing big can catch the ball in the post or at the elbow and you have at least two shooters on the perimeter.',
+    keys: [
+      'The post entry is the trigger: the two players without the ball screen for each other.',
+      'It is most dangerous when the screener is a star shooter. The defense can\'t leave the screener or the cutter.',
+      'The cutter reads the defense and picks a curl, flare, or backdoor; the screener moves the opposite way.',
+      'The post player needs the vision to see all three options: the cut, the pop, and the one-on-one.',
+    ],
+    counters: [
+      { name: 'Switch', desc: 'The two defenders trade assignments immediately. One beat late, and both get away.' },
+      { name: 'Stay home', desc: 'Never leave the shooter who screens; the defenders near the post handle the cutter.' },
+      { name: 'No post help', desc: 'Never double the post, which cuts down the kick-out chances.' },
+    ],
+    famous:
+      'The heart of Steve Kerr\'s Golden State Warriors motion offense (2015–2022). Draymond Green or Andrew Bogut caught it at the post or the elbow while Stephen Curry and Klay Thompson ran the split.',
+    steps: [
+      { title: 'Post entry', text: '[5] seals in the left low post and [1] feeds the ball in with a bounce pass. Now the ball is in the post, and [1], the passer, and [2] at the top start the **split**.' },
+      { title: 'Set the screen', text: 'After the entry, [1] moves up and screens the defender of [2], [x2]. [5] holds the ball in the post and watches the two of them.' },
+      { title: 'Curl & pop', text: '[2] curls tightly around the screen toward the rim. The cut is dangerous, so [x1] gets pulled toward [2], and at that moment [1], the screener, pops back out beyond the arc. The real target was **the screener**.' },
+      { title: 'Post kick-out three', text: '[5] kicks it out of the post to the open [1], who knocks down the three. If the defense had stayed with [1], the curl layup for [2] was there; if they covered both, [5] had a one-on-one in the post.' },
+    ],
+  },
 
   start: { o1: [-18, 23], o2: [0, 31], o5: [-10, 9.5], o3: [23, 3.5], o4: [18, 22] },
   ball: 'o1',

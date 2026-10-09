@@ -43,6 +43,14 @@
 - Type: Pretendard (Korean UI, `word-break: keep-all`) and Barlow Condensed (labels, numbers, wordmark).
 - Logo: two screens (vertical bars) with a cutter's route arrow slipping between them, forming an "H".
 
+## Localization
+
+- `js/i18n.js` holds the UI strings for `ko` and `en`. Static markup is translated through `data-i18n`, `data-i18n-title`, and `data-i18n-aria` attributes.
+- Play files keep Korean content at the top level and English content in an `en` block with the same shape. `localize(play, lang)` merges them and falls back to Korean field by field.
+- Every label shows exactly one language. Switching languages re-renders the text without touching the playback state (time, reading pause, camera).
+- Reading time is language-aware: Korean `1 + chars / 12`, English `1 + words / 4.5`, both clamped to 2.5–10 s.
+- Language priority: `?lang=` in the URL, then the saved choice, then the browser language.
+
 ## Verification
 
 - Every play was sampled at 0.05 s intervals to check for NaN values, peak player speed (kept at or under a sprint of roughly 25 ft/s), and that shot distance matches the points scored (2 vs 3).

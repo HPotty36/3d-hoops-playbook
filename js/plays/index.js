@@ -10,7 +10,7 @@ import chicago from './chicago.js';
 import hammer from './hammer.js';
 import splitAction from './split-action.js';
 
-export const CATEGORIES = ['온볼 스크린', '오프볼 스크린', '모션 & 드라이브'];
+export const CATEGORIES = ['onball', 'offball', 'motion'];  // 표시 이름은 i18n.js의 cat.* 키
 
 export const PLAYS = [
   pickAndRoll,

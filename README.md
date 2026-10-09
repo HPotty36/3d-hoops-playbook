@@ -8,7 +8,7 @@
 An interactive playbook that replays **10 offensive sets commonly run in pro basketball (NBA)** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
 
-> The in-app text (play descriptions, step captions, UI) is written in **Korean**. A Korean version of this README is collapsed at the [bottom of the page](#korean).
+> The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
 ![3D Hoops Playbook preview](docs/preview.jpg)
 
@@ -44,6 +44,7 @@ Each play comes with **step-by-step breakdown · when to use it · key teaching 
 
 - Drag the timeline to freeze any moment; click a step in the right panel to jump to it.
 - Deep links: `#hammer` opens a play directly, and `?cam=top&t=3.5#hammer` opens it paused at 3.5 s from the top-down camera.
+- Language: the `KO | EN` toggle switches every label, caption, and play note without restarting playback. `?lang=en` or `?lang=ko` forces a language; otherwise your last choice (or the browser language) is used.
 
 ### Reading mode
 
@@ -93,7 +94,8 @@ js/court.js           Regulation half court (canvas texture) and the hoop
 js/players.js         Mannequin player model, poses (run, defend, screen, shoot), ball
 js/notation.js        Coach-board notation drawn on the floor
 js/camera.js          Camera presets and transitions
-js/plays/*.js         Play definitions (one file per play)
+js/i18n.js            UI strings (ko / en) and play-content localization
+js/plays/*.js         Play definitions (one file per play, Korean + English content)
 assets/logo-mark.svg  Logo mark (also the favicon)
 docs/design.md        Design notes
 ```
@@ -108,18 +110,26 @@ Create a file in `js/plays/` and register it in `js/plays/index.js`. Coordinates
 
 ```js
 export default {
-  id: 'my-play', name: '내 작전', en: 'My Play',
-  category: '온볼 스크린', difficulty: 1,
-  summary: '...', when: '...', keys: ['...'], famous: '...',
-  counters: [{ name: 'Switch', desc: '...' }],
+  id: 'my-play', category: 'onball', difficulty: 1,   // category: onball | offball | motion
+
+  // Korean content (default)
+  name: '내 작전', summary: '...', when: '...', keys: ['...'], famous: '...',
+  counters: [{ name: '스위치', desc: '...' }],
+
+  // English content: same shape, steps are matched by index
+  en: {
+    name: 'My Play', summary: '...', when: '...', keys: ['...'], famous: '...',
+    counters: [{ name: 'Switch', desc: '...' }],
+    steps: [{ title: 'Set the screen', text: '[5] screens for [x1].' }],
+  },
 
   start: { o1: [0, 32], o2: [-23, 3.5], o3: [23, 3.5], o4: [-19, 22], o5: [8, 18] },
   ball: 'o1',
   steps: [
     {
-      title: 'Set the screen',
+      title: '스크린 세팅',
       dur: 1.6,                                    // step length in seconds
-      text: '[5] screens for [x1].',               // [1] = offense chip, [x1] = defense chip, **bold**
+      text: '[5]가 [x1]에게 스크린을 겁니다.',       // [1] = offense chip, [x1] = defense chip, **bold**
       move: {
         o5: [[2.6, 28.6]],                         // waypoints (starts from the current position)
         o1: { path: [[-1.8, 32.6]], t: [0.25, 0.85] }, // t: active window inside the step (0–1)
@@ -139,7 +149,7 @@ export default {
 };
 ```
 
-Unless you script them, defenders position themselves automatically: between their man and the rim, sagging toward the paint when they are far from the ball.
+Any field missing from the `en` block falls back to Korean. Unless you script them, defenders position themselves automatically: between their man and the rim, sagging toward the paint when they are far from the ball.
 
 ## Tech
 
@@ -200,6 +210,7 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 - 타임라인을 드래그하면 원하는 순간에 멈춰서 볼 수 있고, 오른쪽 패널의 단계를 누르면 그 단계로 바로 이동합니다.
 - 주소 뒤에 `#hammer`처럼 작전 id를 붙이면 그 작전이 바로 열리고, `?cam=top&t=3.5#hammer`처럼 붙이면 그 장면에서 멈춘 채로 열립니다.
+- 오른쪽 위 `KO | EN` 토글로 언어를 바꿀 수 있습니다. 재생은 멈추지 않고 모든 문구와 설명이 바로 바뀝니다. `?lang=ko` / `?lang=en`으로 언어를 지정해 열 수도 있습니다.
 
 ### 읽기 모드
 
@@ -238,7 +249,7 @@ python -m http.server 8000
 
 ### 작전 추가하기
 
-`js/plays/`에 파일을 하나 만들고 `js/plays/index.js`에 등록하면 됩니다. 좌표 단위는 피트(ft)이고, 형식은 위 영어 섹션의 예시와 같습니다.
+`js/plays/`에 파일을 하나 만들고 `js/plays/index.js`에 등록하면 됩니다. 좌표 단위는 피트(ft)이고, 형식은 위 영어 섹션의 예시와 같습니다. 한국어 내용은 파일 본문에, 영어 내용은 `en` 블록에 같은 구조로 넣습니다(빠진 항목은 한국어로 표시).
 
 - `x`: 왼쪽 사이드라인 `-25` ~ 오른쪽 사이드라인 `25` (공격 방향 기준 왼쪽이 음수)
 - `z`: 베이스라인 `0` ~ 하프라인 `47`, 림 중심은 `(0, 5.25)`

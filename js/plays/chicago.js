@@ -2,11 +2,10 @@
 export default {
   id: 'chicago',
   name: '시카고 액션',
-  en: 'Chicago (Pin-down into DHO)',
-  category: '오프볼 스크린',
+  category: 'offball',
   difficulty: 2,
   summary:
-    '슈터가 핀다운 스크린을 타고 올라오자마자 빅맨에게서 **드리블 핸드오프(DHO)**를 받는 연속 동작입니다. 슈터의 수비수는 스크린 두 개를 연달아 맞게 되고, 슈터는 달리는 속도 그대로 슛이나 돌파를 시작합니다.',
+    '슈터가 핀다운 스크린을 타고 올라오자마자 빅맨에게서 **드리블 핸드오프**를 받는 연속 동작입니다. 슈터의 수비수는 스크린 두 개를 연달아 맞게 되고, 슈터는 달리는 속도 그대로 슛이나 돌파를 시작합니다.',
   when:
     '슈터를 살리면서 자연스럽게 픽앤롤로 이어가고 싶을 때, 패스 좋은 빅맨이 탑에서 공을 다룰 수 있을 때 씁니다.',
   keys: [
@@ -22,6 +21,33 @@ export default {
   ],
   famous:
     '골든스테이트의 스테픈 커리, 마이애미 히트의 던컨 로빈슨–뱀 아데바요, 덴버의 니콜라 요키치 핸드오프에서 자주 보입니다. 요즘 NBA에서 가장 흔한 오프볼→온볼 연결 동작 중 하나입니다.',
+
+  en: {
+    name: 'Chicago',
+    summary:
+      'A shooter comes off a pin-down screen and immediately takes a **dribble handoff** from a big. The shooter\'s defender gets hit by two screens in a row, and the shooter starts a shot or a drive at full speed.',
+    when:
+      'When you want to use a shooter and flow naturally into a pick and roll, especially with a passing big who can handle the ball at the top.',
+    keys: [
+      'The pin-down brings the shooter from low to high, so the shooter catches the ball already on the move.',
+      'The big handing off also screens the defender at the same moment.',
+      'No pause between the two actions: carry the speed off the pin-down straight into the handoff.',
+      'If the big\'s defender jumps out to the shooter, the big rolls to the rim.',
+    ],
+    counters: [
+      { name: 'Switch the handoff', desc: 'The big\'s defender takes the shooter to deny the three, at the cost of a shooter-versus-big mismatch.' },
+      { name: 'Trail', desc: 'The shooter\'s defender stays on the shooter\'s hip all the way through.' },
+      { name: 'Deny the handoff', desc: 'Cut off the shooter\'s path to the ball and force a backdoor cut.' },
+    ],
+    famous:
+      'You will see it with Stephen Curry in Golden State, the Duncan Robinson and Bam Adebayo pairing in Miami, and Nikola Jokić\'s handoffs in Denver. It is one of the most common off-ball-to-on-ball links in today\'s NBA.',
+    steps: [
+      { title: 'Entry to the big', text: '[5] comes up to the top and receives the pass from [1]. After giving it up, [1] clears out to the right wing to make room. Now the big, [5], has the ball.' },
+      { title: 'Pin-down', text: '[4] comes down and sets a **pin-down screen** (a screen set going downward) on [x2]. [2] rises up off the screen while [5] dribbles toward [2].' },
+      { title: 'Dribble handoff', text: 'As [5] hands the ball straight to [2] in a **dribble handoff**, [5] also blocks the path of [x2], becoming a second screen. After two screens in a row, [x2] can\'t keep up.' },
+      { title: 'Shoot or roll', text: '[2] takes the handoff and fires a three in the space the defense gave up. If [x5] jumps out to stop [2], [5] rolls to the rim and it becomes a pick and roll.' },
+    ],
+  },
 
   start: { o1: [6, 32], o5: [-1, 23], o2: [-9, 6], o4: [-17, 20], o3: [23, 3.5] },
   ball: 'o1',
@@ -51,7 +77,7 @@ export default {
     {
       title: '드리블 핸드오프',
       dur: 1.3,
-      text: '[5]가 [2]에게 공을 직접 건네주는 **드리블 핸드오프(DHO)**와 동시에, 몸으로 [x2]의 길을 막아 한 번 더 스크린이 됩니다. 스크린 두 개를 연달아 맞은 [x2]는 따라갈 수가 없습니다.',
+      text: '[5]가 [2]에게 공을 직접 건네주는 **드리블 핸드오프**와 동시에, 몸으로 [x2]의 길을 막아 한 번 더 스크린이 됩니다. 스크린 두 개를 연달아 맞은 [x2]는 따라갈 수가 없습니다.',
       move: {
         o2: { path: [[-13.8, 25.4], [-9.5, 28]], t: [0, 0.75] },
       },

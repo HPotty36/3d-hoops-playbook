@@ -2,8 +2,7 @@
 export default {
   id: 'hammer',
   name: '해머',
-  en: 'Hammer',
-  category: '모션 & 드라이브',
+  category: 'motion',
   difficulty: 2,
   summary:
     '한쪽에서 베이스라인 돌파로 수비를 림 쪽으로 모은 뒤, 반대편에서 도움 수비하러 들어온 수비수의 등 뒤에 **해머 스크린**을 걸어 코너의 슈터를 완전히 비워 놓는 작전입니다. 돌파 후 킥아웃의 교과서입니다.',
@@ -16,12 +15,38 @@ export default {
     '패스는 베이스라인 위를 가로지르는 한 번의 강한 패스입니다.',
   ],
   counters: [
-    { name: '노 헬프 (No Help)', desc: '약한 쪽 수비가 슈터에게서 떨어지지 않습니다. 대신 돌파 레이업을 내줄 수 있습니다.' },
+    { name: '노 헬프', desc: '약한 쪽 수비가 슈터에게서 떨어지지 않습니다. 대신 돌파 레이업을 내줄 수 있습니다.' },
     { name: '로테이션 스위치', desc: '[x4]가 코너로 나가고 [x2]가 [4]를 맡아 슈터를 지웁니다.' },
     { name: '베이스라인 차단', desc: '처음부터 베이스라인 돌파를 막아 도움 수비가 많은 중앙으로 유도합니다.' },
   ],
   famous:
     '그렉 포포비치 감독의 샌안토니오 스퍼스가 2014년 우승 시즌 전후로 즐겨 썼습니다. 마누 지노빌리의 베이스라인 돌파에 이은 대니 그린의 코너 3점이 대표 장면입니다.',
+
+  en: {
+    name: 'Hammer',
+    summary:
+      'A baseline drive on one side pulls the defense toward the rim, then on the other side a **hammer screen** is set behind the defender who rotated over to help, leaving the corner shooter wide open. The textbook drive-and-kick.',
+    when:
+      'When you have a wing who can drive and a corner three-point shooter. The more aggressive the opponent\'s help defense, the better it works.',
+    keys: [
+      'The drive must go baseline. The defense collapses on the rim and the passing lane to the opposite corner opens.',
+      'The hammer screen goes **behind** the defender who came over to help, so that defender never sees it.',
+      'The shooter drifts from the wing down to the corner in time with the drive.',
+      'The pass is a single hard throw across the baseline.',
+    ],
+    counters: [
+      { name: 'No help', desc: 'The weak-side defender never leaves the shooter, which can concede the layup on the drive.' },
+      { name: 'Rotation switch', desc: '[x4] runs out to the corner and [x2] takes [4], erasing the shooter.' },
+      { name: 'Take away the baseline', desc: 'Deny the baseline drive from the start and force the ball into the crowded middle.' },
+    ],
+    famous:
+      'Gregg Popovich\'s San Antonio Spurs ran it heavily around their 2014 title season. Manu Ginóbili driving the baseline and Danny Green hitting the corner three is the classic image.',
+    steps: [
+      { title: 'Setup', text: '[1] has the ball on the right wing, looking to attack. On the weak side (left), shooter [2] is on the wing and big [4] is on the block. The real action happens on the left.' },
+      { title: 'Baseline drive & hammer screen', text: '[1] attacks hard along the baseline. As the help collapses, [x2] sinks toward the paint in help position, and [4] sets a **hammer screen** behind [x2]. [2] slides down to the corner.' },
+      { title: 'Hammer pass & corner three', text: 'From the end of the baseline, [1] fires the ball across to the opposite corner (the hammer pass). [x2] is stuck on the screen and can\'t get to the corner, and [2] takes the shortest three on the floor: the **corner three**.' },
+    ],
+  },
 
   start: { o1: [17, 24], o3: [23, 3.5], o5: [6.5, 19.5], o2: [-18, 22], o4: [-9, 9] },
   ball: 'o1',

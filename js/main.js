@@ -6,6 +6,7 @@ import { createPlayer, posePlayer, handPoint, createBall } from './players.js';
 import { Notation } from './notation.js';
 import { CameraRig } from './camera.js';
 import { PLAYS, CATEGORIES } from './plays/index.js';
+import { t as tr, applyStatic, localize, initLang, setLang, getLang } from './i18n.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -69,12 +70,14 @@ const state = {
   scrubbing: false, stepShown: -1,
 };
 notation.visible = prefs.showNotes ?? true;
+initLang(prefs.lang);
+const content = () => localize(PLAYS[state.idx]);
 
 function savePrefs() {
   try {
     localStorage.setItem(PREF_KEY, JSON.stringify({
       speed: state.speed, loop: state.loop, showDef: state.showDef, showLabels: state.showLabels,
-      showNotes: notation.visible, readMode: state.readMode,
+      showNotes: notation.visible, readMode: state.readMode, lang: getLang(),
     }));
   } catch { /* 저장소를 못 쓰는 환경이면 무시 */ }
 }
@@ -83,9 +86,13 @@ function savePrefs() {
 // 1배속은 실제 경기 속도로 두고, 단계가 시작될 때 설명을 읽을 시간을 따로 준다.
 // 그동안 코트에는 이번 단계의 동선(전술판 표기)과 관련 선수 강조가 먼저 나타난다.
 const READ_FACTOR = { auto: 1, relaxed: 1.7 };
+// 한국어는 글자 수(초당 약 12자), 영어는 단어 수(초당 약 4.5단어)로 읽는 시간을 잡는다
 function readTime(text) {
-  const chars = text.replace(/\*\*|\[x?\d\]/g, '').replace(/\s+/g, '').length;
-  return clamp(1 + chars / 12, 2.5, 10);
+  const plain = text.replace(/\*\*|\[x?\d\]/g, '');
+  const sec = getLang() === 'en'
+    ? 1 + plain.split(/\s+/).filter(Boolean).length / 4.5
+    : 1 + plain.replace(/\s+/g, '').length / 12;
+  return clamp(sec, 2.5, 10);
 }
 
 function beginStep(k) {
@@ -98,7 +105,7 @@ function beginStep(k) {
     syncPlayBtn();
     return;
   }
-  const total = readTime(state.cp.steps[k].text) * READ_FACTOR[state.readMode];
+  const total = readTime(content().steps[k].text) * READ_FACTOR[state.readMode];
   state.hold = { k, remaining: total, total };
 }
 
@@ -120,11 +127,12 @@ function fmt(s) {
 function renderList() {
   const nav = $('#play-list');
   nav.innerHTML = '';
+  nav.setAttribute('aria-label', tr('aria.plays'));
   let n = 0;
   for (const cat of CATEGORIES) {
     const h = document.createElement('div');
     h.className = 'cat-title';
-    h.textContent = cat;
+    h.textContent = tr(`cat.${cat}`);
     nav.append(h);
     PLAYS.forEach((p, i) => {
       if (p.category !== cat) return;
@@ -133,8 +141,8 @@ function renderList() {
       b.className = 'play-item';
       b.dataset.idx = i;
       b.innerHTML = `<span class="num">${String(n).padStart(2, '0')}</span>
-        <span class="names"><span class="ko">${esc(p.name)}</span><span class="en">${esc(p.en)}</span></span>
-        <span class="diff" title="난이도 ${p.difficulty}/3">${[1, 2, 3].map((d) => `<i class="${d <= p.difficulty ? 'on' : ''}"></i>`).join('')}</span>`;
+        <span class="nm">${esc(localize(p).name)}</span>
+        <span class="diff" title="${tr('diff', { n: p.difficulty })}">${[1, 2, 3].map((d) => `<i class="${d <= p.difficulty ? 'on' : ''}"></i>`).join('')}</span>`;
       b.addEventListener('click', () => selectPlay(i, true));
       nav.append(b);
     });
@@ -144,17 +152,17 @@ function renderList() {
 // ── 작전 설명 패널 ───────────────────────────────────────────
 function renderInfo() {
   const p = state.cp.play;
-  $('#hud-cat').textContent = p.category;
-  $('#hud-title').textContent = p.name;
-  $('#hud-en').textContent = p.en;
-  $('#info-summary').innerHTML = fmt(p.summary);
-  $('#info-when').innerHTML = fmt(p.when);
-  $('#info-famous').innerHTML = fmt(p.famous);
-  $('#info-keys').innerHTML = p.keys.map((k) => `<li>${fmt(k)}</li>`).join('');
-  $('#info-counters').innerHTML = p.counters.map((c) => `<div><dt>${esc(c.name)}</dt><dd>${fmt(c.desc)}</dd></div>`).join('');
+  const c = content();
+  $('#hud-cat').textContent = tr(`cat.${p.category}`);
+  $('#hud-title').textContent = c.name;
+  $('#info-summary').innerHTML = fmt(c.summary);
+  $('#info-when').innerHTML = fmt(c.when);
+  $('#info-famous').innerHTML = fmt(c.famous);
+  $('#info-keys').innerHTML = c.keys.map((k) => `<li>${fmt(k)}</li>`).join('');
+  $('#info-counters').innerHTML = c.counters.map((x) => `<div><dt>${esc(x.name)}</dt><dd>${fmt(x.desc)}</dd></div>`).join('');
   const ol = $('#info-steps');
   ol.innerHTML = '';
-  state.cp.steps.forEach((st, k) => {
+  c.steps.forEach((st, k) => {
     const li = document.createElement('li');
     li.innerHTML = `<button><span class="n">${k + 1}</span><span class="st">${esc(st.title)}</span><span class="sx">${fmt(st.text)}</span></button>`;
     li.querySelector('button').addEventListener('click', () => seekStep(k, true));
@@ -169,13 +177,13 @@ function renderInfo() {
   if (active && window.matchMedia('(max-width: 1100px)').matches) {
     nav.scrollTo({ left: active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2, behavior: 'smooth' });
   }
-  document.title = `${p.name} · 3D Hoops Playbook`;
+  document.title = `${c.name} · 3D Hoops Playbook`;
   state.stepShown = -1;
 }
 
 function showCaption(k) {
-  const st = state.cp.steps[k];
-  $('#cap-step').textContent = `STEP ${k + 1} / ${state.cp.steps.length}`;
+  const st = content().steps[k];
+  $('#cap-step').textContent = tr('cap.step', { k: k + 1, n: state.cp.steps.length });
   $('#cap-title').textContent = st.title;
   $('#cap-text').innerHTML = fmt(st.text);
   $$('#info-steps li').forEach((li, i) => {
@@ -273,7 +281,7 @@ function togglePlay() {
 function syncPlayBtn() {
   const b = $('#btn-play');
   b.querySelector('use').setAttribute('href', state.playing ? '#i-pause' : '#i-play');
-  b.setAttribute('aria-label', state.playing ? '일시정지' : '재생');
+  b.setAttribute('aria-label', tr(state.playing ? 'aria.pause' : 'aria.play'));
 }
 
 function snapHeadings() {
@@ -387,7 +395,7 @@ function checkScore(prev, t) {
   for (const s of state.cp.scores) {
     if (prev < s.t && t >= s.t) {
       const el = $('#score-pop');
-      const label = s.kind === 'dunk' ? 'DUNK' : s.pts === 3 ? '3-POINTER' : s.kind === 'layup' ? 'LAYUP' : 'JUMPER';
+      const label = tr(s.kind === 'dunk' ? 'score.dunk' : s.pts === 3 ? 'score.three' : s.kind === 'layup' ? 'score.layup' : 'score.jumper');
       el.innerHTML = `+${s.pts}<small>${label}</small>`;
       el.classList.add('show');
       clearTimeout(popTimer);
@@ -411,11 +419,11 @@ function updateUI() {
   let status = null, text = '', bar = 0;
   if (state.hold) {
     status = 'hold';
-    text = `설명 읽는 중 · ${Math.ceil(state.hold.remaining)}초 뒤 재생`;
+    text = tr('status.hold', { n: Math.ceil(state.hold.remaining) });
     bar = 1 - state.hold.remaining / state.hold.total;
   } else if (state.waiting) {
     status = 'wait';
-    text = '준비되면 재생하세요';
+    text = tr('status.wait');
   }
   if (status !== ui.status) { $('#cap-status').hidden = !status; ui.status = status; }
   if (text !== ui.statusText) { $('#cap-status-text').textContent = text; ui.statusText = text; }
@@ -423,6 +431,23 @@ function updateUI() {
 }
 
 // ── 이벤트 ───────────────────────────────────────────────────
+// 언어 전환: 정적 문구, 목록, 설명을 다시 그린다 (재생 위치와 상태는 그대로)
+function setLanguage(l) {
+  setLang(l);
+  applyStatic();
+  $$('.lang-bar button').forEach((b) => b.classList.toggle('on', b.dataset.lang === getLang()));
+  renderList();
+  renderInfo();
+  syncPlayBtn();
+  ui.statusText = null;
+  const params = new URLSearchParams(location.search);
+  if (params.has('lang')) {
+    params.set('lang', getLang());
+    history.replaceState(null, '', `${location.pathname}?${params}${location.hash}`);
+  }
+  savePrefs();
+}
+
 function setCam(mode) {
   rig.setMode(mode, ball.position);
   $$('.cam-bar button').forEach((b) => b.classList.toggle('on', b.dataset.cam === mode));
@@ -488,6 +513,7 @@ function bindUI() {
   bindToggle('#tg-loop', () => state.loop, (v) => { state.loop = v; });
   bindToggle('#tg-notes', () => notation.visible, (v) => { notation.visible = v; });
   $$('.cam-bar button').forEach((b) => b.addEventListener('click', () => setCam(b.dataset.cam)));
+  $$('.lang-bar button').forEach((b) => b.addEventListener('click', () => { if (b.dataset.lang !== getLang()) setLanguage(b.dataset.lang); }));
 
   window.addEventListener('keydown', (e) => {
     if (e.target.closest('input, select, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -576,6 +602,8 @@ async function waitForFonts(timeout = 3000) {
 }
 
 async function init() {
+  applyStatic();
+  $$('.lang-bar button').forEach((b) => b.classList.toggle('on', b.dataset.lang === getLang()));
   await waitForFonts();
   for (const id of [...OFF, ...DEF]) {
     const p = createPlayer(id);
