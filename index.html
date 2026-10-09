@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>NBA 3D Playbook</title>
+  <meta name="description" content="NBA에서 자주 쓰이는 공격 작전을 3D 코트 위에서 단계별로 재생하며 배우는 인터랙티브 플레이북" />
+  <meta name="theme-color" content="#0b0e14" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23ff7a1a'/%3E%3Cpath d='M4 32h56M32 4v56M12 12c12 10 12 30 0 40M52 12c-12 10-12 30 0 40' stroke='%23161a22' stroke-width='3' fill='none'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <!-- 작전 목록 -->
+    <aside id="sidebar" aria-label="작전 목록">
+      <header class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <h1>NBA 3D PLAYBOOK</h1>
+          <p>코트 위에서 보는 NBA 작전 교과서</p>
+        </div>
+      </header>
+      <nav id="play-list"></nav>
+      <footer class="side-foot">
+        <kbd>Space</kbd> 재생 · <kbd>←</kbd><kbd>→</kbd> 단계 · <kbd>1</kbd>–<kbd>5</kbd> 카메라
+      </footer>
+    </aside>
+
+    <!-- 3D 스테이지 -->
+    <main id="stage">
+      <div id="viewport">
+        <div class="hud-top">
+          <span id="hud-cat" class="chip"></span>
+          <h2 id="hud-title"></h2>
+          <span id="hud-en"></span>
+        </div>
+        <div class="cam-bar" role="group" aria-label="카메라 시점">
+          <button data-cam="coach" class="active" title="코치 뷰 (1)">코치</button>
+          <button data-cam="broadcast" title="중계 화면 (2)">중계</button>
+          <button data-cam="top" title="전술판 탑뷰 (3)">전술판</button>
+          <button data-cam="baseline" title="엔드라인 (4)">엔드라인</button>
+          <button data-cam="follow" title="공 추적 (5)">공 추적</button>
+        </div>
+        <div id="score-pop" aria-live="polite"></div>
+        <div id="loading">3D 코트를 준비하는 중…</div>
+      </div>
+
+      <section id="caption" aria-live="polite">
+        <div class="cap-head">
+          <span id="cap-step" class="step-badge"></span>
+          <strong id="cap-title"></strong>
+        </div>
+        <p id="cap-text"></p>
+      </section>
+
+      <section id="transport" aria-label="재생 컨트롤">
+        <div class="t-buttons">
+          <button id="btn-restart" class="icon" title="처음부터 (R)" aria-label="처음부터">⟲</button>
+          <button id="btn-prev" class="icon" title="이전 단계 (←)" aria-label="이전 단계">⏮</button>
+          <button id="btn-play" class="icon play" title="재생/일시정지 (Space)" aria-label="재생">▶</button>
+          <button id="btn-next" class="icon" title="다음 단계 (→)" aria-label="다음 단계">⏭</button>
+        </div>
+        <div class="timeline">
+          <div id="ticks"></div>
+          <input id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="타임라인" />
+          <div class="time"><span id="time-cur">0.0</span> / <span id="time-total">0.0</span>s</div>
+        </div>
+        <div class="t-options">
+          <label class="sel">속도
+            <select id="speed">
+              <option value="0.5">0.5×</option>
+              <option value="0.75">0.75×</option>
+              <option value="1" selected>1×</option>
+              <option value="1.5">1.5×</option>
+            </select>
+          </label>
+          <button id="tg-def" class="toggle on" title="수비 표시 (D)">수비</button>
+          <button id="tg-notes" class="toggle on" title="전술판 표기 (N)">표기</button>
+          <button id="tg-labels" class="toggle on" title="번호 라벨 (L)">라벨</button>
+          <button id="tg-loop" class="toggle" title="반복 재생">반복</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- 작전 설명 -->
+    <section id="info" aria-label="작전 설명">
+      <div class="legend" aria-label="전술판 표기 범례">
+        <span><i class="lg cut"></i>컷(이동)</span>
+        <span><i class="lg dribble"></i>드리블</span>
+        <span><i class="lg pass"></i>패스</span>
+        <span><i class="lg screen"></i>스크린</span>
+        <span><i class="lg shot"></i>슛</span>
+      </div>
+      <p id="info-summary" class="summary"></p>
+      <div class="block">
+        <h3>이럴 때 쓴다</h3>
+        <p id="info-when"></p>
+      </div>
+      <div class="block">
+        <h3>단계별 진행</h3>
+        <ol id="info-steps"></ol>
+      </div>
+      <div class="block">
+        <h3>핵심 포인트</h3>
+        <ul id="info-keys" class="bullets"></ul>
+      </div>
+      <div class="block">
+        <h3>수비는 어떻게 막나</h3>
+        <ul id="info-counters" class="counters"></ul>
+      </div>
+      <div class="block">
+        <h3>대표 사례</h3>
+        <p id="info-famous"></p>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
