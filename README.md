@@ -1,9 +1,12 @@
-# 🏀 3D Hoops Playbook
+<p align="center"><img src="assets/logo-mark.svg" width="72" alt="3D Hoops Playbook logo"></p>
+<h1 align="center">3D Hoops Playbook</h1>
+<p align="center">
+  10 offensive sets from pro basketball, replayed step by step on a 3D half court.<br>
+  <a href="https://hpotty36.github.io/3d-hoops-playbook/"><b>Live demo →</b></a>
+</p>
 
 An interactive playbook that replays **10 offensive sets commonly run in pro basketball (NBA)** on a 3D half court, step by step.
-Players move in real time, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
-
-**▶ Live demo: https://hpotty36.github.io/3d-hoops-playbook/**
+Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
 
 > The in-app text (play descriptions, step captions, UI) is written in **Korean**. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
@@ -31,6 +34,7 @@ Each play comes with **step-by-step breakdown · when to use it · key teaching 
 | Input | Action |
 |------|------|
 | `Space` | Play / pause |
+| `Enter` | Skip the reading pause and play the step now |
 | `←` `→` | Previous / next step |
 | `↑` `↓` | Previous / next play |
 | `1`–`5` | Camera: Coach · Broadcast · Top-down board · Baseline · Ball follow |
@@ -40,6 +44,19 @@ Each play comes with **step-by-step breakdown · when to use it · key teaching 
 
 - Drag the timeline to freeze any moment; click a step in the right panel to jump to it.
 - Deep links: `#hammer` opens a play directly, and `?cam=top&t=3.5#hammer` opens it paused at 3.5 s from the top-down camera.
+
+### Reading mode
+
+`1×` is real game speed, which is too fast to read along. So at the start of every step the playback pauses briefly: the court already shows that step's routes and highlights the players involved while you read the caption, then the action plays.
+
+| Mode | Behavior |
+|------|------|
+| Auto (default) | Pause length scales with the caption length (2.5–10 s) |
+| Relaxed | 1.7× longer than Auto |
+| Step-by-step | Stops at every step until you press Play, `Space`, or `Enter` |
+| Off | Continuous playback |
+
+The countdown and a **Play now** button appear next to the caption. Your reading mode, speed, and display toggles are remembered in the browser.
 
 ### Floor notation
 
@@ -77,6 +94,7 @@ js/players.js         Mannequin player model, poses (run, defend, screen, shoot)
 js/notation.js        Coach-board notation drawn on the floor
 js/camera.js          Camera presets and transitions
 js/plays/*.js         Play definitions (one file per play)
+assets/logo-mark.svg  Logo mark (also the favicon)
 docs/design.md        Design notes
 ```
 
@@ -127,6 +145,7 @@ Unless you script them, defenders position themselves automatically: between the
 
 - [Three.js](https://threejs.org/) r160 via CDN and an import map. No bundler or build tools
 - Court lines and hardwood are a canvas-drawn texture; players are built from primitive shapes
+- Type: [Pretendard](https://github.com/orioncactus/pretendard) for Korean UI text, [Barlow Condensed](https://fonts.google.com/specimen/Barlow+Condensed) for labels and numbers
 - Every position is a pure function of time `t`, so you can scrub the timeline back and forth precisely
 
 ## License & disclaimer
@@ -142,7 +161,7 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 <details>
 <summary><strong>🇰🇷 한국어 README 펼치기 (Korean)</strong></summary>
 
-## 3D Hoops Playbook
+### 3D Hoops Playbook
 
 프로 농구(NBA)에서 자주 쓰이는 공격 작전 10가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
@@ -171,6 +190,7 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | 조작 | 기능 |
 |------|------|
 | `Space` | 재생 / 일시정지 |
+| `Enter` | 읽는 시간을 건너뛰고 바로 재생 |
 | `←` `→` | 이전 / 다음 단계 |
 | `↑` `↓` | 이전 / 다음 작전 |
 | `1`–`5` | 카메라: 코치 · 중계 · 전술판(탑뷰) · 엔드라인 · 공 추적 |
@@ -180,6 +200,19 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 - 타임라인을 드래그하면 원하는 순간에 멈춰서 볼 수 있고, 오른쪽 패널의 단계를 누르면 그 단계로 바로 이동합니다.
 - 주소 뒤에 `#hammer`처럼 작전 id를 붙이면 그 작전이 바로 열리고, `?cam=top&t=3.5#hammer`처럼 붙이면 그 장면에서 멈춘 채로 열립니다.
+
+### 읽기 모드
+
+1배속은 실제 경기 속도라서 설명을 읽으며 따라가기엔 빠릅니다. 그래서 단계가 시작될 때마다 잠깐 멈추고, 그동안 코트에는 이번 단계의 동선과 관련 선수가 먼저 표시됩니다. 설명을 다 읽으면 그 단계가 실제 속도로 재생됩니다.
+
+| 모드 | 동작 |
+|------|------|
+| 자동 (기본) | 설명 길이에 맞춰 2.5–10초 멈춤 |
+| 넉넉히 | 자동보다 1.7배 길게 멈춤 |
+| 단계별 | 단계마다 멈추고 재생(`Space`/`Enter`)을 누를 때까지 기다림 |
+| 끄기 | 멈추지 않고 이어서 재생 |
+
+설명 옆에 남은 시간과 **바로 재생** 버튼이 나타납니다. 읽기 모드, 속도, 표시 옵션은 브라우저에 저장됩니다.
 
 ### 전술판 표기
 

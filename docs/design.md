@@ -30,6 +30,19 @@
   - At step boundaries, positions are blended over 0.5 s from the previous spot to the new target to avoid jumps.
 - Because everything is a function of `t`, timeline scrubbing and step jumps always land on exactly the same frame.
 
+## Reading mode
+
+- `1×` stays real game speed. Instead of slowing the action, playback inserts a **reading pause** at the start of each step.
+- The pause is measured in real time (not timeline time): `clamp(1 + chars / 12, 2.5, 10)` seconds for Auto, ×1.7 for Relaxed. Step-by-step mode pauses until the user continues; Off disables it.
+- During the pause the timeline is frozen at the step's start, while the floor notation and the involved players' highlight rings fade in on a real-time clock, so the diagram "explains" the step before it runs.
+
+## Visual design
+
+- References: Linear (neutral near-black surfaces, hairline borders, restrained gray text), Hudl (Barlow-family condensed type, bold/light weight contrast, orange accent), FastModel Sports (geometric monogram + condensed wordmark).
+- Tokens follow the Tailwind scale: 4 px spacing grid, 6/8/12 px radii, a single accent (`orange-500`), offense `orange-500`, defense `blue-500`, notation in white / `amber-300` / `orange-400` / `cyan-300` / `rose-400`.
+- Type: Pretendard (Korean UI, `word-break: keep-all`) and Barlow Condensed (labels, numbers, wordmark).
+- Logo: two screens (vertical bars) with a cutter's route arrow slipping between them, forming an "H".
+
 ## Verification
 
 - Every play was sampled at 0.05 s intervals to check for NaN values, peak player speed (kept at or under a sprint of roughly 25 ft/s), and that shot distance matches the points scored (2 vs 3).

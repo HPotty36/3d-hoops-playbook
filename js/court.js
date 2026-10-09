@@ -6,10 +6,27 @@ import { BASKET, RIM_Y } from './engine.js';
 const X0 = -31, Z0 = -8, SPAN = 62;
 
 const COLORS = {
-  paint: '#173a6b',
-  apron: '#0f2445',
+  paint: 'rgba(62, 30, 10, 0.6)',   // 페인트존: 진한 월넛 스테인 (나뭇결이 비치도록 반투명)
+  apron: '#15171a',                // 코트 밖: UI와 같은 차콜
   line: '#f4f1ea',
 };
+
+// 로고 마크(assets/logo-mark.svg)를 캔버스에 그린다. (cx, cy) 중심, size px
+export function drawMark(g, cx, cy, size) {
+  const k = size / 48;
+  g.save();
+  g.translate(cx - size / 2, cy - size / 2);
+  g.scale(k, k);
+  g.fillStyle = '#F97316';
+  g.beginPath(); g.roundRect(0, 0, 48, 48, 11); g.fill();
+  g.fillStyle = '#0B0C0E';
+  g.beginPath(); g.roundRect(11, 10, 7, 28, 2.5); g.fill();
+  g.beginPath(); g.roundRect(30, 10, 7, 28, 2.5); g.fill();
+  g.strokeStyle = '#0B0C0E'; g.lineWidth = 5.4;
+  g.beginPath(); g.moveTo(17.6, 30.4); g.lineTo(25, 23.3); g.stroke();
+  g.beginPath(); g.moveTo(30.6, 18); g.lineTo(28.4, 27.3); g.lineTo(21.2, 19.8); g.closePath(); g.fill();
+  g.restore();
+}
 
 function drawCourt(size) {
   const c = document.createElement('canvas');
@@ -103,18 +120,36 @@ function drawCourt(size) {
     g.fillRect(X(-8.67), Z(z), 0.67 * k, w * k);
     g.fillRect(X(8), Z(z), 0.67 * k, w * k);
   }
-  // 베이스라인 밖 문구
-  g.fillStyle = 'rgba(244,241,234,0.85)';
-  g.font = `700 ${2.6 * k}px Oswald, "Noto Sans KR", sans-serif`;
-  g.textAlign = 'center';
+  // 베이스라인 밖 로고 (마크 + 굵기 대비 워드마크)
+  const fs = 2.7 * k;
   g.textBaseline = 'middle';
-  g.fillText('3D HOOPS PLAYBOOK', X(0), Z(-3.4));
-  g.font = `700 ${1.6 * k}px "Noto Sans KR", sans-serif`;
+  g.textAlign = 'left';
+  g.font = `700 ${fs}px "Barlow Condensed", sans-serif`;
+  const w1 = g.measureText('3D HOOPS ').width;
+  g.font = `300 ${fs}px "Barlow Condensed", sans-serif`;
+  const w2 = g.measureText('PLAYBOOK').width;
+  const markS = 3.2 * k, gap = 1.0 * k;
+  const x0 = X(0) - (markS + gap + w1 + w2) / 2, cy = Z(-3.6);
+  drawMark(g, x0 + markS / 2, cy, markS);
+  g.fillStyle = '#f4f5f6';
+  g.font = `700 ${fs}px "Barlow Condensed", sans-serif`;
+  g.fillText('3D HOOPS ', x0 + markS + gap, cy + 0.08 * k);
+  g.fillStyle = 'rgba(244,245,246,0.62)';
+  g.font = `300 ${fs}px "Barlow Condensed", sans-serif`;
+  g.fillText('PLAYBOOK', x0 + markS + gap + w1, cy + 0.08 * k);
+  // 사이드라인 밖 문구
+  g.textAlign = 'center';
+  g.fillStyle = 'rgba(244,245,246,0.38)';
+  g.font = `600 ${1.5 * k}px "Barlow Condensed", sans-serif`;
   g.save();
   g.translate(X(-28), Z(23.5));
   g.rotate(-Math.PI / 2);
-  g.fillText('HALF-COURT SETS', 0, 0);
+  g.fillText('H A L F - C O U R T   S E T S', 0, 0);
   g.restore();
+  // 센터서클 안 마크
+  g.globalAlpha = 0.92;
+  drawMark(g, X(0), Z(44.2), 3.4 * k);
+  g.globalAlpha = 1;
 
   return c;
 }
@@ -137,7 +172,7 @@ export function buildCourt(scene, renderer, { hiRes = true } = {}) {
   // 코트 바깥의 어두운 바닥
   const outer = new THREE.Mesh(
     new THREE.CircleGeometry(220, 64),
-    new THREE.MeshStandardMaterial({ color: 0x07090d, roughness: 1 })
+    new THREE.MeshStandardMaterial({ color: 0x0a0b0d, roughness: 1 })
   );
   outer.rotation.x = -Math.PI / 2;
   outer.position.set(0, -0.03, 23);
@@ -150,7 +185,7 @@ export function buildCourt(scene, renderer, { hiRes = true } = {}) {
 function buildHoop(scene) {
   const hoop = new THREE.Group();
   const white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
-  const pad = new THREE.MeshStandardMaterial({ color: 0x0f2445, roughness: 0.8 });
+  const pad = new THREE.MeshStandardMaterial({ color: 0x1d1f23, roughness: 0.8 });
   const steel = new THREE.MeshStandardMaterial({ color: 0x9aa3b2, roughness: 0.35, metalness: 0.7 });
 
   // 백보드 (폭 6ft, 높이 3.5ft, 하단 9ft, 앞면 z=4)

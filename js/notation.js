@@ -2,9 +2,10 @@
 import * as THREE from 'three';
 import { BASKET } from './engine.js';
 
+// Tailwind: white / amber-300 / orange-400 / cyan-300 / rose-400
 const COLORS = {
-  cut: 0xffffff, dribble: 0xffd23f, pass: 0xff8a3d, handoff: 0xff8a3d,
-  screen: 0x4fe3ff, screenMark: 0x4fe3ff, shot: 0xff4d7a,
+  cut: 0xffffff, dribble: 0xfcd34d, pass: 0xfb923c, handoff: 0xfb923c,
+  screen: 0x67e8f9, screenMark: 0x67e8f9, shot: 0xfb7185,
 };
 const W = 0.3;          // 선 두께(ft)
 const Y = 0.055;
@@ -175,11 +176,14 @@ export class Notation {
     scene.add(this.group);
     this.steps = [];
     this.visible = true;
+    this.cur = -1;
+    this.fade = 0;   // 현재 단계 표기가 나타난 뒤 흐른 실제 시간(초)
   }
 
   build(cp) {
     for (const s of this.steps) for (const m of s.meshes) { m.geometry.dispose(); m.material.dispose(); }
     this.group.clear();
+    this.cur = -1;
     this.steps = cp.notes.map((list) => {
       const meshes = [];
       for (const note of list) {
@@ -198,14 +202,16 @@ export class Notation {
     });
   }
 
-  update(t, cp) {
+  // 타임라인이 멈춘 '읽는 시간'에도 자연스럽게 나타나도록 실제 시간(dt)으로 페이드한다
+  update(t, cp, dt = 1 / 60) {
     this.group.visible = this.visible;
     if (!this.visible) return;
     const cur = cp.stepIndexAt(Math.max(0, t));
+    if (cur !== this.cur) { this.cur = cur; this.fade = 0; } else this.fade += dt;
     this.steps.forEach((s, k) => {
       let a;
-      if (k < cur) a = 0.3;
-      else if (k === cur) a = Math.min(1, Math.max(0, (t - cp.steps[k].s0) / 0.35 + 0.15));
+      if (k < cur) a = 0.28;
+      else if (k === cur) a = Math.min(1, 0.15 + this.fade / 0.35);
       else a = 0;
       for (const m of s.meshes) {
         m.material.opacity = a * m.userData.base;

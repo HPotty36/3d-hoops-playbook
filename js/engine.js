@@ -117,7 +117,7 @@ export function compilePlay(play) {
         bsegs.push({ type: 'shot', kind, who: holder, t0: tr, t1: tr + tf, from: { ...fromP, y: y0 }, to: { ...BASKET, y: RIM_Y + 0.25 }, apex, step: k });
         bsegs.push({ type: 'drop', t0: tr + tf, t1: Infinity });
         jumps.push({ who: holder, t: tr, kind });
-        scores.push({ t: tr + tf, pts: ev.pts || 2, step: k });
+        scores.push({ t: tr + tf, pts: ev.pts || 2, step: k, kind });
         end = Math.max(end, tr + tf + 1.6);
         holder = null;
       } else {

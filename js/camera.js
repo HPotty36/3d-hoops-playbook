@@ -34,6 +34,13 @@ export class CameraRig {
     const aspect = this.camera.aspect;
     const target = new THREE.Vector3(...p.target);
     const pos = new THREE.Vector3(...p.pos);
+    // 세로 화면에서는 위에서 더 내려다봐서 세로 공간을 코트로 채운다
+    if (aspect < 1 && (mode === 'coach' || mode === 'broadcast')) {
+      const off = pos.clone().sub(target);
+      const len = off.length();
+      off.normalize().lerp(new THREE.Vector3(0, 1, 0.3).normalize(), 0.4).normalize();
+      pos.copy(target).addScaledVector(off, len);
+    }
     const need = p.need;
     if (aspect < need) {
       // 세로 화면(aspect < 1)에서는 좌우 폭을 확보하려고 더 많이 물러난다

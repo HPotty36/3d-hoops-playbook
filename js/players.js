@@ -2,11 +2,11 @@
 import * as THREE from 'three';
 
 export const TEAM = {
-  off: { jersey: 0xff5a36, shorts: 0xc9411f, css: '#ff5a36' },
-  def: { jersey: 0x3d8bff, shorts: 0x275fc4, css: '#3d8bff' },
+  off: { jersey: 0xf97316, shorts: 0xc2410c, css: '#f97316', text: '#1a0a00' },   // orange-500 / 700
+  def: { jersey: 0x3b82f6, shorts: 0x1d4ed8, css: '#3b82f6', text: '#ffffff' },   // blue-500 / 700
 };
-const MANNEQUIN = 0xd3d8e0;
-const SHOE = 0x1b1f27;
+const MANNEQUIN = 0x4a4f57;   // 그래파이트 톤 마네킹
+const SHOE = 0x111214;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 function labelTexture(id) {
@@ -14,18 +14,19 @@ function labelTexture(id) {
   c.width = c.height = 128;
   const g = c.getContext('2d');
   const off = id[0] === 'o';
-  g.fillStyle = off ? TEAM.off.css : TEAM.def.css;
-  g.strokeStyle = '#ffffff';
-  g.lineWidth = 7;
+  const team = off ? TEAM.off : TEAM.def;
+  g.fillStyle = team.css;
+  g.strokeStyle = '#0a0b0d';
+  g.lineWidth = 6;
   g.beginPath();
-  if (off) g.arc(64, 64, 54, 0, Math.PI * 2);
-  else g.roundRect(12, 12, 104, 104, 22);
+  if (off) g.arc(64, 64, 52, 0, Math.PI * 2);
+  else g.roundRect(14, 14, 100, 100, 20);
   g.fill();
   g.stroke();
-  g.fillStyle = '#fff';
+  g.fillStyle = team.text;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.font = `700 ${off ? 70 : 54}px Oswald, "Noto Sans KR", sans-serif`;
+  g.font = `700 ${off ? 76 : 60}px "Barlow Condensed", sans-serif`;
   g.fillText(off ? id[1] : `X${id[1]}`, 64, 68);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -46,7 +47,7 @@ export function createPlayer(id) {
   const colors = TEAM[team];
   const jersey = new THREE.MeshStandardMaterial({ color: colors.jersey, roughness: 0.55 });
   const shorts = new THREE.MeshStandardMaterial({ color: colors.shorts, roughness: 0.6 });
-  const skin = new THREE.MeshStandardMaterial({ color: MANNEQUIN, roughness: 0.55 });
+  const skin = new THREE.MeshStandardMaterial({ color: MANNEQUIN, roughness: 0.42, metalness: 0.15 });
   const shoe = new THREE.MeshStandardMaterial({ color: SHOE, roughness: 0.5 });
 
   const root = new THREE.Group();
@@ -108,7 +109,7 @@ export function createPlayer(id) {
   root.add(ring);
   const focus = new THREE.Mesh(
     new THREE.RingGeometry(1.42, 1.62, 40),
-    new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: 0, depthWrite: false })
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false })
   );
   focus.rotation.x = -Math.PI / 2;
   focus.position.y = 0.075;
@@ -125,7 +126,7 @@ export function createPlayer(id) {
   // 스크린 '벽' (스크린을 거는 순간 반투명하게 표시)
   const wall = new THREE.Mesh(
     new THREE.PlaneGeometry(3.4, 6.6),
-    new THREE.MeshBasicMaterial({ color: 0x4fe3ff, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })
+    new THREE.MeshBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })
   );
   wall.renderOrder = 4;
 
@@ -169,7 +170,7 @@ export function posePlayer(p, s, dt) {
   } else if (s.stance === 'hold') {
     p.armL.rotation.set(-0.95, 0, -0.35); p.armR.rotation.set(-0.95, 0, 0.35);
   } else if (s.stance === 'dribble') {
-    p.armR.rotation.set(-0.55 + Math.abs(Math.sin(s.t * Math.PI / 0.5)) * 0.25, 0, -0.25);
+    p.armR.rotation.set(-0.55 + Math.abs(Math.sin(s.clock * Math.PI / 0.5)) * 0.25, 0, -0.25);
   }
   if (s.y > 0.05) { p.legL.rotation.x = -0.25; p.legR.rotation.x = 0.15; crouch = 0; }
   p.body.position.y = s.y - crouch;
