@@ -188,7 +188,9 @@ function renderInfo() {
   $('#hud-title').textContent = c.name;
   $('#info-summary').innerHTML = fmt(c.summary);
   $('#info-when').innerHTML = fmt(c.when);
-  $('#info-famous').innerHTML = fmt(c.famous);
+  // 대표 사례가 없는 콘텐츠(스토어 빌드)에서는 섹션을 숨긴다
+  $('#info-famous').closest('.block').hidden = !c.famous;
+  $('#info-famous').innerHTML = c.famous ? fmt(c.famous) : '';
   $('#info-keys').innerHTML = c.keys.map((k) => `<li>${fmt(k)}</li>`).join('');
   $('#info-counters').innerHTML = c.counters.map((x) => `<div><dt>${esc(x.name)}</dt><dd>${fmt(x.desc)}</dd></div>`).join('');
   const ol = $('#info-steps');
@@ -652,7 +654,14 @@ async function waitForFonts(timeout = 3000) {
   }
 }
 
+// 스토어(앱) 빌드는 <html data-build="store">로 표시되며, 앱용 면책 문구와 라이선스 링크를 쓴다
+const IS_STORE = document.documentElement.dataset.build === 'store';
+
 async function init() {
+  if (IS_STORE) {
+    $('.disclaimer').dataset.i18n = 'disclaimer.store';
+    $('#licenses-link').hidden = false;
+  }
   applyStatic();
   applyTheme();
   $$('.lang-bar button').forEach((b) => b.classList.toggle('on', b.dataset.lang === getLang()));

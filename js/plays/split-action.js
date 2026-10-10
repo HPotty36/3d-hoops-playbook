@@ -5,7 +5,7 @@ export default {
   category: 'motion',
   difficulty: 3,
   summary:
-    '공이 포스트에 들어가면, 공 없는 두 선수가 서로 스크린을 걸며 갈라지는 작전입니다. 수비가 컷하는 선수에게 신경 쓰는 사이 **스크린을 건 선수**가 오픈 3점을 얻습니다. 골든스테이트 모션 오펜스의 상징입니다.',
+    '공이 포스트에 들어가면, 공 없는 두 선수가 서로 스크린을 걸며 갈라지는 작전입니다. 수비가 컷하는 선수에게 신경 쓰는 사이 **스크린을 건 선수**가 오픈 3점을 얻습니다. 현대 모션 오펜스를 대표하는 작전입니다.',
   when:
     '패스 좋은 빅맨이 포스트나 엘보에서 공을 잡을 수 있고, 외곽에 슈터가 둘 이상 있을 때 씁니다.',
   keys: [
@@ -25,7 +25,7 @@ export default {
   en: {
     name: 'Split Action',
     summary:
-      'Once the ball goes into the post, the two players without the ball screen for each other and split apart. While the defense worries about the cutter, **the screener** gets an open three. It is the signature of Golden State\'s motion offense.',
+      'Once the ball goes into the post, the two players without the ball screen for each other and split apart. While the defense worries about the cutter, **the screener** gets an open three. It is a signature action of modern motion offenses.',
     when:
       'When a passing big can catch the ball in the post or at the elbow and you have at least two shooters on the perimeter.',
     keys: [

@@ -5,7 +5,7 @@ export default {
   category: 'onball',
   difficulty: 1,
   summary:
-    'NBA에서 가장 많이 쓰는 2인 공격입니다. 빅맨이 볼 핸들러의 수비수에게 스크린을 걸고, 핸들러는 그 스크린을 타고 돌파하며, 스크리너는 림으로 굴러 들어갑니다. 수비 두 명이 공격 두 명을 동시에 막아야 하는 **2대2 딜레마**를 만드는 것이 핵심입니다.',
+    '프로 농구에서 가장 많이 쓰는 2인 공격입니다. 빅맨이 볼 핸들러의 수비수에게 스크린을 걸고, 핸들러는 그 스크린을 타고 돌파하며, 스크리너는 림으로 굴러 들어갑니다. 수비 두 명이 공격 두 명을 동시에 막아야 하는 **2대2 딜레마**를 만드는 것이 핵심입니다.',
   when:
     '볼 핸들링과 패스가 좋은 가드와 림을 위협하는 빅맨이 있으면 언제든 쓸 수 있습니다. 샷클락이 얼마 남지 않았을 때 가장 먼저 꺼내는 카드이고, 상대 빅맨의 발이 느릴수록 위력이 커집니다.',
   keys: [
@@ -22,12 +22,12 @@ export default {
     { name: '블리츠', desc: '두 명이 핸들러를 더블팀합니다. 공을 빼게 만들 수 있지만 롤맨이 4대3을 만들면 위험합니다.' },
   ],
   famous:
-    '존 스탁턴–칼 말론(유타 재즈), 스티브 내시–아마레 스터드마이어(피닉스 선즈), 크리스 폴, 루카 돈치치(댈러스 매버릭스) 등. 현대 NBA 하프코트 공격의 상당수가 픽앤롤에서 출발합니다.',
+    '존 스탁턴–칼 말론(유타 재즈), 스티브 내시–아마레 스터드마이어(피닉스 선즈), 크리스 폴, 루카 돈치치(댈러스 매버릭스) 등. 현대 프로 농구 하프코트 공격의 상당수가 픽앤롤에서 출발합니다.',
 
   en: {
     name: 'Pick and Roll',
     summary:
-      'The most common two-man action in the NBA. A big sets a screen on the ball handler\'s defender, the handler drives off the screen, and the screener rolls hard to the rim. The whole point is the **2-on-2 dilemma**: two defenders have to stop two attackers at once.',
+      'The most common two-man action in pro basketball. A big sets a screen on the ball handler\'s defender, the handler drives off the screen, and the screener rolls hard to the rim. The whole point is the **2-on-2 dilemma**: two defenders have to stop two attackers at once.',
     when:
       'Any time you have a guard who can handle and pass and a big who threatens the rim. It is the first thing teams reach for late in the shot clock, and it hurts most against slow-footed bigs.',
     keys: [
@@ -44,7 +44,7 @@ export default {
       { name: 'Blitz', desc: 'Both defenders trap the handler. It can force the ball out, but it is risky if the roller gets a 4-on-3.' },
     ],
     famous:
-      'John Stockton and Karl Malone (Utah Jazz), Steve Nash and Amar\'e Stoudemire (Phoenix Suns), Chris Paul, Luka Dončić (Dallas Mavericks), and many more. A huge share of modern NBA half-court offense starts with a pick and roll.',
+      'John Stockton and Karl Malone (Utah Jazz), Steve Nash and Amar\'e Stoudemire (Phoenix Suns), Chris Paul, Luka Dončić (Dallas Mavericks), and many more. A huge share of modern pro half-court offense starts with a pick and roll.',
     steps: [
       { title: 'Set the screen', text: '[5] comes up from the elbow and sets a screen on the right side of [x1]. [1] jabs the other way first to steer [x1] into the screen.' },
       { title: 'Use the screen & roll', text: '[1] comes off the screen shoulder to shoulder and dribbles right. [x1] gets caught on the screen and trails, while [5] **rolls** to the rim. [x5] plays **drop** coverage, sinking toward the paint to try to guard both.' },

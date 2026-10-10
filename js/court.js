@@ -1,4 +1,4 @@
-// NBA 규격 하프코트 (단위: ft). 바닥 라인은 캔버스 텍스처로 그리고, 골대는 3D 메시로 만든다.
+// 프로 농구 규격 하프코트 (단위: ft). 바닥 라인은 캔버스 텍스처로 그리고, 골대는 3D 메시로 만든다.
 import * as THREE from 'three';
 import { BASKET, RIM_Y } from './engine.js';
 

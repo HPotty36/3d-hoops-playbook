@@ -20,7 +20,7 @@ export default {
     { name: '엘보 디나이', desc: '엘보 빅맨에게 가는 패스를 끊어 대형 자체를 무력화합니다.' },
   ],
   famous:
-    '샌안토니오 스퍼스, 마이애미 히트, 댈러스 매버릭스 등 대부분의 NBA 플레이북에 혼즈 계열 작전이 들어 있습니다. 경기 첫 공격에서 가장 자주 보이는 대형 중 하나입니다.',
+    '샌안토니오 스퍼스, 마이애미 히트, 댈러스 매버릭스 등 대부분의 프로 팀 플레이북에 혼즈 계열 작전이 들어 있습니다. 경기 첫 공격에서 가장 자주 보이는 대형 중 하나입니다.',
 
   en: {
     name: 'Horns',
@@ -40,7 +40,7 @@ export default {
       { name: 'Elbow denial', desc: 'Deny the pass to the elbow bigs and the set never gets started.' },
     ],
     famous:
-      'The San Antonio Spurs, Miami Heat, Dallas Mavericks, and nearly every other NBA playbook include horns actions. It is one of the most common alignments you will see on a team\'s first possession.',
+      'The San Antonio Spurs, Miami Heat, Dallas Mavericks, and nearly every other pro playbook include horns actions. It is one of the most common alignments you will see on a team\'s first possession.',
     steps: [
       { title: 'Horns alignment', text: 'Bigs [4] and [5] stand at the two elbows and shooters [2] and [3] in the two corners, forming a shape like a bull\'s horns. [1] can use a screen from either side, which makes it hard for the defense to prepare.' },
       { title: 'Pick a screen', text: '[1] jabs left, then [5] steps up to set the screen on the right. [4] waits at the elbow.' },

@@ -20,7 +20,7 @@ export default {
     { name: '슈터 고정', desc: '[x2]가 끝까지 슈터를 따라가고, 롤맨은 약한 쪽 수비가 막습니다.' },
   ],
   famous:
-    '스페인 대표팀과 유로리그에서 유행해 이런 이름이 붙었고, 2010년대 후반부터 NBA 팀들이 본격적으로 도입했습니다. 포틀랜드(데미안 릴라드–유서프 너키치), 토론토 랩터스 등이 자주 썼습니다.',
+    '스페인 대표팀과 유로리그에서 유행해 이런 이름이 붙었고, 2010년대 후반부터 미국 프로 팀들도 본격적으로 도입했습니다. 포틀랜드(데미안 릴라드–유서프 너키치), 토론토 랩터스 등이 자주 썼습니다.',
 
   en: {
     name: 'Spain Pick and Roll',
@@ -40,7 +40,7 @@ export default {
       { name: 'Stay with the shooter', desc: '[x2] stays glued to the shooter, and a weak-side defender handles the roller.' },
     ],
     famous:
-      'It caught on with the Spanish national team and in the EuroLeague, hence the name, and NBA teams adopted it widely in the late 2010s. The Portland Trail Blazers (Damian Lillard and Jusuf Nurkić) and the Toronto Raptors ran it often.',
+      'It caught on with the Spanish national team and in the EuroLeague, hence the name, and North American pro teams adopted it widely in the late 2010s. The Portland Trail Blazers (Damian Lillard and Jusuf Nurkić) and the Toronto Raptors ran it often.',
     steps: [
       { title: 'Spain setup', text: '[5] comes up to set a high screen for [1], while shooter [2] drifts up from the paint and settles in **behind** [x5]. So far it looks like an ordinary pick and roll.' },
       { title: 'Back screen', text: 'As [1] comes off the screen to the right, [2] sets a **back screen** on [x5]. [x5] is watching the ball and never sees the screen coming from behind.' },

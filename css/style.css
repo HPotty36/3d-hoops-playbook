@@ -345,6 +345,8 @@ kbd {
 .keys-list div:first-child { border-top: 0; }
 .keys-list dt { display: flex; align-items: center; gap: 4px; flex: none; min-width: 92px; color: var(--text-3); }
 .keys-list dd { margin: 0; font-size: 14px; color: var(--text-sub); }
+.licenses-link { display: inline-block; margin-top: 8px; font-size: 12.5px; color: var(--text-2); }
+.licenses-link[hidden] { display: none; }
 
 /* ───────── Responsive ───────── */
 @media (max-width: 1440px) {

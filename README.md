@@ -5,7 +5,7 @@
   <a href="https://hpotty36.github.io/3d-hoops-playbook/"><b>Live demo →</b></a>
 </p>
 
-An interactive playbook that replays **10 offensive sets commonly run in pro basketball (NBA)** on a 3D half court, step by step.
+An interactive playbook that replays **10 offensive sets commonly run in pro basketball** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
@@ -165,7 +165,7 @@ Any field missing from the `en` block falls back to Korean. Unless you script th
 
 Code is released under the [MIT License](LICENSE).
 
-This is an unofficial, non-commercial educational project. It is **not affiliated with, endorsed by, or sponsored by the NBA or any of its teams**. "NBA" and team names are trademarks of their respective owners and are used only to describe where these publicly known basketball tactics are commonly seen. No logos, player images, or other official assets are used.
+This is an unofficial, non-commercial educational project. It is **not affiliated with, endorsed by, or sponsored by any professional league, team, or player**. Team and player names are trademarks or names of their respective owners and appear only to describe where these publicly known basketball tactics have been used. No logos, player images, or other official assets are used.
 
 ---
 
@@ -176,7 +176,7 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 3D Hoops Playbook
 
-프로 농구(NBA)에서 자주 쓰이는 공격 작전 10가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
+프로 농구에서 자주 쓰이는 공격 작전 10가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
@@ -265,6 +265,6 @@ python -m http.server 8000
 
 코드는 [MIT 라이선스](LICENSE)로 공개합니다.
 
-이 프로젝트는 비영리·비공식 교육용 자료이며 **NBA 및 각 구단과 관련이 없고, 승인이나 후원을 받지 않았습니다.** 'NBA'와 구단명은 각 소유자의 상표이며, 공개적으로 알려진 농구 전술이 어디서 주로 쓰이는지 설명하기 위해서만 언급합니다. 로고, 선수 사진 등 공식 자료는 사용하지 않습니다.
+이 프로젝트는 비영리·비공식 교육용 자료이며 **특정 프로 리그·구단·선수와 관련이 없고, 승인이나 후원을 받지 않았습니다.** 구단명과 선수 이름은 각 소유자의 상표 또는 이름이며, 공개적으로 알려진 농구 전술이 쓰인 사례를 설명하기 위해서만 언급합니다. 로고, 선수 사진 등 공식 자료는 사용하지 않습니다.
 
 </details>

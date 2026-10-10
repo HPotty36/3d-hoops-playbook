@@ -20,7 +20,7 @@ export default {
     { name: '스위치', desc: '엘보 빅맨의 수비수가 슈터를 넘겨받습니다.' },
   ],
   famous:
-    '앨런 아이버슨이 뛰던 2000년대 필라델피아 76ers가 그를 위해 즐겨 써서 이 이름이 붙었습니다. 지금은 거의 모든 NBA 팀이 공격 시작 동작으로 사용합니다.',
+    '앨런 아이버슨이 뛰던 2000년대 필라델피아 76ers가 그를 위해 즐겨 써서 이 이름이 붙었습니다. 지금은 거의 모든 프로 팀이 공격 시작 동작으로 사용합니다.',
 
   en: {
     name: 'Iverson Cut',
@@ -40,7 +40,7 @@ export default {
       { name: 'Switch', desc: 'The elbow big\'s defender takes over the cutter.' },
     ],
     famous:
-      'Named after Allen Iverson, for whom the 2000s Philadelphia 76ers ran it constantly. Today almost every NBA team uses it as an entry action.',
+      'Named after Allen Iverson, for whom the 2000s Philadelphia 76ers ran it constantly. Today almost every pro team uses it as an entry action.',
     steps: [
       { title: 'Alignment', text: 'Bigs [4] and [5] stand at the elbows and scorer [2] starts low on the left wing. [1] brings the ball to the right slot.' },
       { title: 'Iverson cut', text: '[2] sprints from left to right **across the top of the free-throw line**. [4] and [5] at the elbows screen in turn, and [x2], ducking under the screens, falls further and further behind.' },

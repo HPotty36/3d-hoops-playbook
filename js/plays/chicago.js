@@ -20,7 +20,7 @@ export default {
     { name: '핸드오프 차단', desc: '슈터가 공을 받으러 오는 길을 미리 막아 백도어 컷으로 유도합니다.' },
   ],
   famous:
-    '골든스테이트의 스테픈 커리, 마이애미 히트의 던컨 로빈슨–뱀 아데바요, 덴버의 니콜라 요키치 핸드오프에서 자주 보입니다. 요즘 NBA에서 가장 흔한 오프볼→온볼 연결 동작 중 하나입니다.',
+    '골든스테이트의 스테픈 커리, 마이애미 히트의 던컨 로빈슨–뱀 아데바요, 덴버의 니콜라 요키치 핸드오프에서 자주 보입니다. 요즘 프로 농구에서 가장 흔한 오프볼→온볼 연결 동작 중 하나입니다.',
 
   en: {
     name: 'Chicago',
@@ -40,7 +40,7 @@ export default {
       { name: 'Deny the handoff', desc: 'Cut off the shooter\'s path to the ball and force a backdoor cut.' },
     ],
     famous:
-      'You will see it with Stephen Curry in Golden State, the Duncan Robinson and Bam Adebayo pairing in Miami, and Nikola Jokić\'s handoffs in Denver. It is one of the most common off-ball-to-on-ball links in today\'s NBA.',
+      'You will see it with Stephen Curry in Golden State, the Duncan Robinson and Bam Adebayo pairing in Miami, and Nikola Jokić\'s handoffs in Denver. It is one of the most common off-ball-to-on-ball links in today\'s pro game.',
     steps: [
       { title: 'Entry to the big', text: '[5] comes up to the top and receives the pass from [1]. After giving it up, [1] clears out to the right wing to make room. Now the big, [5], has the ball.' },
       { title: 'Pin-down', text: '[4] comes down and sets a **pin-down screen** (a screen set going downward) on [x2]. [2] rises up off the screen while [5] dribbles toward [2].' },
