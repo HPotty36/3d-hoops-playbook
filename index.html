@@ -83,6 +83,13 @@
           <h2 id="hud-title"></h2>
         </div>
         <div class="tool-right">
+          <div class="seg cam-bar" role="group" data-i18n-aria="aria.camera">
+            <button data-cam="coach" class="on" data-i18n="cam.coach" data-i18n-title="cam.coach.t"></button>
+            <button data-cam="broadcast" data-i18n="cam.broadcast" data-i18n-title="cam.broadcast.t"></button>
+            <button data-cam="top" data-i18n="cam.top" data-i18n-title="cam.top.t"></button>
+            <button data-cam="baseline" data-i18n="cam.baseline" data-i18n-title="cam.baseline.t"></button>
+            <button data-cam="follow" data-i18n="cam.follow" data-i18n-title="cam.follow.t"></button>
+          </div>
           <div class="seg lang-bar" role="group" data-i18n-aria="aria.lang">
             <button data-lang="ko" title="한국어" lang="ko">KO</button>
             <button data-lang="en" title="English" lang="en">EN</button>
@@ -95,20 +102,6 @@
         <div id="viewport">
           <div id="score-pop" aria-live="polite"></div>
           <div id="loading" data-i18n="loading"></div>
-        </div>
-        <div class="view-tools">
-          <div class="seg cam-bar" role="group" data-i18n-aria="aria.camera">
-            <button data-cam="coach" class="on" data-i18n="cam.coach" data-i18n-title="cam.coach.t"></button>
-            <button data-cam="broadcast" data-i18n="cam.broadcast" data-i18n-title="cam.broadcast.t"></button>
-            <button data-cam="top" data-i18n="cam.top" data-i18n-title="cam.top.t"></button>
-            <button data-cam="baseline" data-i18n="cam.baseline" data-i18n-title="cam.baseline.t"></button>
-            <button data-cam="follow" data-i18n="cam.follow" data-i18n-title="cam.follow.t"></button>
-          </div>
-          <div class="seg toggles" role="group" data-i18n-aria="aria.display">
-            <button id="tg-def" aria-pressed="true" data-i18n="tg.def" data-i18n-title="tg.def.t"></button>
-            <button id="tg-notes" aria-pressed="true" data-i18n="tg.notes" data-i18n-title="tg.notes.t"></button>
-            <button id="tg-labels" aria-pressed="true" data-i18n="tg.labels" data-i18n-title="tg.labels.t"></button>
-          </div>
         </div>
       </div>
 
@@ -135,6 +128,7 @@
             <button id="btn-prev" class="icon" data-i18n-title="btn.prev.t" data-i18n-aria="aria.prev"><svg><use href="#i-prev" /></svg></button>
             <button id="btn-play" class="icon play" data-i18n-title="btn.play.t"><svg><use href="#i-play" /></svg></button>
             <button id="btn-next" class="icon" data-i18n-title="btn.next.t" data-i18n-aria="aria.next"><svg><use href="#i-next" /></svg></button>
+            <button id="tg-loop" class="icon loop" aria-pressed="false" data-i18n-title="tg.loop.t" data-i18n-aria="tg.loop"><svg><use href="#i-loop" /></svg></button>
           </div>
           <div id="timeline" class="timeline" role="slider" tabindex="0" data-i18n-aria="aria.timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div id="tl-segs" class="tl-segs"></div>
@@ -162,10 +156,11 @@
               <button data-v="1.5">1.5×</button>
             </div>
           </div>
-          <button id="tg-loop" class="loop-btn" aria-pressed="false" data-i18n-title="tg.loop.t">
-            <svg aria-hidden="true"><use href="#i-loop" /></svg>
-            <span data-i18n="tg.loop"></span>
-          </button>
+          <div class="seg toggles" role="group" data-i18n-aria="aria.display">
+            <button id="tg-def" aria-pressed="true" data-i18n="tg.def" data-i18n-title="tg.def.t"></button>
+            <button id="tg-notes" aria-pressed="true" data-i18n="tg.notes" data-i18n-title="tg.notes.t"></button>
+            <button id="tg-labels" aria-pressed="true" data-i18n="tg.labels" data-i18n-title="tg.labels.t"></button>
+          </div>
         </section>
       </div>
     </main>

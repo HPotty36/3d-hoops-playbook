@@ -46,7 +46,7 @@
   - The 3D scene follows the theme too: background/fog, the apron around the court, the outer floor, and the floor lettering are redrawn from `SCENE_THEMES` in `court.js`.
 - Tokens live as CSS custom properties on `:root` and `:root[data-theme="light"]`. Radii: panels 20 px, inner blocks 14 px, controls 999 px. One accent (`#ee7a3a`) shared by offense chips, the play button, and the 3D jerseys; defense is `#3a6fd8` (`#2f64cf` in light).
 - Type: Rubik (rounded corners, used for Latin text and numbers, the wordmark, and canvas labels) with Pretendard for Korean (`word-break: keep-all`). Weights stay at 400–600.
-- Layout notes: camera and display toggles float over the court; the step list in the info panel shows titles only (the caption carries the full text); timeline segments are labeled with step names; the reading pause shows a ring countdown; keyboard shortcuts live in a popover (`?`).
+- Layout notes: nothing sits on top of the 3D court, so players in the corners are never covered. The camera switch shares the header row with the title and the language/theme controls; display toggles sit in the settings row; loop is an icon button next to the playback buttons. The floating-panel gaps cost some height, so the header, caption and controls are kept compact to leave the court about as tall as in the previous flush layout. The step list in the info panel shows titles only (the caption carries the full text); timeline segments are labeled with step names; the reading pause shows a ring countdown; keyboard shortcuts live in a popover (`?`).
 - Logo: two screens (vertical bars) with a cutter's route arrow slipping between them, forming an "H", on a rounded orange tile.
 
 ## Localization
