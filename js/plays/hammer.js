@@ -4,6 +4,7 @@ export default {
   name: '해머',
   category: 'motion',
   difficulty: 2,
+  aliases: ['hammer screen', 'baseline drive', '해머 스크린'],
   summary:
     '한쪽에서 베이스라인 돌파로 수비를 림 쪽으로 모은 뒤, 반대편에서 도움 수비하러 들어온 수비수의 등 뒤에 **해머 스크린**을 걸어 코너의 슈터를 완전히 비워 놓는 작전입니다. 돌파 후 킥아웃의 교과서입니다.',
   when:

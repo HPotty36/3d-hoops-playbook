@@ -4,6 +4,7 @@ export default {
   name: '아이버슨 컷',
   category: 'offball',
   difficulty: 1,
+  aliases: ['Iverson', 'Iverson ram', '아이버슨'],
   summary:
     '득점원이 한쪽 윙에서 **자유투 라인 위를 가로질러** 반대쪽 윙으로 달리고, 양쪽 엘보의 빅맨들이 차례로 스크린이 되어 주는 작전입니다. 에이스가 달리면서 공을 잡게 해 주는 공격 시작(엔트리) 동작입니다.',
   when:

@@ -4,6 +4,7 @@ export default {
   name: '엘리베이터 도어',
   category: 'offball',
   difficulty: 2,
+  aliases: ['elevator', 'gate screen', '엘리베이터', '게이트 스크린'],
   summary:
     '두 스크리너가 문짝처럼 나란히 서 있다가, 슈터가 그 사이 틈을 통과하자마자 **틈을 닫아** 뒤쫓던 수비수를 가둬버리는 작전입니다. 오픈 3점을 만드는 가장 화려한 세트 중 하나입니다.',
   when:

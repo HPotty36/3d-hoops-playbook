@@ -4,6 +4,7 @@ export default {
   name: '혼즈',
   category: 'onball',
   difficulty: 2,
+  aliases: ['horns set', 'elbow set', '혼스', '엘보 세트'],
   summary:
     '두 빅맨이 양쪽 엘보(자유투 라인 끝)에, 두 슈터가 양쪽 코너에 서는 **뿔 모양 대형**에서 시작합니다. 가드가 양쪽 스크린 중 하나를 고르고, 롤맨과 탑으로 올라간 다른 빅맨이 **하이-로우** 패스로 연결합니다.',
   when:

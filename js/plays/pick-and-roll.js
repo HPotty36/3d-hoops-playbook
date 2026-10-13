@@ -4,6 +4,7 @@ export default {
   name: '픽 앤 롤',
   category: 'onball',
   difficulty: 1,
+  aliases: ['PnR', 'high pick and roll', 'ball screen', '하이 픽앤롤', '볼 스크린'],
   summary:
     '프로 농구에서 가장 많이 쓰는 2인 공격입니다. 빅맨이 볼 핸들러의 수비수에게 스크린을 걸고, 핸들러는 그 스크린을 타고 돌파하며, 스크리너는 림으로 굴러 들어갑니다. 수비 두 명이 공격 두 명을 동시에 막아야 하는 **2대2 딜레마**를 만드는 것이 핵심입니다.',
   when:

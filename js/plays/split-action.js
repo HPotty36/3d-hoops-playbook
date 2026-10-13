@@ -4,6 +4,7 @@ export default {
   name: '스플릿 액션',
   category: 'motion',
   difficulty: 3,
+  aliases: ['split', 'post split', '스플릿', '포스트 스플릿'],
   summary:
     '공이 포스트에 들어가면, 공 없는 두 선수가 서로 스크린을 걸며 갈라지는 작전입니다. 수비가 컷하는 선수에게 신경 쓰는 사이 **스크린을 건 선수**가 오픈 3점을 얻습니다. 현대 모션 오펜스를 대표하는 작전입니다.',
   when:

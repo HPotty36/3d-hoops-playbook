@@ -4,6 +4,7 @@ export default {
   name: '플로피',
   category: 'offball',
   difficulty: 2,
+  aliases: ['floppy action', 'stagger screen', '스태거'],
   summary:
     '슈터가 림 아래에서 출발해, 양쪽에 놓인 스크린(한쪽은 싱글, 한쪽은 더블) 중 하나를 골라 타고 윙으로 뛰쳐나오는 작전입니다. 수비는 슈터가 어느 쪽으로 나올지 끝까지 알 수 없습니다.',
   when:

@@ -5,8 +5,9 @@ import { buildCourt, SCENE_THEMES } from './court.js';
 import { createPlayer, posePlayer, handPoint, createBall } from './players.js';
 import { Notation } from './notation.js';
 import { CameraRig } from './camera.js';
-import { PLAYS, CATEGORIES } from './plays/index.js';
+import { PLAYS, SECTIONS } from './plays/index.js';
 import { t as tr, applyStatic, localize, initLang, setLang, getLang } from './i18n.js';
+import { createLibrary } from './library.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -72,12 +73,14 @@ const state = {
 notation.visible = prefs.showNotes ?? true;
 initLang(prefs.lang);
 const content = () => localize(PLAYS[state.idx]);
+const collapsedSections = new Set(Array.isArray(prefs.collapsed) ? prefs.collapsed : []);
 
 function savePrefs() {
   try {
     localStorage.setItem(PREF_KEY, JSON.stringify({
       speed: state.speed, loop: state.loop, showDef: state.showDef, showLabels: state.showLabels,
       showNotes: notation.visible, readMode: state.readMode, lang: getLang(), theme: themePref || undefined,
+      collapsed: [...collapsedSections],
     }));
   } catch { /* 저장소를 못 쓰는 환경이면 무시 */ }
 }
@@ -156,29 +159,13 @@ function fmt(s) {
     .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
 }
 
-// ── 사이드바 ─────────────────────────────────────────────────
-function renderList() {
-  const nav = $('#play-list');
-  nav.innerHTML = '';
-  nav.setAttribute('aria-label', tr('aria.plays'));
-  for (const cat of CATEGORIES) {
-    const h = document.createElement('div');
-    h.className = 'cat-title';
-    h.textContent = tr(`cat.${cat}`);
-    nav.append(h);
-    PLAYS.forEach((p, i) => {
-      if (p.category !== cat) return;
-      const b = document.createElement('button');
-      const diff = tr('diff', { n: p.difficulty });
-      b.className = 'play-item';
-      b.dataset.idx = i;
-      b.innerHTML = `<span class="nm">${esc(localize(p).name)}</span>
-        <span class="diff" title="${diff}">${[1, 2, 3].map((d) => `<i class="${d <= p.difficulty ? 'on' : ''}"></i>`).join('')}<span class="sr-only">${diff}</span></span>`;
-      b.addEventListener('click', () => selectPlay(i, true));
-      nav.append(b);
-    });
-  }
-}
+// ── 작전 목록 (js/library.js) ────────────────────────────────
+const library = createLibrary({
+  plays: PLAYS, sections: SECTIONS, tr, localize,
+  onSelect: (i) => selectPlay(i, true),
+  collapsed: collapsedSections,
+  onCollapse: () => savePrefs(),
+});
 
 // ── 작전 설명 패널 ───────────────────────────────────────────
 function renderInfo() {
@@ -203,18 +190,7 @@ function renderInfo() {
   });
   buildTimeline();
   $('#time-total').textContent = state.cp.end.toFixed(1);
-  $$('.play-item').forEach((b) => {
-    const on = +b.dataset.idx === state.idx;
-    b.classList.toggle('active', on);
-    if (on) b.setAttribute('aria-current', 'true');
-    else b.removeAttribute('aria-current');
-  });
-  // 모바일 가로 목록에서는 선택한 작전을 가운데로 (페이지 자체는 스크롤하지 않음)
-  const active = $('.play-item.active');
-  const nav = $('#play-list');
-  if (active && window.matchMedia('(max-width: 1100px)').matches) {
-    nav.scrollTo({ left: active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2, behavior: 'smooth' });
-  }
+  library.setActive(PLAYS[state.idx].id);
   document.title = `${c.name} · 3D Hoops Playbook`;
   state.stepShown = -1;
 }
@@ -484,7 +460,7 @@ function setLanguage(l) {
   setLang(l);
   applyStatic();
   $$('.lang-bar button').forEach((b) => b.classList.toggle('on', b.dataset.lang === getLang()));
-  renderList();
+  library.render(PLAYS[state.idx]?.id);
   renderInfo();
   syncPlayBtn();
   syncThemeBtn();
@@ -580,6 +556,7 @@ function bindUI() {
     else if (e.key === 'l' || e.key === 'L') $('#tg-labels').click();
     else if (e.key === 't' || e.key === 'T') toggleTheme();
     else if (e.key === '?') $('#keys-pop').togglePopover?.();
+    else if (e.key === '/') { e.preventDefault(); library.focusSearch(); }
     else if (cams[+e.key - 1]) setCam(cams[+e.key - 1]);
   });
 
@@ -672,7 +649,8 @@ async function init() {
     scene.add(p.root, p.wall);
   }
   court = buildCourt(scene, renderer, { hiRes: !isSmall, theme: currentTheme() });
-  renderList();
+  $('#sidebar .brand').after(library.el);
+  library.render(PLAYS[state.idx]?.id);
   bindUI();
   setSeg('#speed', state.speed);
   setSeg('#read-mode', state.readMode);

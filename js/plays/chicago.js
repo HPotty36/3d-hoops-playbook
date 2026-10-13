@@ -4,6 +4,7 @@ export default {
   name: '시카고 액션',
   category: 'offball',
   difficulty: 2,
+  aliases: ['Chicago action', 'pin-down handoff', 'DHO', '핀다운 핸드오프'],
   summary:
     '슈터가 핀다운 스크린을 타고 올라오자마자 빅맨에게서 **드리블 핸드오프**를 받는 연속 동작입니다. 슈터의 수비수는 스크린 두 개를 연달아 맞게 되고, 슈터는 달리는 속도 그대로 슛이나 돌파를 시작합니다.',
   when:

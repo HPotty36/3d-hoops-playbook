@@ -4,6 +4,7 @@ export default {
   name: '스페인 픽앤롤',
   category: 'onball',
   difficulty: 3,
+  aliases: ['Spain PnR', 'stack pick and roll', 'back screen', '스페인 픽앤롤', '백스크린'],
   summary:
     '픽앤롤에 세 번째 선수를 더한 작전입니다. 볼 스크린 직후 슈터가 롤맨의 수비수(빅맨)에게 **백스크린**을 걸어 롤맨을 자유롭게 하고, 백스크린을 건 슈터는 곧바로 3점 라인으로 빠집니다. 수비 세 명이 동시에 딜레마에 빠집니다.',
   when:

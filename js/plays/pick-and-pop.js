@@ -4,6 +4,7 @@ export default {
   name: '픽 앤 팝',
   category: 'onball',
   difficulty: 1,
+  aliases: ['PnP', 'pop', '픽앤팝'],
   summary:
     '픽앤롤의 변형입니다. 스크리너가 림으로 굴러가는 대신 3점 라인 밖으로 빠져서 슈팅 찬스를 노립니다. 슛이 좋은 빅맨(스트레치 4·5번)이 수비 빅맨을 페인트 밖으로 끌어내는 작전입니다.',
   when:
