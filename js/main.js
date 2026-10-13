@@ -8,6 +8,8 @@ import { CameraRig } from './camera.js';
 import { PLAYS, SECTIONS } from './plays/index.js';
 import { t as tr, applyStatic, localize, initLang, setLang, getLang } from './i18n.js';
 import { createLibrary } from './library.js';
+import { readIds, variant, branchTime, readMeta } from './reads.js';
+import { createReadsUI } from './reads-ui.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -69,10 +71,23 @@ const state = {
   hold: null,       // { k, remaining, total } — 단계 시작 전 '읽는 시간'
   waiting: false,   // 단계별 모드에서 다음 단계 시작을 기다리는 중
   scrubbing: false, stepShown: -1,
+  read: null,         // 지금 보고 있는 수비 대응(읽기) id. 분기가 없는 작전이면 null
+  readChosen: false,  // 이 작전에서 읽기를 직접 골랐는지 (탭, 분기점 선택지, 링크, '보기' 버튼)
+  prompt: null,       // 분기점 선택지: { wait: true } (단계별 모드) 또는 { remaining, total } (자동 진행)
 };
 notation.visible = prefs.showNotes ?? true;
 initLang(prefs.lang);
-const content = () => localize(PLAYS[state.idx]);
+const curPlay = () => PLAYS[state.idx];
+const content = () => localize(state.cp.play);   // 선택한 읽기의 단계까지 붙은 작전
+const meta = () => readMeta(curPlay(), getLang());
+
+// 작전 × 읽기마다 한 번만 컴파일한다
+const cpCache = new Map();
+function compiled(play, readId) {
+  const key = `${play.id}:${readId ?? ''}`;
+  if (!cpCache.has(key)) cpCache.set(key, compilePlay(variant(play, readId)));
+  return cpCache.get(key);
+}
 const collapsedSections = new Set(Array.isArray(prefs.collapsed) ? prefs.collapsed : []);
 
 function savePrefs() {
@@ -146,6 +161,7 @@ function beginStep(k) {
 }
 
 function skipWait() {
+  if (state.prompt) { pickRead(state.read); return; }
   if (state.hold) state.hold = null;
   else if (state.waiting) { state.waiting = false; state.playing = true; syncPlayBtn(); }
 }
@@ -157,6 +173,83 @@ function fmt(s) {
     .replace(/\[x(\d)\]/g, '<span class="pc d">X$1</span>')
     .replace(/\[(\d)\]/g, '<span class="pc o">$1</span>')
     .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+}
+
+// ── 수비 대응별 분기 (js/reads.js, js/reads-ui.js) ───────────
+const readsUI = createReadsUI({
+  tabs: $('#read-tabs'), prompt: $('#branch-prompt'), tr, fmt,
+  onTab: (id) => (state.prompt ? pickRead(id) : selectRead(id)),
+  onPick: (id) => pickRead(id),
+});
+
+// 읽기 바꾸기. 분기점 전이면 위치를 그대로 두고(공유 구간은 같으므로 끊김이 없다), 지났으면 분기점으로 돌아간다.
+function selectRead(id) {
+  const play = curPlay();
+  const ids = readIds(play);
+  if (!ids.length) return;
+  if (!ids.includes(id)) id = ids[0];
+  closePrompt();
+  state.read = id;
+  state.readChosen = true;
+  const bt = branchTime(play);
+  const atBranch = state.t >= bt;
+  if (atBranch) { state.t = bt; state.hold = null; state.waiting = false; }
+  state.cp = compiled(play, id);
+  notation.build(state.cp);
+  renderInfo();
+  prevT = state.t;
+  syncReadParam();
+  if (atBranch && state.playing) beginStep(play.reads.at);
+  syncPlayBtn();
+}
+
+const shouldPrompt = () => !!curPlay().reads && !state.readChosen && state.readMode !== 'off';
+
+// 분기점 선택지: 단계별 모드는 고를 때까지 기다리고, 자동 모드는 읽는 시간이 지나면 지금 탭으로 계속한다
+function openPrompt() {
+  const m = meta();
+  state.hold = null;
+  state.waiting = false;
+  readsUI.showPrompt(m, state.read);
+  if (state.readMode === 'step') {
+    state.prompt = { wait: true };
+    state.playing = false;
+  } else {
+    const total = readTime(m.prompt) * READ_FACTOR[state.readMode];
+    state.prompt = { remaining: total, total };
+  }
+  syncPlayBtn();
+}
+
+function closePrompt() {
+  if (!state.prompt) return;
+  state.prompt = null;
+  readsUI.hidePrompt();
+}
+
+// auto: 자동 모드의 시간 초과나 읽기 모드 끄기로 넘어간 경우. 직접 고른 게 아니므로 다시 보면 또 묻는다.
+function pickRead(id, auto = false) {
+  selectRead(id);
+  if (auto) state.readChosen = false;
+  state.playing = true;
+  beginStep(curPlay().reads.at);
+  syncPlayBtn();
+}
+
+// ?read=switch 처럼 주소에 남긴다 (기본 읽기면 지운다)
+function syncReadParam() {
+  const params = new URLSearchParams(location.search);
+  const base = readIds(curPlay())[0];
+  if (state.read && state.read !== base) params.set('read', state.read);
+  else params.delete('read');
+  const q = params.toString();
+  history.replaceState(null, '', `${location.pathname}${q ? `?${q}` : ''}${location.hash}`);
+}
+
+// 대응 수비 목록의 '보기': 그 읽기로 바꾸고 분기 직전 단계부터 재생
+function watchRead(id) {
+  selectRead(id);
+  seekStep(curPlay().reads.at - 1, true);
 }
 
 // ── 작전 목록 (js/library.js) ────────────────────────────────
@@ -195,10 +288,27 @@ function renderInfo() {
   $('#info-famous').closest('.block').hidden = !c.famous;
   $('#info-famous').innerHTML = c.famous ? fmt(c.famous) : '';
   $('#info-keys').innerHTML = c.keys.map((k) => `<li>${fmt(k)}</li>`).join('');
-  $('#info-counters').innerHTML = c.counters.map((x) => `<div><dt>${esc(x.name)}</dt><dd>${fmt(x.desc)}</dd></div>`).join('');
+  // 애니메이션으로 볼 수 있는 대응 수비에는 '보기' 버튼 (read id는 한국어 본문의 counters에 있다)
+  const m = meta();
+  const ids = readIds(curPlay());
+  $('#info-counters').innerHTML = c.counters.map((x, i) => {
+    const rid = curPlay().counters[i]?.read;
+    const watch = rid && ids.includes(rid)
+      ? `<button type="button" class="watch" data-read="${rid}"><svg aria-hidden="true"><use href="#i-play" /></svg>${esc(tr('branch.watch'))}</button>` : '';
+    return `<div><dt><span>${esc(x.name)}</span>${watch}</dt><dd>${fmt(x.desc)}</dd></div>`;
+  }).join('');
+  $$('#info-counters .watch').forEach((b) => b.addEventListener('click', () => watchRead(b.dataset.read)));
+  readsUI.render(m, state.read);
   const ol = $('#info-steps');
   ol.innerHTML = '';
   c.steps.forEach((st, k) => {
+    if (m && k === m.at) {
+      const div = document.createElement('li');
+      div.className = 'branch-divider';
+      div.setAttribute('aria-hidden', 'true');
+      div.textContent = tr('branch.divider', { label: m.reads.find((r) => r.id === state.read).label });
+      ol.append(div);
+    }
     const li = document.createElement('li');
     li.innerHTML = `<button><span class="n">${k + 1}</span><span class="st">${esc(st.title)}</span><span class="now">${tr('step.now')}</span></button>`;
     li.querySelector('button').addEventListener('click', () => seekStep(k, true));
@@ -216,7 +326,16 @@ function showCaption(k) {
   $('#cap-step').textContent = tr('cap.step', { k: k + 1, n: state.cp.steps.length });
   $('#cap-title').textContent = st.title;
   $('#cap-text').innerHTML = fmt(st.text);
-  $$('#info-steps li').forEach((li, i) => {
+  // 분기 직후 단계에는 고른 읽기와 '왜 이렇게 푸는지' 한 줄을 붙인다
+  const m = meta();
+  const showRead = !!m && k === m.at;
+  $('#cap-read').hidden = !showRead;
+  if (showRead) {
+    const r = m.reads.find((x) => x.id === state.read);
+    $('#cap-read .chip').textContent = tr('branch.chip', { label: r.label });
+    $('#cap-read .why').textContent = r.why;
+  }
+  $$('#info-steps li:not(.branch-divider)').forEach((li, i) => {
     li.classList.toggle('active', i === k);
     li.classList.toggle('done', i < k);
     if (i === k) li.firstChild.setAttribute('aria-current', 'step');
@@ -244,6 +363,9 @@ function buildTimeline() {
     wrap.append(el);
     return el;
   });
+  // 분기점 표시(◆): 읽기가 갈라지는 단계의 왼쪽 끝
+  const at = curPlay().reads?.at;
+  if (at) segEls[at]?.classList.add('branch');
 }
 
 function tFromX(clientX) {
@@ -274,8 +396,11 @@ function updateTimeline(t) {
 
 // ── 재생 제어 ─────────────────────────────────────────────────
 function selectPlay(i, autoplay) {
+  closePrompt();
   state.idx = i;
-  state.cp = compilePlay(PLAYS[i]);
+  state.read = readIds(PLAYS[i])[0] ?? null;
+  state.readChosen = false;
+  state.cp = compiled(PLAYS[i], state.read);
   state.t = 0;
   state.hold = null;
   state.waiting = false;
@@ -286,20 +411,25 @@ function selectPlay(i, autoplay) {
   if (autoplay) beginStep(0);
   syncPlayBtn();
   if (location.hash.slice(1) !== PLAYS[i].id) history.replaceState(null, '', `#${PLAYS[i].id}`);
+  syncReadParam();
 }
 
 function seekStep(k, play) {
   const cp = state.cp;
+  closePrompt();
   k = clamp(k, 0, cp.steps.length - 1);
   state.t = cp.steps[k].s0 + 0.001;
   if (play !== undefined) state.playing = play;
   state.hold = null;
   state.waiting = false;
+  // 아직 읽기를 고르지 않았다면 분기 단계로 건너뛸 때도 선택지를 먼저 보여 준다
+  if (k === curPlay().reads?.at && shouldPrompt()) { state.t = cp.steps[k].s0; openPrompt(); return; }
   if (state.playing) beginStep(k);
   syncPlayBtn();
 }
 
 function restart() {
+  closePrompt();
   state.t = 0;
   state.playing = true;
   beginStep(0);
@@ -307,6 +437,8 @@ function restart() {
 }
 
 function togglePlay() {
+  // 단계별 모드의 선택지는 '지금 탭으로 계속'. 자동 모드의 선택지는 재생/일시정지로 카운트다운을 멈춘다.
+  if (state.prompt?.wait) { pickRead(state.read); return; }
   if (state.waiting) { skipWait(); return; }
   if (!state.playing && state.t >= state.cp.end - 0.01) { restart(); return; }
   state.playing = !state.playing;
@@ -445,7 +577,8 @@ const RING = 2 * Math.PI * 8;   // 캡션 옆 원형 카운트다운의 둘레 (
 function updateUI() {
   const cp = state.cp;
   const t = Math.max(0, state.t);
-  const k = cp.stepIndexAt(Math.min(t, cp.total - 1e-6));
+  // 분기점 선택지가 떠 있는 동안에는 답을 미리 보여 주지 않도록 마지막 공유 단계의 설명을 유지한다
+  const k = state.prompt ? curPlay().reads.at - 1 : cp.stepIndexAt(Math.min(t, cp.total - 1e-6));
   if (k !== state.stepShown) { showCaption(k); state.stepShown = k; }
   updateTimeline(t);
   const tt = t.toFixed(1);
@@ -468,6 +601,7 @@ function updateUI() {
   }
   if (text !== ui.statusText) { $('#cap-status-text').textContent = text; ui.statusText = text; }
   if (Math.abs(bar - ui.bar) > 0.002) { $('#cap-ring-fill').style.strokeDashoffset = `${RING * (1 - bar)}`; ui.bar = bar; }
+  if (state.prompt) readsUI.setPromptProgress(state.prompt.wait ? null : 1 - state.prompt.remaining / state.prompt.total);
 }
 
 // ── 이벤트 ───────────────────────────────────────────────────
@@ -478,6 +612,7 @@ function setLanguage(l) {
   $$('.lang-bar button').forEach((b) => b.classList.toggle('on', b.dataset.lang === getLang()));
   library.render(PLAYS[state.idx]?.id);
   renderInfo();
+  if (state.prompt) readsUI.showPrompt(meta(), state.read);
   syncPlayBtn();
   syncThemeBtn();
   ui.statusText = null;
@@ -530,6 +665,7 @@ function bindUI() {
   const tl = $('#timeline');
   const scrubTo = (e) => { state.t = tFromX(e.clientX); };
   tl.addEventListener('pointerdown', (e) => {
+    closePrompt();
     state.scrubbing = true;
     state.playing = false;
     state.hold = null;
@@ -551,6 +687,11 @@ function bindUI() {
     setSeg('#read-mode', state.readMode);
     if (state.readMode === 'off' || state.readMode === 'step') state.hold = null;
     if (state.readMode !== 'step' && state.waiting) skipWait();
+    // 분기점 선택지가 열려 있으면: 끄기는 지금 탭으로 계속, 그 외에는 새 모드에 맞춰 다시 연다
+    if (state.prompt) {
+      if (state.readMode === 'off') pickRead(state.read, true);
+      else { openPrompt(); if (state.readMode !== 'step') { state.playing = true; syncPlayBtn(); } }
+    }
     savePrefs();
   }));
   const bindToggle = (id, get, set) => $(id).addEventListener('click', () => { set(!get()); setToggle(id, get()); savePrefs(); });
@@ -602,7 +743,13 @@ let prevT = 0;
 function advance(dt) {
   const cp = state.cp;
   if (state.playing) {
-    if (state.hold) {
+    if (state.prompt) {
+      // 분기점 선택지: 자동 모드면 읽는 시간이 지나 지금 탭으로 계속한다
+      if (!state.prompt.wait) {
+        state.prompt.remaining -= dt;
+        if (state.prompt.remaining <= 0) pickRead(state.read, true);
+      }
+    } else if (state.hold) {
       state.hold.remaining -= dt;
       if (state.hold.remaining <= 0) state.hold = null;
     } else {
@@ -610,7 +757,11 @@ function advance(dt) {
       state.t += dt * state.speed;
       if (state.t < cp.total) {
         const k1 = cp.stepIndexAt(state.t);
-        if (k1 !== k0) { state.t = cp.steps[k1].s0; beginStep(k1); }
+        if (k1 !== k0) {
+          state.t = cp.steps[k1].s0;
+          if (k1 === curPlay().reads?.at && shouldPrompt()) openPrompt();
+          else beginStep(k1);
+        }
       } else if (state.t >= cp.end) {
         if (state.loop) restart();
         else { state.t = cp.end; state.playing = false; syncPlayBtn(); }
@@ -694,6 +845,9 @@ async function init() {
   }
   const fromHash = PLAYS.findIndex((p) => p.id === location.hash.slice(1));
   selectPlay(fromHash >= 0 ? fromHash : 0, false);
+  // ?read=switch: 처음부터 그 읽기로 연다 (모르는 id면 기본)
+  const read0 = params.get('read');
+  if (read0 && readIds(curPlay()).slice(1).includes(read0)) selectRead(read0);
   const startT = parseFloat(params.get('t'));
   if (startT >= 0) { state.t = Math.min(startT, state.cp.end); prevT = state.t; }
   requestAnimationFrame(frame);
@@ -702,7 +856,7 @@ async function init() {
 
   // 디버깅용: 탭이 백그라운드여도 특정 시점을 강제로 그려 볼 수 있다
   window.__playbook = {
-    state, rig, camera, selectPlay, setCam, advance, readTime, toggleTheme,
+    state, rig, camera, selectPlay, selectRead, setCam, advance, readTime, toggleTheme,
     renderNow(frames = 12) {
       for (let i = 0; i < frames; i++) { applyState(state.t, 1 / 30); rig.update(1 / 30, ball.position); }
       renderer.render(scene, camera);

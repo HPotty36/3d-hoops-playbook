@@ -102,6 +102,7 @@
       <div class="view">
         <div id="viewport">
           <div id="score-pop" aria-live="polite"></div>
+          <div id="branch-prompt" class="branch-prompt" role="group" aria-labelledby="bp-q" hidden></div>
           <div id="loading" data-i18n="loading"></div>
         </div>
       </div>
@@ -119,10 +120,15 @@
             <button id="btn-skip" type="button"><span data-i18n="btn.skip"></span> <kbd>Enter</kbd></button>
           </div>
         </div>
+        <p id="cap-read" class="cap-read" hidden><span class="chip"></span><span class="why"></span></p>
         <p id="cap-text"></p>
       </section>
 
       <div class="controls panel">
+        <div class="read-bar" hidden>
+          <span class="read-bar-label" data-i18n="branch.tabs"></span>
+          <div id="read-tabs" class="seg read-tabs" role="group" data-i18n-aria="branch.tabs"></div>
+        </div>
         <section id="transport" data-i18n-aria="aria.controls">
           <div class="t-buttons">
             <button id="btn-restart" class="icon" data-i18n-title="btn.restart.t" data-i18n-aria="aria.restart"><svg><use href="#i-restart" /></svg></button>

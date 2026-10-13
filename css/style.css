@@ -362,6 +362,68 @@ kbd {
 .counters dt { font-size: 14px; font-weight: 600; color: var(--text); }
 .counters dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.7; color: var(--text-2); }
 
+.counters dt { display: flex; align-items: center; gap: 10px; }
+.counters dt span { flex: 1; min-width: 0; }
+.counters .watch {
+  display: inline-flex; align-items: center; gap: 5px; flex: none; min-height: 28px; padding: 0 11px 0 9px;
+  border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); font-size: 12.5px; font-weight: 600;
+}
+.counters .watch svg { width: 12px; height: 12px; }
+.counters .watch:hover { background: var(--accent); color: var(--on-accent); }
+
+/* ───────── 수비 대응별 분기 ───────── */
+/* 읽기 탭: 타임라인 위 */
+.read-bar { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.read-bar[hidden] { display: none; }
+.read-bar-label { flex: none; font-size: 12.5px; font-weight: 500; color: var(--text-3); }
+.read-tabs { min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.read-tabs::-webkit-scrollbar { display: none; }
+.read-tabs button { flex: none; min-height: 32px; }
+
+/* 분기점 표시(◆): 갈라지는 단계 막대의 왼쪽 끝 */
+.tl-seg.branch { position: relative; }
+.tl-seg.branch::before {
+  content: ""; position: absolute; left: -7px; top: 5px; width: 9px; height: 9px; z-index: 1;
+  background: var(--accent); border: 2px solid var(--panel); transform: rotate(45deg); border-radius: 2px;
+}
+
+/* 분기점 선택지: 코트 위 카드 */
+.branch-prompt {
+  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 2;
+  width: min(520px, calc(100% - 24px)); padding: 16px 18px 14px; border-radius: var(--r-xl);
+  background: var(--panel); color: var(--text); box-shadow: var(--float-shadow);
+  animation: bp-in 220ms var(--ease);
+}
+.branch-prompt[hidden] { display: none; }
+@keyframes bp-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.bp-eyebrow { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--accent-text); }
+.bp-q { margin: 4px 0 12px; font-size: 16.5px; font-weight: 600; line-height: 1.5; }
+.bp-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.bp-options button {
+  flex: 1 1 auto; min-height: 42px; padding: 0 16px; border-radius: 999px; background: var(--raised-2);
+  font-size: 14.5px; font-weight: 600; color: var(--text); transition: background-color 150ms var(--ease);
+}
+.bp-options button:hover { background: var(--seg-on); }
+.bp-options button.current { box-shadow: inset 0 0 0 2px var(--accent); }
+.bp-foot { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.bp-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
+.bp-bar[hidden] { display: none; }
+.bp-bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+.bp-hint { margin-left: auto; font-size: 12.5px; color: var(--text-3); white-space: nowrap; }
+
+/* 분기 직후 캡션: 고른 읽기 + 이유 한 줄 */
+.cap-read { display: flex; align-items: baseline; gap: 10px; margin: 10px 0 0; padding: 9px 12px; border-radius: var(--r-md); background: var(--raised); }
+.cap-read[hidden] { display: none; }
+.cap-read .chip { flex: none; font-size: 12.5px; font-weight: 600; color: var(--accent-text); }
+.cap-read .why { font-size: 14px; line-height: 1.6; color: var(--text-sub); }
+
+/* 단계 목록의 분기 구분선 */
+#info-steps .branch-divider {
+  display: flex; align-items: center; gap: 8px; margin: 6px 0 2px; padding: 0 12px;
+  font-size: 12.5px; font-weight: 600; color: var(--accent-text);
+}
+#info-steps .branch-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
 .disclaimer { margin: 28px 0 0; font-size: 12.5px; line-height: 1.7; color: var(--text-3); }
 
 /* 작전 제목: 데스크톱에서는 그냥 제목, 모바일에서는 목록 시트를 여는 버튼 (▾) */
@@ -460,6 +522,10 @@ kbd {
   #settings { gap: 10px 16px; }
   .set-group { width: 100%; justify-content: space-between; }
   #score-pop { font-size: 64px; }
+  .read-bar-label { display: none; }
+  .branch-prompt { bottom: 10px; padding: 14px 14px 12px; }
+  .bp-q { font-size: 15.5px; }
+  .bp-options button { min-height: 40px; padding: 0 12px; font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
