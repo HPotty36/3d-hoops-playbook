@@ -79,7 +79,19 @@ Pure module, no DOM, importable from Node.
 - `branchTime(play)` → sum of `dur` over the shared steps.
 - Compiled results are cached per `play.id + readId` in `main.js`.
 
-`engine.js` does not change.
+## Engine fix: defenders must not snap
+
+Reads put the defense front and center, and the current engine makes defenders jump for a single frame. Measured at 1/120 s, defender peaks today are 127–407 ft/s on every play. There are three causes:
+
+1. **On/off-ball switch is instant.** `autoPos` switches between the on-ball spot and the help spot the instant `holderAt` changes (catch, pass release, shot). Fix: an ownership weight per player.
+   - 1 while holding the ball.
+   - Ramps 0 → 1 (smoothstep) during a pass flight toward that player.
+   - Ramps 1 → 0 over 0.45 s after the player releases the ball.
+   - The defender's target is `lerp(helpSpot, onBallSpot, weight)`.
+2. **Collision push flips sides.** Pushing a defender all the way out of a circle flips them to the other side when the target crosses the center. Fix: inside the circle, push to `r(l) = R·sin(πl / 2R)` (0 at the center, R at the edge). Run defender–defender separation twice, then a single offense pass.
+3. **Blending re-applies the push.** Step-boundary blending starts from already-resolved positions and resolves again. Fix: blend from pre-collision positions; resolve once at the end.
+
+A prototype of these three changes brings every current play to ≤ 37 ft/s. These are the only `engine.js` changes. The compile output and the play format stay the same.
 
 ## Playback and UI — `js/reads-ui.js`
 
@@ -178,8 +190,8 @@ New UI strings in both languages:
 
 For every play and every read:
 
-- Compiles without throwing, and samples every 1/30 s have no NaN for offense, defense and ball.
-- Offense and defense speed ≤ 25 ft/s.
+- Compiles without throwing, and samples every 1/120 s have no NaN for offense, defense and ball.
+- Offense speed ≤ 25 ft/s; defense speed ≤ 38 ft/s (closeouts plus collision pushes).
 - Shared part identical to the base read up to the branch time (offense, defense and ball positions within 1e-6).
 - 3-point shots are taken from 22 ft or more, 2-point shots from inside 23.75 ft.
 - KO/EN parity: step counts, read labels, `why` and prompts present in both languages.
