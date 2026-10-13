@@ -52,6 +52,20 @@ test('play ids are unique and URL-safe', () => {
   for (const id of ids) assert.match(id, ID);
 });
 
+// 스토어 빌드는 famous(실존 선수·구단 이름)만 지운다. 검색 별칭에 그 이름이 들어가면 앱에 그대로 남는다.
+// 영어 famous의 고유명사(대문자로 시작하는 단어)로 검사한다. 한국어는 조사가 붙어 단어 경계를 믿을 수 없어 사람이 확인한다.
+test('search aliases contain no names from the famous examples', () => {
+  const names = new Set();
+  for (const p of PLAYS) {
+    // 문장 첫 단어(The, Shooting …)는 고유명사가 아니므로 뺀다
+    for (const w of (p.en?.famous || '').match(/(?<!(?:^|[.!?])\s*)\b[A-Z][a-z]{2,}\b/g) || []) names.add(w.toLowerCase());
+  }
+  const hits = PLAYS.flatMap((p) => (p.aliases || [])
+    .filter((a) => a.split(/[\s-]+/).some((w) => names.has(w.toLowerCase())))
+    .map((a) => `${p.id}: ${a}`));
+  assert.deepEqual(hits, []);
+});
+
 test('every play belongs to a library section', () => {
   const cats = SECTIONS.flatMap((s) => s.cats);
   for (const p of PLAYS) assert.ok(cats.includes(p.category), `${p.id}: category ${p.category}`);
