@@ -16,9 +16,9 @@ export default {
     '수비가 위쪽으로 몰리면 슈터는 반대로 **백도어**로 림을 노립니다.',
   ],
   counters: [
-    { name: '언더 추격', desc: '스크린 아래로 지름길을 타고 윙에서 먼저 기다립니다. 슈터에게 3점을 내줄 위험이 있습니다.' },
-    { name: '범프', desc: '컷이 시작되는 지점에서 몸으로 밀어 경로와 타이밍을 늦춥니다.' },
-    { name: '스위치', desc: '엘보 빅맨의 수비수가 슈터를 넘겨받습니다.' },
+    { name: '언더 추격', desc: '스크린 아래로 지름길을 타고 윙에서 먼저 기다립니다. 슈터에게 3점을 내줄 위험이 있습니다.', read: 'under' },
+    { name: '범프', desc: '컷이 시작되는 지점에서 몸으로 밀어 경로와 타이밍을 늦춥니다.', read: 'bump' },
+    { name: '스위치', desc: '엘보 빅맨의 수비수가 슈터를 넘겨받습니다.', read: 'switch' },
   ],
   famous:
     '앨런 아이버슨이 뛰던 2000년대 필라델피아 76ers가 그를 위해 즐겨 써서 이 이름이 붙었습니다. 지금은 거의 모든 프로 팀이 공격 시작 동작으로 사용합니다.',
@@ -48,6 +48,34 @@ export default {
       { title: 'Wing catch', text: '[1] passes to [2] coming out on the right wing. [2] catches it ready to attack before the defense can catch up.' },
       { title: 'Drive & pull-up', text: '[2] attacks the hard closeout from [x2], drives inside, and rises for a **pull-up jumper** near the free-throw line. Defender close: drive. Defender off: shoot the three. From the catch, the offense is in control.' },
     ],
+    reads: {
+      prompt: 'How does the defense handle [2] cutting across the elbows?',
+      base: { label: 'Late chase', why: 'A defender who comes out late off two screens closes out hard. Use that momentum and drive inside.' },
+      options: [
+        {
+          label: 'Chase under', why: 'Shortcutting under the screens leaves the top open. Stop behind the screen at the top and shoot right away.',
+          steps: [
+            { title: 'Chase under', text: '[x2] takes the shortcut under the screens to beat [2] to the right wing (going **under**). [2] sees it, skips the wing and comes out at the top behind the screen from [5].' },
+            { title: 'Catch & shoot', text: '[1] hands the ball to [2] at the top and [2] lets the three fly. [x2], having gone under, runs into [5] and arrives far too late.' },
+          ],
+        },
+        {
+          label: 'Switch', why: 'When the big defender leaves to take the shooter, the rim that big was guarding is empty. The screener dives straight to it.',
+          steps: [
+            { title: 'Cut & first screen', text: '[2] starts on the left, comes off the screen from [4] and runs across the top of the free-throw line. [x2] ducks under the screen.' },
+            { title: 'Switch', text: 'As [2] comes off the screen from [5], [x5] takes over [2] (the **switch**) and [x2] picks up [5].' },
+            { title: 'Screener dive', text: '[2] catches on the wing and [x5] follows. Meanwhile [5] **dives** to the empty rim, catches the bounce pass from [2] and lays it in.' },
+          ],
+        },
+        {
+          label: 'Bump', why: 'Bodying up the cut opens the opposite way. Cut toward the rim instead of over the top.',
+          steps: [
+            { title: 'Bump', text: '[x2] steps into the path of [2] right where the cut starts (the **bump**). The high route is blocked and the timing of the cut is off.' },
+            { title: 'Counter cut', text: 'When the top is taken, the bottom is open. [2] cuts the other way toward the rim along the baseline (the **counter cut**), catches the pass from [1] and lays it in.' },
+          ],
+        },
+      ],
+    },
   },
 
   start: { o1: [0, 34], o4: [-8, 19.5], o5: [8, 19.5], o2: [-21, 10], o3: [23, 3.5] },
@@ -99,4 +127,115 @@ export default {
       },
     },
   ],
+
+  // 수비 대응별 분기: 대형(1단계) 뒤에 갈라진다. 기본(위 2~4단계)은 [x2]가 스크린 두 개에 걸려 늦게 달려 나오는 경우.
+  reads: {
+    at: 1,
+    prompt: '수비는 엘보를 가로지르는 [2]를 어떻게 막을까요?',
+    base: { id: 'late', label: '늦은 추격', why: '스크린 두 개에 걸려 늦게 달려 나오는 수비는 급하게 붙습니다. 그 힘을 역이용해 안으로 치고 들어갑니다.' },
+    options: [
+      {
+        id: 'under',
+        label: '언더 추격',
+        why: '스크린 아래로 지름길을 타면 위쪽이 빕니다. 스크린 뒤 탑에서 멈춰 바로 던집니다.',
+        steps: [
+          {
+            title: '언더 추격',
+            dur: 2.6,
+            text: '[x2]가 스크린 아래로 지름길을 타고 오른쪽 윙에서 먼저 기다리려 합니다(**언더**). [2]는 그걸 보고 윙까지 가지 않고, [5]의 스크린 뒤 탑으로 빠져나옵니다.',
+            move: {
+              o2: [[-15.5, 17], [-9, 22.8], [-1, 24.6], [4.4, 29.4]],
+              o4: { path: [[-7.6, 20.8]], t: [0, 0.3] },
+              o5: { path: [[6.2, 23.6]], t: [0.4, 0.7] },
+              o1: { path: [[11.5, 27.5]], t: [0.3, 0.9] },
+            },
+            screens: [
+              { by: 'o4', face: [-9.5, 17.5], hold: 0.2 },
+              { by: 'o5', face: [5.6, 20.8], hold: 0.4 },
+            ],
+            def: { d2: { path: [[-15, 14], [-9.5, 16.4], [-1, 16.8], [8.5, 18.2]], t: [0.1, 0.9] } },
+          },
+          {
+            title: '캐치 & 슛',
+            dur: 1.6,
+            text: '[1]이 탑의 [2]에게 공을 건네고, [2]가 그대로 3점을 던집니다. 스크린 아래로 돈 [x2]는 [5]에게 막혀 한참 늦게 달려옵니다.',
+            ball: [
+              { type: 'pass', to: 'o2', at: 0.06 },
+              { type: 'shot', at: 0.45, pts: 3 },
+            ],
+            def: { d2: { path: [[4.6, 21.2], [4.2, 25.8]], t: [0.1, 0.65] } },
+          },
+        ],
+      },
+      {
+        id: 'switch',
+        label: '스위치',
+        why: '빅맨의 수비가 슈터를 맡으러 나가면 그 빅맨이 지키던 림이 빕니다. 스크리너가 곧장 림으로 다이브합니다.',
+        steps: [
+          {
+            title: '컷 & 첫 스크린',
+            dur: 1.6,
+            text: '[2]가 왼쪽에서 출발해 [4]의 스크린을 지나 자유투 라인 위를 가로지릅니다. [x2]는 스크린을 피해 아래로 돌아갑니다.',
+            move: {
+              o2: [[-15.5, 17], [-9, 22.8], [-1.5, 23.6]],
+              o4: { path: [[-7.6, 20.8]], t: [0, 0.5] },
+            },
+            screens: [{ by: 'o4', face: [-9.5, 17.5], hold: 0.2 }],
+            def: { d2: { path: [[-15, 14], [-10.5, 17.4], [-5, 17.8]], t: [0.15, 1] } },
+          },
+          {
+            title: '스위치',
+            dur: 1.4,
+            text: '[2]가 [5]의 스크린을 지나는 순간 [x5]가 [2]를 넘겨받고(**스위치**), [x2]는 [5]를 맡습니다.',
+            move: {
+              o2: [[8.5, 23], [15.5, 22.6]],
+              o5: { path: [[7.6, 20.8]], t: [0, 0.3] },
+            },
+            screens: [{ by: 'o5', face: [7.5, 17], hold: 0.3 }],
+            def: { d5: { guard: 'o2' }, d2: { guard: 'o5', lag: 0.7 } },
+          },
+          {
+            title: '스크리너 다이브',
+            dur: 1.9,
+            text: '[2]가 윙에서 공을 받자 [x5]가 따라 나옵니다. 그 사이 [5]가 비어 있는 림으로 **다이브**하고, [2]의 바운스 패스를 받아 레이업으로 마무리합니다.',
+            move: { o5: { path: [[5.4, 14], [2, 7.4]], t: [0, 0.5] } },
+            ball: [
+              { type: 'pass', to: 'o2', at: 0.05 },
+              { type: 'bounce', to: 'o5', at: 0.42 },
+              { type: 'shot', at: 0.82, pts: 2 },
+            ],
+            def: { d2: { lag: 0.6 } },
+          },
+        ],
+      },
+      {
+        id: 'bump',
+        label: '범프',
+        why: '컷 길을 몸으로 막으면 그 반대쪽이 열립니다. 위 대신 림 쪽으로 끊습니다.',
+        steps: [
+          {
+            title: '범프',
+            dur: 1.5,
+            text: '[x2]가 컷이 시작되는 지점에서 [2]의 길을 몸으로 막아섭니다(**범프**). 위쪽 길이 막혀 컷의 타이밍이 어긋났습니다.',
+            move: { o2: { path: [[-17.5, 14.8]], t: [0, 0.5] } },
+            def: { d2: { path: [[-15.4, 15.6]], t: [0, 0.45] } },
+          },
+          {
+            title: '카운터 컷',
+            dur: 1.8,
+            text: '위가 막히면 아래가 빕니다. [2]는 반대로 베이스라인 쪽 림을 향해 끊어 들어가고(**카운터 컷**), [1]의 패스를 받아 레이업으로 마무리합니다.',
+            move: { o2: { path: [[-14.6, 11.2], [-6.4, 7.2], [-1.6, 5.4]], t: [0, 0.72] } },
+            ball: [
+              { type: 'pass', to: 'o2', at: 0.35 },
+              { type: 'shot', at: 0.88, pts: 2 },
+            ],
+            def: {
+              d2: { path: [[-12.4, 11.8], [-5.2, 8.8]], t: [0.15, 0.85] },
+              d4: { path: [[-3.6, 9.6]], t: [0.55, 0.9] },
+            },
+          },
+        ],
+      },
+    ],
+  },
 };
