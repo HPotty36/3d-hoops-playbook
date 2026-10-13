@@ -16,9 +16,9 @@ export default {
     '패스는 베이스라인 위를 가로지르는 한 번의 강한 패스입니다.',
   ],
   counters: [
-    { name: '노 헬프', desc: '약한 쪽 수비가 슈터에게서 떨어지지 않습니다. 대신 돌파 레이업을 내줄 수 있습니다.' },
-    { name: '로테이션 스위치', desc: '[x4]가 코너로 나가고 [x2]가 [4]를 맡아 슈터를 지웁니다.' },
-    { name: '베이스라인 차단', desc: '처음부터 베이스라인 돌파를 막아 도움 수비가 많은 중앙으로 유도합니다.' },
+    { name: '노 헬프', desc: '약한 쪽 수비가 슈터에게서 떨어지지 않습니다. 대신 돌파 레이업을 내줄 수 있습니다.', read: 'no-help' },
+    { name: '로테이션 스위치', desc: '[x4]가 코너로 나가고 [x2]가 [4]를 맡아 슈터를 지웁니다.', read: 'rotation-switch' },
+    { name: '베이스라인 차단', desc: '처음부터 베이스라인 돌파를 막아 도움 수비가 많은 중앙으로 유도합니다.', read: 'baseline-deny' },
   ],
   famous:
     '그렉 포포비치 감독의 샌안토니오 스퍼스가 2014년 우승 시즌 전후로 즐겨 썼습니다. 마누 지노빌리의 베이스라인 돌파에 이은 대니 그린의 코너 3점이 대표 장면입니다.',
@@ -47,6 +47,32 @@ export default {
       { title: 'Baseline drive & hammer screen', text: '[1] attacks hard along the baseline. As the help collapses, [x2] sinks toward the paint in help position, and [4] sets a **hammer screen** behind [x2]. [2] slides down to the corner.' },
       { title: 'Hammer pass & corner three', text: 'From the end of the baseline, [1] fires the ball across to the opposite corner (the hammer pass). [x2] is stuck on the screen and can\'t get to the corner, and [2] takes the shortest three on the floor: the **corner three**.' },
     ],
+    reads: {
+      prompt: 'How does the defense handle the drive from [1]?',
+      base: { label: 'Help', why: 'When the weak-side defender helps on the drive, the corner behind opens, and the hammer screen blocks the way back.' },
+      options: [
+        {
+          label: 'No help', why: 'If nobody comes to help, the way stays open all the way to the rim. Just finish it.',
+          steps: [
+            { title: 'No help & layup', text: '[x2] stays glued to shooter [2] and nobody comes over to help (**no help**). [1] drives the baseline all the way and lays it in.' },
+          ],
+        },
+        {
+          label: 'Rotation switch', why: 'When a big runs out to the corner shooter, that big is missing under the rim. Drop to the dunker spot and catch it.',
+          steps: [
+            { title: 'Hammer & rotation', text: '[1] drives the baseline and [4] sets the hammer screen. This time [x4] rotates out to the corner early to take [2] (the **rotation switch**), and [x2] is supposed to take [4].' },
+            { title: 'Dunker spot', text: 'While [x2] is held up by the screen, [4] drops to the **dunker spot** along the baseline under the rim. A short pass from [1] and a layup for [4].' },
+          ],
+        },
+        {
+          label: 'Take away the baseline', why: 'Taking away the baseline pushes the drive into the middle. The more help collapses, the more the far side opens, so kick it out.',
+          steps: [
+            { title: 'Baseline denied', text: '[x1] sits on the baseline side from the start to close the drive (**taking away the baseline**). [1] attacks the crowded middle instead, and [5] moves up to the top to make room.' },
+            { title: 'Middle drive & kick-out', text: 'The drive into the middle pulls even [x2] in from the weak side. [1] kicks it out to [2] on the left wing that [x2] just left, and [2] fires the three.' },
+          ],
+        },
+      ],
+    },
   },
 
   start: { o1: [17, 24], o3: [23, 3.5], o5: [6.5, 19.5], o2: [-18, 22], o4: [-9, 9] },
@@ -92,4 +118,106 @@ export default {
       },
     },
   ],
+
+  // 수비 대응별 분기: 셋업(1단계) 뒤에 갈라진다. 기본(위 2·3단계)은 약한 쪽 [x2]가 돌파를 도우러 들어오는 경우.
+  reads: {
+    at: 1,
+    prompt: '수비는 [1]의 돌파를 어떻게 막을까요?',
+    base: { id: 'help', label: '도움 수비', why: '약한 쪽 수비가 돌파를 도우러 들어오면 그 뒤 코너가 빕니다. 해머 스크린이 돌아가는 길까지 막아 줍니다.' },
+    options: [
+      {
+        id: 'no-help',
+        label: '노 헬프',
+        why: '아무도 도우러 오지 않으면 돌파한 사람 앞이 끝까지 비어 있습니다. 그대로 림까지 갑니다.',
+        steps: [
+          {
+            title: '노 헬프 & 레이업',
+            dur: 2.4,
+            text: '[x2]가 슈터 [2]에게서 떨어지지 않고, 아무도 돌파를 도우러 오지 않습니다(**노 헬프**). [1]은 베이스라인을 끝까지 파고들어 그대로 레이업을 올립니다.',
+            move: {
+              o1: { path: [[19, 15.5], [15.5, 8.5], [9.5, 4.5], [3.6, 3.8]], t: [0, 0.88] },
+              o3: { path: [[21, 18]], t: [0, 0.6] },
+              o5: { path: [[1, 19]], t: [0, 0.6] },
+            },
+            ball: [{ type: 'shot', at: 0.95, pts: 2 }],
+            def: {
+              d1: { lag: 0.45 },
+              d2: { sag: 0 },
+              d4: { sag: 0 },
+              d3: { path: [[22.6, 9.5], [22, 16.5]], t: [0, 0.65] },
+            },
+          },
+        ],
+      },
+      {
+        id: 'rotation-switch',
+        label: '로테이션 스위치',
+        why: '빅맨이 코너 슈터를 맡으러 나가면 골밑의 그 빅맨이 빕니다. 덩커 스팟으로 내려가 받습니다.',
+        steps: [
+          {
+            title: '해머 & 로테이션',
+            dur: 2.1,
+            text: '[1]이 베이스라인으로 돌파하고 [4]가 해머 스크린을 겁니다. 이번에는 [x4]가 미리 코너로 돌아 나가 [2]를 맡고(**로테이션 스위치**), [x2]가 [4]를 맡기로 합니다.',
+            move: {
+              o1: [[19, 15.5], [15.5, 8.5], [9.5, 4.5], [5, 3.2]],
+              o3: { path: [[21, 18]], t: [0, 0.6] },
+              o5: { path: [[1, 19]], t: [0, 0.6] },
+              o4: { path: [[-13.5, 11.2]], t: [0.25, 0.75] },
+              o2: { path: [[-21.5, 14], [-23, 4]], t: [0.35, 1] },
+            },
+            screens: [{ by: 'o4', face: [-11, 15], hold: 0.6 }],
+            def: {
+              d1: { lag: 0.45 },
+              d2: { path: [[-11, 15.5]], t: [0, 0.6] },
+              d3: { path: [[22.6, 9.5], [22, 16.5]], t: [0, 0.65] },
+              d4: { guard: 'o2', path: [[-17.5, 6.6]], t: [0.45, 1] },
+              d5: { path: [[4.5, 8]], t: [0.3, 0.9] },
+            },
+          },
+          {
+            title: '덩커 스팟',
+            dur: 1.8,
+            text: '[x2]가 스크린에 막혀 있는 사이 [4]가 골밑 베이스라인 쪽 **덩커 스팟**으로 내려갑니다. [1]의 짧은 패스, [4]의 레이업.',
+            move: { o4: { path: [[-7.2, 6.6], [-4.6, 4.4]], t: [0, 0.45] } },
+            ball: [
+              { type: 'pass', to: 'o4', at: 0.35 },
+              { type: 'shot', at: 0.75, pts: 2 },
+            ],
+            def: { d2: { guard: 'o4', path: [[-9.2, 11.6]], t: [0, 0.6] }, d4: { sag: 0 } },
+          },
+        ],
+      },
+      {
+        id: 'baseline-deny',
+        label: '베이스라인 차단',
+        why: '베이스라인을 막으면 중앙으로 몰립니다. 도움 수비가 몰려드는 만큼 반대쪽이 비니 밖으로 빼 줍니다.',
+        steps: [
+          {
+            title: '베이스라인 차단',
+            dur: 1.6,
+            text: '[x1]이 처음부터 베이스라인 쪽에 서서 돌파 길을 막습니다(**베이스라인 차단**). [1]은 막힌 쪽 대신 수비가 많은 중앙으로 파고들고, [5]는 탑으로 비켜 자리를 내줍니다.',
+            move: {
+              o1: { path: [[14.5, 23.6], [8.6, 19.6]], t: [0.3, 1] },
+              o5: { path: [[4.2, 25.4]], t: [0, 0.5] },
+            },
+            def: { d1: { path: [[19.6, 21.6], [12.4, 20.6]], t: [0, 1] } },
+          },
+          {
+            title: '중앙 돌파 & 킥아웃',
+            dur: 2.0,
+            text: '중앙으로 들어오는 돌파에 약한 쪽의 [x2]까지 도우러 들어옵니다. [1]은 [x2]가 비운 왼쪽 윙의 [2]에게 공을 빼 주고, [2]가 3점을 던집니다.',
+            move: { o1: { path: [[5.6, 15.6]], t: [0, 0.35] } },
+            ball: [
+              { type: 'pass', to: 'o2', at: 0.4 },
+              { type: 'shot', at: 0.82, pts: 3 },
+            ],
+            def: {
+              d1: { lag: 0.4 },
+              d2: { path: [[-3.6, 14.2], [-14.4, 19.2]], t: [0, 1] },
+            },
+          },
+        ],
+      },
+    ],
+  },
 };
