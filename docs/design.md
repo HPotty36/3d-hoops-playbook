@@ -5,6 +5,7 @@
 - Recreate common pro-basketball offensive sets in 3D and explain each phase step by step.
 - Open instantly in a browser with no install or build step, and deploy as a static site (GitHub Pages).
 - Define each play purely as data (one file per play) so new plays are easy to add.
+- Go past the basic play: show how each play changes depending on what the defense does (reads), and keep the library browsable as it grows past 40 plays.
 
 ## Modules
 
@@ -15,7 +16,10 @@
 | `players.js` | Player model and poses, ball model | three |
 | `notation.js` | Turns notation data into floor ribbon meshes with per-step opacity | engine |
 | `camera.js` | Camera presets, aspect-ratio fitting, ball follow | OrbitControls |
-| `main.js` | Scene assembly, playback loop, UI | all of the above |
+| `reads.js` | Turns a play plus a read id into an ordinary play (shared steps + that read's steps); read labels per language. Pure, no DOM | — |
+| `reads-ui.js` | Read tabs above the timeline and the branch-point prompt over the court | — |
+| `library.js` | Searchable, sectioned play list (`filterPlays` is pure and tested) | reads |
+| `main.js` | Scene assembly, playback loop, branch-point flow, UI | all of the above |
 
 ## Time model
 
@@ -26,9 +30,23 @@
   - On-ball defender: about 3 ft between the ball handler and the rim.
   - Off-ball defenders: between their man and the rim, sagging toward a help spot in the paint the farther they are from the ball (`sag`).
   - `lag` (reaction delay) makes a defender look caught on a screen.
-  - Defenders closer than 2 ft to an offensive player are pushed out, so screens naturally impede them.
-  - At step boundaries, positions are blended over 0.5 s from the previous spot to the new target to avoid jumps.
+  - Switching between the on-ball and help spots follows a ball-ownership weight instead of flipping instantly: it ramps up while a pass flies toward the defender's man and ramps down over 0.45 s after the man gives the ball up.
+  - Defenders closer than 2.05 ft to an offensive player (1.8 ft to another defender) are kept out of that circle. Pushing straight out would flip a defender to the far side when its target passes through the center, so the engine finds the window during which the target is inside the circle (entry and exit times; positions are functions of `t`, so both can be searched) and slides the defender along the circle from the entry side to the exit side.
+  - At step boundaries, positions are blended over 0.5 s from the previous spot to the new target. Blending uses the positions before collision handling, so the push is applied exactly once.
 - Because everything is a function of `t`, timeline scrubbing and step jumps always land on exactly the same frame.
+
+## Reads (defensive branches)
+
+- A play may carry a `reads` block: `at` (number of shared steps), a prompt, the base read (the play's own steps), and options that replace `steps[at..]`. `reads.js` builds the chosen read as a normal play object, so the engine and localization never see branches.
+- All reads share the opening exactly, which `npm test` checks frame by frame, so switching reads before the branch point never jumps.
+- Playing from the start stops at the branch point and asks how the defense plays it. Step mode waits, Auto/Relaxed continue with the current tab after the reading time, Off never asks. While the prompt is open the caption stays on the last shared step so it does not give the answer away.
+- Tabs above the timeline switch reads at any time; a ◆ marks the branch point. The first step after the branch shows a one-line "why". Counters with an animated read get a Watch button. `?read=<id>` links to a read.
+
+## Library
+
+- `SECTIONS` in `js/plays/index.js` groups categories into offense sets, special situations and defensive schemes; empty sections are hidden.
+- Search matches Korean names, English names and `aliases` regardless of UI language, ignoring case, spaces and hyphens. Difficulty chips use the same dots as the list. Collapsed sections are remembered.
+- On screens up to 1100 px wide, the play title opens the same library in a bottom sheet instead of a horizontal strip.
 
 ## Reading mode
 
@@ -59,5 +77,5 @@
 
 ## Verification
 
-- Every play was sampled at 0.05 s intervals to check for NaN values, peak player speed (kept at or under a sprint of roughly 25 ft/s), and that shot distance matches the points scored (2 vs 3).
+- `npm test` (Node's built-in runner, `three` as the only dev dependency) samples every play and every read at 1/120 s: no NaN, offense ≤ 25 ft/s, defense ≤ 38 ft/s, no defender inside an attacker (≥ 1.8 ft) or another defender (≥ 1.35 ft), 3-pointers from 22 ft or more and 2-pointers from inside 23.75 ft. It also checks KO/EN parity, read ids, counter links, sections, and that every read shares the opening with the base read.
 - Desktop (1440×900), tablet (1024 wide) and mobile (390×844) layouts were checked in both themes to show the whole half court without horizontal page scrolling.
