@@ -364,6 +364,37 @@ kbd {
 
 .disclaimer { margin: 28px 0 0; font-size: 12.5px; line-height: 1.7; color: var(--text-3); }
 
+/* 작전 제목: 데스크톱에서는 그냥 제목, 모바일에서는 목록 시트를 여는 버튼 (▾) */
+.title-btn {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%; text-align: left;
+  font: inherit; letter-spacing: inherit; cursor: text;
+}
+#hud-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.title-btn .chev { display: none; width: 22px; height: 22px; flex: none; color: var(--text-3); }
+
+/* ───────── 모바일 작전 목록 시트 ───────── */
+.sheet {
+  width: 100%; max-width: 560px; max-height: 82dvh; margin: auto auto 0; padding: 0; border: 0;
+  border-radius: var(--r-xl) var(--r-xl) 0 0; background: var(--panel); color: var(--text);
+  box-shadow: var(--float-shadow); overflow: hidden;
+}
+.sheet[open] { display: flex; }
+.sheet::backdrop { background: var(--backdrop); }
+.sheet-inner {
+  display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%;
+  padding: 10px 14px calc(14px + env(safe-area-inset-bottom));
+}
+.sheet-inner::before {
+  content: ""; align-self: center; width: 40px; height: 4px; border-radius: 2px; margin-bottom: 6px; background: var(--diff);
+}
+.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 0 2px 4px 4px; }
+.sheet-head h3 { margin: 0; font-size: 17px; font-weight: 600; }
+.sheet-head .round-btn { width: 40px; height: 40px; background: var(--raised); }
+.sheet-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.sheet .library { margin-top: 6px; }
+.sheet .lib-search input { font-size: 16px; }   /* iOS가 입력창을 확대하지 않도록 16px 이상 */
+.sheet .play-item { min-height: 48px; }
+
 /* ───────── 단축키 팝오버 ───────── */
 .keys-pop {
   width: min(380px, calc(100vw - 32px)); margin: auto; padding: 20px 22px 22px; border: 0;
@@ -395,6 +426,8 @@ kbd {
   #sidebar { background: transparent; padding: 4px 0 0; }
   .brand { padding: 0 4px; }
   .side-foot { display: none; }
+  .title-btn { cursor: pointer; }
+  .title-btn .chev { display: block; }
   .view { flex: none; height: 60vh; min-height: 320px; }
   .toolbar { padding: 0 4px; }
   .play-meta { display: block; }

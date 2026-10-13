@@ -81,7 +81,7 @@
       <header class="toolbar">
         <div class="play-head">
           <p id="hud-cat" class="play-meta"></p>
-          <h2 id="hud-title"></h2>
+          <h2><button id="btn-library" class="title-btn" type="button" data-i18n-title="lib.open"><span id="hud-title"></span><svg class="chev" aria-hidden="true"><use href="#i-chevron" /></svg></button></h2>
         </div>
         <div class="tool-right">
           <div class="seg cam-bar" role="group" data-i18n-aria="aria.camera">
@@ -202,6 +202,17 @@
   </div>
 
   <!-- 단축키 안내 (? 키 또는 사이드바 버튼) -->
+  <!-- 모바일 작전 목록 (제목을 누르면 아래에서 올라온다) -->
+  <dialog id="library-sheet" class="sheet" data-i18n-aria="aria.plays">
+    <div class="sheet-inner">
+      <div class="sheet-head">
+        <h3 data-i18n="aria.plays"></h3>
+        <button id="btn-sheet-close" class="round-btn" type="button" data-i18n-aria="keys.close"><svg aria-hidden="true"><use href="#i-close" /></svg></button>
+      </div>
+      <div class="sheet-body"></div>
+    </div>
+  </dialog>
+
   <div id="keys-pop" class="keys-pop" popover data-i18n-aria="keys.title">
     <div class="keys-head">
       <h3 data-i18n="keys.title"></h3>

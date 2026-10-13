@@ -162,10 +162,26 @@ function fmt(s) {
 // ── 작전 목록 (js/library.js) ────────────────────────────────
 const library = createLibrary({
   plays: PLAYS, sections: SECTIONS, tr, localize,
-  onSelect: (i) => selectPlay(i, true),
+  onSelect: (i) => { selectPlay(i, true); if (sheet.open) sheet.close(); },
   collapsed: collapsedSections,
   onCollapse: () => savePrefs(),
 });
+
+// 데스크톱은 사이드바에, 모바일(≤1100px)은 제목을 누르면 열리는 아래쪽 시트에 같은 목록을 둔다
+const mobileMQ = window.matchMedia('(max-width: 1100px)');
+const sheet = $('#library-sheet');
+function mountLibrary() {
+  if (mobileMQ.matches) $('#library-sheet .sheet-body').append(library.el);
+  else {
+    if (sheet.open) sheet.close();
+    $('#sidebar .brand').after(library.el);
+  }
+}
+function openLibrary() {
+  if (!mobileMQ.matches) { library.focusSearch(); return; }
+  sheet.showModal();
+  $('#library-sheet .play-item.active')?.scrollIntoView({ block: 'center' });
+}
 
 // ── 작전 설명 패널 ───────────────────────────────────────────
 function renderInfo() {
@@ -505,6 +521,10 @@ function bindUI() {
   $('#btn-next').addEventListener('click', nextStep);
   $('#btn-skip').addEventListener('click', skipWait);
   $('#btn-theme').addEventListener('click', toggleTheme);
+  $('#btn-library').addEventListener('click', openLibrary);
+  $('#btn-sheet-close').addEventListener('click', () => sheet.close());
+  // 시트 바깥(배경)을 누르면 닫는다. 시트 안쪽은 .sheet-inner가 채우므로 대상이 dialog 자체일 때만 배경이다.
+  sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); });
 
   // 타임라인 드래그
   const tl = $('#timeline');
@@ -556,7 +576,7 @@ function bindUI() {
     else if (e.key === 'l' || e.key === 'L') $('#tg-labels').click();
     else if (e.key === 't' || e.key === 'T') toggleTheme();
     else if (e.key === '?') $('#keys-pop').togglePopover?.();
-    else if (e.key === '/') { e.preventDefault(); library.focusSearch(); }
+    else if (e.key === '/') { e.preventDefault(); openLibrary(); library.focusSearch(); }
     else if (cams[+e.key - 1]) setCam(cams[+e.key - 1]);
   });
 
@@ -649,7 +669,8 @@ async function init() {
     scene.add(p.root, p.wall);
   }
   court = buildCourt(scene, renderer, { hiRes: !isSmall, theme: currentTheme() });
-  $('#sidebar .brand').after(library.el);
+  mountLibrary();
+  mobileMQ.addEventListener('change', mountLibrary);
   library.render(PLAYS[state.idx]?.id);
   bindUI();
   setSeg('#speed', state.speed);
