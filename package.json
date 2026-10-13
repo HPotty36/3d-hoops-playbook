@@ -1,0 +1,12 @@
+{
+  "name": "3d-hoops-playbook",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only: tests for the play data and engine. The site itself needs no build or install.",
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\""
+  },
+  "devDependencies": {
+    "three": "0.160.0"
+  }
+}

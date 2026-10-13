@@ -88,10 +88,11 @@ Reads put the defense front and center, and the current engine makes defenders j
    - Ramps 0 → 1 (smoothstep) during a pass flight toward that player.
    - Ramps 1 → 0 over 0.45 s after the player releases the ball.
    - The defender's target is `lerp(helpSpot, onBallSpot, weight)`.
-2. **Collision push flips sides.** Pushing a defender all the way out of a circle flips them to the other side when the target crosses the center. Fix: inside the circle, push to `r(l) = R·sin(πl / 2R)` (0 at the center, R at the edge). Run defender–defender separation twice, then a single offense pass.
+2. **Collision push flips sides.** Pushing a defender all the way out of a circle flips them to the other side when the target crosses the center. Fix: find the window during which the defender's target sits inside the circle (entry time → exit time; positions are pure functions of t, so both can be searched). For that window the defender slides along the circle from the entry direction to the exit direction instead of jumping. The same rule applies to defender pairs around their midpoint, and the defender-pair offset is carried through the attacker pass.
+   - A softer "push less near the center" profile was tried first. It removed the jumps but left defenders standing inside attackers, so it was dropped.
 3. **Blending re-applies the push.** Step-boundary blending starts from already-resolved positions and resolves again. Fix: blend from pre-collision positions; resolve once at the end.
 
-A prototype of these three changes brings every current play to ≤ 37 ft/s. These are the only `engine.js` changes. The compile output and the play format stay the same.
+With these three changes, every current play stays within the limits below. One play (Hammer) needed a scripted help-defender path, because its driver ran straight through that defender. These are the only `engine.js` changes. The compile output and the play format stay the same.
 
 ## Playback and UI — `js/reads-ui.js`
 
@@ -192,6 +193,7 @@ For every play and every read:
 
 - Compiles without throwing, and samples every 1/120 s have no NaN for offense, defense and ball.
 - Offense speed ≤ 25 ft/s; defense speed ≤ 38 ft/s (closeouts plus collision pushes).
+- No defender inside an attacker (center distance ≥ 1.8 ft) and no two defenders inside each other (≥ 1.35 ft) during the play.
 - Shared part identical to the base read up to the branch time (offense, defense and ball positions within 1e-6).
 - 3-point shots are taken from 22 ft or more, 2-point shots from inside 23.75 ft.
 - KO/EN parity: step counts, read labels, `why` and prompts present in both languages.

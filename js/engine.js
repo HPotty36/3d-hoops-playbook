@@ -13,6 +13,7 @@ const DEF_LAG = 0.28;      // 수비가 공격 움직임에 반응하는 기본 
 const R_OFF = 2.05;        // 수비-공격 충돌 반경
 const R_DEF = 1.8;         // 수비-수비 충돌 반경
 const TAIL = 1.6;          // 마지막 단계 뒤 여유 시간
+const OWN_OUT = 0.45;      // 공을 놓은 수비 대상에게서 온볼 자세를 푸는 시간(초)
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const smooth = (t) => t * t * (3 - 2 * t);
@@ -160,16 +161,29 @@ export function compilePlay(play) {
     guards.push(gmap);
   });
 
-  // sag: 도움 수비로 처지는 정도(1 = 기본, 0 = 자기 선수만 바짝 따라감)
-  const autoPos = (man, lag, t, sag = 1) => {
-    const tl = Math.max(0, t - lag);
-    const m = offAt(man, tl);
-    const toB = norm2(v2(BASKET.x - m.x, BASKET.z - m.z));
-    const dm = dist2(m, BASKET);
-    if (holderAt(tl) === man) {
-      const g = Math.min(3.2, dm * 0.45);
-      return v2(m.x + toB.x * g, m.z + toB.z * g);
+  // 공 소유 가중치: 공을 들고 있으면 1, 자기에게 오는 패스가 날아가는 동안 0→1,
+  // 공을 놓은 뒤 OWN_OUT초 동안 1→0. 수비가 온볼/도움 위치 사이를 순간이동하지 않게 한다.
+  const ownW = (man, t) => {
+    let w = 0;
+    for (const b of bsegs) {
+      if (b.type === 'hold' && b.who === man) {
+        if (t >= b.t0 && t < b.t1) return 1;
+        if (t >= b.t1 && t < b.t1 + OWN_OUT) w = Math.max(w, 1 - smooth((t - b.t1) / OWN_OUT));
+      } else if (b.type === 'flight' && b.target === man && t >= b.t0 && t < b.t1) {
+        w = Math.max(w, smooth((t - b.t0) / (b.t1 - b.t0)));
+      }
     }
+    return w;
+  };
+
+  // 공을 가진 선수 앞: 림 쪽으로 약 3ft
+  const onBallSpot = (m, toB, dm) => {
+    const g = Math.min(3.2, dm * 0.45);
+    return v2(m.x + toB.x * g, m.z + toB.z * g);
+  };
+
+  // 공이 없는 선수: 림 쪽에 서되, 공에서 멀수록 페인트의 도움 위치로 처진다
+  const helpSpot = (m, toB, dm, tl, sag) => {
     const ball = ballXZ(tl);
     const gap = clamp(dm * 0.2, 2.2, 6);
     let p = v2(m.x + toB.x * gap, m.z + toB.z * gap);
@@ -180,56 +194,100 @@ export function compilePlay(play) {
     return p;
   };
 
-  const resolve = (dp, t) => {
-    const op = OFF.map((id) => offAt(id, t));
-    for (let it = 0; it < 3; it++) {
-      for (const d of DEF) {
-        for (const o of op) {
-          const dx = dp[d].x - o.x, dz = dp[d].z - o.z;
-          const l = Math.hypot(dx, dz);
-          if (l < R_OFF) {
-            const n = l > 1e-4 ? v2(dx / l, dz / l) : v2(0, -1);
-            dp[d] = v2(o.x + n.x * R_OFF, o.z + n.z * R_OFF);
-          }
-        }
-      }
-      for (let i = 0; i < DEF.length; i++) for (let j = i + 1; j < DEF.length; j++) {
-        const a = dp[DEF[i]], b = dp[DEF[j]];
-        const dx = a.x - b.x, dz = a.z - b.z, l = Math.hypot(dx, dz);
-        if (l < R_DEF) {
-          const n = l > 1e-4 ? v2(dx / l, dz / l) : v2(1, 0);
-          const push = (R_DEF - l) / 2;
-          dp[DEF[i]] = v2(a.x + n.x * push, a.z + n.z * push);
-          dp[DEF[j]] = v2(b.x - n.x * push, b.z - n.z * push);
-        }
-      }
-    }
-    return dp;
+  // sag: 도움 수비로 처지는 정도(1 = 기본, 0 = 자기 선수만 바짝 따라감)
+  const autoPos = (man, lag, t, sag = 1) => {
+    const tl = Math.max(0, t - lag);
+    const m = offAt(man, tl);
+    const toB = norm2(v2(BASKET.x - m.x, BASKET.z - m.z));
+    const dm = dist2(m, BASKET);
+    const w = ownW(man, tl);
+    if (w >= 1) return onBallSpot(m, toB, dm);
+    const off = helpSpot(m, toB, dm, tl, sag);
+    return w <= 0 ? off : lerp2(off, onBallSpot(m, toB, dm), w);
   };
 
   const defStart = [];
   const defSegs = [];
-  const evalDefIn = (k, t) => {
+
+  // 겹침 처리 전(raw) 수비 위치. 단계 사이 블렌딩도 이 값으로 이어야 겹침 처리가 두 번 적용되지 않는다.
+  const rawIn = (k, d, t) => {
     const st = steps[k];
-    const out = {};
-    for (const d of DEF) {
-      const spec = (st.def || {})[d] || {};
-      if (defSegs[k][d]) { out[d] = segAt(defSegs[k][d], t); continue; }
-      const raw = autoPos(guards[k][d], spec.lag ?? DEF_LAG, t, spec.sag ?? 1);
-      if (k === 0 && !defStart[0]) { out[d] = raw; continue; }
-      const w = smooth(clamp((t - st.s0) / DEF_BLEND, 0, 1));
-      out[d] = lerp2(defStart[k][d], raw, w);
-    }
-    return resolve(out, t);
+    const spec = (st.def || {})[d] || {};
+    if (defSegs[k][d]) return segAt(defSegs[k][d], t);
+    const raw = autoPos(guards[k][d], spec.lag ?? DEF_LAG, t, spec.sag ?? 1);
+    if (k === 0 && !defStart[0]) return raw;
+    const w = smooth(clamp((t - st.s0) / DEF_BLEND, 0, 1));
+    return lerp2(defStart[k][d], raw, w);
   };
+  const evalRaw = (k, t) => Object.fromEntries(DEF.map((d) => [d, rawIn(k, d, t)]));
+  const rawOf = (d, t) => rawIn(stepIndexAt(t), d, t);
+
+  // ── 겹침 처리 ──
+  // 원 밖으로 그냥 밀어내면 목표 위치가 원 중심을 지날 때 반대편으로 순간이동한다.
+  // 그래서 목표가 원 안에 머무는 구간(진입 te ~ 이탈 tx)을 찾아, 그동안 진입 방향에서
+  // 이탈 방향으로 원둘레를 따라 돌아가게 한다. 위치는 여전히 t만의 함수다.
+  // rel(s): 시각 s에서 원 중심 → 수비 목표 벡터. 반환값은 원둘레 위의 각도.
+  const SCAN = 1 / 60;
+  const aroundAngle = (rel, R, t) => {
+    const tEnd = total + TAIL;
+    const isIn = (s) => { const r = rel(s); return Math.hypot(r.x, r.z) < R; };
+    const edge = (tIn, tOut) => {
+      for (let i = 0; i < 14; i++) { const m = (tIn + tOut) / 2; if (isIn(m)) tIn = m; else tOut = m; }
+      return (tIn + tOut) / 2;
+    };
+    const ang = (s) => { const r = rel(s); return Math.atan2(r.z, r.x); };
+    let te = 0;
+    for (let g = Math.floor(t / SCAN) * SCAN; g > 0; g -= SCAN) {
+      if (!isIn(g)) { te = edge(Math.min(g + SCAN, t), g); break; }
+    }
+    let tx = tEnd;
+    for (let g = Math.floor(t / SCAN) * SCAN + SCAN; g < tEnd; g += SCAN) {
+      if (!isIn(g)) { tx = edge(Math.max(g - SCAN, t), g); break; }
+    }
+    const a0 = ang(te);
+    if (tx >= tEnd) return a0;
+    let da = ang(tx) - a0;
+    da -= 2 * Math.PI * Math.round(da / (2 * Math.PI));
+    return a0 + da * clamp((t - te) / (tx - te), 0, 1);
+  };
+
+  const resolve = (raw, t) => {
+    const dp = { ...raw };
+    // 수비끼리: 두 목표의 중점을 기준으로 서로 반대편에 R_DEF/2씩
+    for (let i = 0; i < DEF.length; i++) for (let j = i + 1; j < DEF.length; j++) {
+      const a = DEF[i], b = DEF[j];
+      if (dist2(raw[a], raw[b]) >= R_DEF) continue;
+      const rel = (s) => { const p = rawOf(a, s), q = rawOf(b, s); return v2(p.x - q.x, p.z - q.z); };
+      const ang = aroundAngle(rel, R_DEF, t);
+      const mid = lerp2(raw[a], raw[b], 0.5), h = R_DEF / 2;
+      dp[a] = v2(mid.x + Math.cos(ang) * h, mid.z + Math.sin(ang) * h);
+      dp[b] = v2(mid.x - Math.cos(ang) * h, mid.z - Math.sin(ang) * h);
+    }
+    // 공격수와: 공격수 중심에서 R_OFF 떨어진 원둘레를 따라 돌아간다.
+    // 수비끼리 밀어낸 만큼(off)은 그대로 더해 두 처리 사이에서도 위치가 끊기지 않게 한다.
+    for (const d of DEF) {
+      const off = v2(dp[d].x - raw[d].x, dp[d].z - raw[d].z);
+      let p = raw[d];
+      for (const id of OFF) {
+        const o = offAt(id, t);
+        if (dist2(raw[d], o) >= R_OFF) continue;
+        const rel = (s) => { const r = rawOf(d, s), q = offAt(id, s); return v2(r.x - q.x, r.z - q.z); };
+        const ang = aroundAngle(rel, R_OFF, t);
+        p = v2(o.x + Math.cos(ang) * R_OFF, o.z + Math.sin(ang) * R_OFF);
+      }
+      dp[d] = v2(p.x + off.x, p.z + off.z);
+    }
+    return dp;
+  };
+  const evalDefIn = (k, t) => resolve(evalRaw(k, t), t);
 
   steps.forEach((st, k) => {
     defSegs[k] = {};
     if (k === 0) {
       defStart[0] = null;
-      defStart[0] = evalDefIn(0, 0);
+      defStart[0] = evalRaw(0, 0);
     } else {
-      defStart[k] = evalDefIn(k - 1, steps[k - 1].s1 - 1e-6);
+      defStart[k] = evalRaw(k - 1, steps[k - 1].s1 - 1e-6);
     }
     for (const [d, spec] of Object.entries(st.def || {})) {
       if (spec.path) defSegs[k][d] = makeSegment(defStart[k][d], spec.t ? { path: spec.path, t: spec.t } : spec.path, st.s0, st.dur);
