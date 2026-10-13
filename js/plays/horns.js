@@ -16,9 +16,9 @@ export default {
     '혼즈 플레어, 혼즈 트위스트, 혼즈 스태거처럼 파생 작전이 아주 많습니다.',
   ],
   counters: [
-    { name: '스위치', desc: '핸들러와 롤맨 모두 즉시 마크를 바꿉니다. 대신 가드가 빅맨을 막는 미스매치가 생깁니다.' },
-    { name: '한쪽으로 몰기', desc: '스크린 전에 핸들러를 한쪽으로 몰아 스크린 선택권을 빼앗습니다.' },
-    { name: '엘보 디나이', desc: '엘보 빅맨에게 가는 패스를 끊어 대형 자체를 무력화합니다.' },
+    { name: '스위치', desc: '핸들러와 롤맨 모두 즉시 마크를 바꿉니다. 대신 가드가 빅맨을 막는 미스매치가 생깁니다.', read: 'switch' },
+    { name: '한쪽으로 몰기', desc: '스크린 전에 핸들러를 한쪽으로 몰아 스크린 선택권을 빼앗습니다.', read: 'push-side' },
+    { name: '엘보 디나이', desc: '엘보 빅맨에게 가는 패스를 끊어 대형 자체를 무력화합니다.', read: 'elbow-deny' },
   ],
   famous:
     '샌안토니오 스퍼스, 마이애미 히트, 댈러스 매버릭스 등 대부분의 프로 팀 플레이북에 혼즈 계열 작전이 들어 있습니다. 경기 첫 공격에서 가장 자주 보이는 대형 중 하나입니다.',
@@ -48,6 +48,34 @@ export default {
       { title: 'Roll & replace', text: '[1] goes right off the screen and [5] rolls to the rim. The other big, [4], lifts to the top to fill the empty space (the replace). The roller is dangerous, so [x4] drops into the paint to slow [5].' },
       { title: 'High-low', text: '[1] swings the ball to [4] at the top, and as [x4] rushes up to guard [4], [5] is left alone in the paint. [4] floats a **high-low** lob to [5] for the finish. Two bigs creating for each other is the signature option of horns.' },
     ],
+    reads: {
+      prompt: 'How does the defense play horns?',
+      base: { label: 'Big helps', why: 'If the other big\'s defender drops to help on the roller, the big who lifted to the top is open. Connect the two bigs with a high-low.' },
+      options: [
+        {
+          label: 'Switch', why: 'A switch leaves a small defender on a big. Pin the defender behind on the roll and catch it at the rim.',
+          steps: [
+            { title: 'Screen & switch', text: '[1] jabs left and [5] steps up to screen on the right. The defense decides to switch it.' },
+            { title: 'Post mismatch', text: '[x5] takes [1] and the smaller [x1] takes [5]. [5] rolls with [x1] pinned behind, carries it down to the right block, catches the bounce pass from [1] and scores over the smaller defender.' },
+          ],
+        },
+        {
+          label: 'Elbow denial', why: 'Denying the pass from the front leaves the way to the rim open behind. Cut backdoor into that space.',
+          steps: [
+            { title: 'Elbow denial', text: '[x4] and [x5] get in front of the elbow bigs to cut off the passes (**denial**). If the ball cannot get to the elbow, horns never starts.' },
+            { title: 'Backdoor cut', text: 'A defender in front leaves the back door open. [4] cuts behind [x4] to the rim (the **backdoor cut**), catches the bounce pass from [1] and lays it in.' },
+          ],
+        },
+        {
+          label: 'Force', why: 'Taking away the screen side opens the other side. Reject the screen and attack it.',
+          steps: [
+            { title: 'Force one way', text: '[x1] jumps to the right side where the screen is coming and pushes [1] to the left, trying to take away the choice that makes horns work.' },
+            { title: 'Reject & drive left', text: '[1] **rejects** the screen and drives to the open left side. [4] at the left elbow clears out of the way, and [x2] comes in from the corner to stop the drive.' },
+            { title: 'Kick-out & corner three', text: '[1] kicks it out to the left corner that [x2] just left, and [2] knocks down the **corner three**. Forcing one way leaves the other side open.' },
+          ],
+        },
+      ],
+    },
   },
 
   start: { o1: [0, 34], o4: [-8, 20], o5: [8, 20], o2: [-23, 3.5], o3: [23, 3.5] },
@@ -103,4 +131,121 @@ export default {
       },
     },
   ],
+
+  // 수비 대응별 분기: 혼즈 대형(1단계) 뒤에 갈라진다. 기본(위 2~4단계)은 [x4]가 롤맨을 도우러 내려가는 경우.
+  reads: {
+    at: 1,
+    prompt: '수비는 혼즈를 어떻게 막을까요?',
+    base: { id: 'help', label: '빅맨 도움', why: '다른 빅맨의 수비가 롤맨을 도우러 내려가면 탑으로 올라간 빅맨이 빕니다. 하이-로우로 두 빅맨을 잇습니다.' },
+    options: [
+      {
+        id: 'switch',
+        label: '스위치',
+        why: '스위치하면 작은 수비수가 빅맨을 막게 됩니다. 롤하면서 등 뒤에 묶어 골밑에서 받습니다.',
+        steps: [
+          {
+            title: '스크린 & 스위치',
+            dur: 1.4,
+            text: '[1]이 왼쪽으로 한 번 흔들고, [5]가 올라와 오른쪽에 스크린을 겁니다. 수비는 이 스크린을 바꿔 막기로 합니다.',
+            move: {
+              o5: { path: [[5, 25], [2.6, 28.4]], t: [0, 0.8] },
+              o1: { path: [[-1.6, 31.8]], t: [0.2, 0.8] },
+            },
+            screens: [{ by: 'o5', face: [-1.4, 28.6], hold: 0.55 }],
+          },
+          {
+            title: '포스트 미스매치',
+            dur: 2.3,
+            text: '[x5]가 [1]을, 작은 [x1]이 [5]를 맡습니다. [5]는 롤하며 [x1]을 등 뒤에 묶고 오른쪽 블록까지 밀고 들어가, [1]의 바운스 패스를 받아 키 차이로 마무리합니다.',
+            move: {
+              o1: [[1, 32.6], [4.8, 30.6], [9.5, 25]],
+              o5: { path: [[3.2, 22], [5, 11.5], [4.4, 8.6]], t: [0.25, 0.88] },
+              o4: { path: [[-4, 25], [-2, 29.5]], t: [0.2, 0.9] },
+            },
+            ball: [
+              { type: 'bounce', to: 'o5', at: 0.62 },
+              { type: 'shot', at: 0.94, pts: 2 },
+            ],
+            def: {
+              d5: { guard: 'o1' },
+              d1: { guard: 'o5', lag: 0.4, sag: 0 },
+            },
+          },
+        ],
+      },
+      {
+        id: 'elbow-deny',
+        label: '엘보 디나이',
+        why: '패스 길을 앞에서 막으면 수비 뒤쪽, 림까지가 빕니다. 백도어 컷으로 그 뒤를 찌릅니다.',
+        steps: [
+          {
+            title: '엘보 디나이',
+            dur: 1.5,
+            text: '[x4]와 [x5]가 엘보의 두 빅맨 앞을 막아 패스 길을 끊습니다(**디나이**). 공이 엘보로 들어가지 않으면 혼즈가 시작되지 않습니다.',
+            move: { o1: { path: [[-2, 30.6]], t: [0, 0.5] } },
+            def: {
+              d4: { path: [[-6.6, 22.6]], t: [0, 0.5] },
+              d5: { path: [[6.6, 22.6]], t: [0, 0.5] },
+            },
+          },
+          {
+            title: '백도어 컷',
+            dur: 1.9,
+            text: '앞을 막는 수비는 뒤가 비어 있습니다. [4]가 [x4] 등 뒤로 림을 향해 끊어 들어가고(**백도어 컷**), [1]의 바운스 패스를 받아 레이업으로 마무리합니다.',
+            move: { o4: { path: [[-7.2, 14.5], [-2.6, 8.2]], t: [0, 0.55] } },
+            ball: [
+              { type: 'bounce', to: 'o4', at: 0.38 },
+              { type: 'shot', at: 0.78, pts: 2 },
+            ],
+            def: {
+              d4: { lag: 0.5, sag: 0 },
+              d5: { path: [[6.6, 22.6]], t: [0, 0.1] },
+              d2: { path: [[-5.4, 8.6]], t: [0.55, 0.9] },
+            },
+          },
+        ],
+      },
+      {
+        id: 'push-side',
+        label: '한쪽으로 몰기',
+        why: '스크린 쪽을 미리 막으면 반대쪽이 열립니다. 스크린을 버리고 그쪽을 공격합니다.',
+        steps: [
+          {
+            title: '한쪽으로 몰기',
+            dur: 1.5,
+            text: '[x1]이 스크린이 오는 오른쪽을 미리 막아서서 [1]을 왼쪽으로 몹니다. 스크린을 쓰지 못하게 해 혼즈의 선택권을 빼앗으려는 수비입니다.',
+            move: {
+              o5: { path: [[5, 25], [2.6, 28.4]], t: [0, 0.8] },
+              o1: { path: [[-1.2, 31.8]], t: [0.2, 0.6] },
+            },
+            screens: [{ by: 'o5', face: [-1.4, 28.6], hold: 0.3 }],
+            def: { d1: { path: [[1.4, 30.6]], t: [0.1, 0.6] } },
+          },
+          {
+            title: '리젝트 & 반대쪽 돌파',
+            dur: 1.5,
+            text: '[1]은 스크린을 버리고(**리젝트**) 비어 있는 왼쪽으로 돌파합니다. 왼쪽 엘보의 [4]가 자리를 비켜 주고, 코너의 [x2]가 돌파를 막으러 들어옵니다.',
+            move: {
+              o1: { path: [[-4, 29.6], [-7.2, 22.4], [-5.6, 15.4]], t: [0, 0.9] },
+              o4: { path: [[-11.5, 24.5]], t: [0.05, 0.55] },
+            },
+            def: {
+              d1: { lag: 0.45 },
+              d2: { path: [[-6.4, 11.4]], t: [0.35, 0.95] },
+            },
+          },
+          {
+            title: '킥아웃 & 코너 3점',
+            dur: 1.7,
+            text: '[x2]가 비운 왼쪽 코너로 [1]이 공을 빼 주고, [2]가 **코너 3점**을 던집니다. 한쪽으로 몰아서 막으면 반대쪽은 그만큼 비어 있습니다.',
+            ball: [
+              { type: 'pass', to: 'o2', at: 0.1 },
+              { type: 'shot', at: 0.62, pts: 3 },
+            ],
+            def: { d2: { path: [[-17.6, 5.2]], t: [0.15, 0.85] } },
+          },
+        ],
+      },
+    ],
+  },
 };

@@ -229,7 +229,7 @@ export function compilePlay(play) {
   // rel(s): 시각 s에서 원 중심 → 수비 목표 벡터. 반환값은 원둘레 위의 각도.
   const SCAN = 1 / 60;
   const aroundAngle = (rel, R, t) => {
-    const tEnd = total + TAIL;
+    const tEnd = end;   // 슛이 늦게 끝나면 total + TAIL보다 길다
     const isIn = (s) => { const r = rel(s); return Math.hypot(r.x, r.z) < R; };
     const edge = (tIn, tOut) => {
       for (let i = 0; i < 14; i++) { const m = (tIn + tOut) / 2; if (isIn(m)) tIn = m; else tOut = m; }

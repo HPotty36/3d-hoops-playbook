@@ -16,9 +16,9 @@ export default {
     '볼 핸들러는 [x2]의 선택을 보고 롤맨(롭 패스)과 슈터(킥아웃) 중 하나를 고릅니다.',
   ],
   counters: [
-    { name: '올 스위치', desc: '모든 스크린에 스위치해서 엇갈림을 없앱니다. 소통이 늦으면 더 큰 구멍이 생깁니다.' },
-    { name: '백스크린 피하기', desc: '[x5]가 백스크린을 예상하고 미리 아래로 물러납니다. 대신 핸들러의 풀업 슛을 내줍니다.' },
-    { name: '슈터 고정', desc: '[x2]가 끝까지 슈터를 따라가고, 롤맨은 약한 쪽 수비가 막습니다.' },
+    { name: '올 스위치', desc: '모든 스크린에 스위치해서 엇갈림을 없앱니다. 소통이 늦으면 더 큰 구멍이 생깁니다.', read: 'all-switch' },
+    { name: '백스크린 피하기', desc: '[x5]가 백스크린을 예상하고 미리 아래로 물러납니다. 대신 핸들러의 풀업 슛을 내줍니다.', read: 'avoid-back-screen' },
+    { name: '슈터 고정', desc: '[x2]가 끝까지 슈터를 따라가고, 롤맨은 약한 쪽 수비가 막습니다.', read: 'stay-home' },
   ],
   famous:
     '스페인 대표팀과 유로리그에서 유행해 이런 이름이 붙었고, 2010년대 후반부터 미국 프로 팀들도 본격적으로 도입했습니다. 포틀랜드(데미안 릴라드–유서프 너키치), 토론토 랩터스 등이 자주 썼습니다.',
@@ -48,6 +48,32 @@ export default {
       { title: 'Roll & pop', text: 'With [x5] caught on the screen, [5] rolls to the rim and [2], who just set the back screen, **pops** to the top. If [x2] drops to stop the roller, [2] is open; if [x2] stays with [2], [5] is open.' },
       { title: 'Kick-out three', text: '[x2] gets pulled down by the roller, so [1] passes to [2] at the top for an open three. Had the defense stayed with [2], the right answer would have been a **lob** to [5].' },
     ],
+    reads: {
+      prompt: 'How does the defense play the Spain pick and roll?',
+      base: { label: 'Help on the roller', why: 'If the shooter\'s defender drops to help on the roller, the shooter who set the back screen and popped is open.' },
+      options: [
+        {
+          label: 'Stay home', why: 'If the shooter is never left, nobody is left to stop the roller. Throw it up to the big rolling to the rim.',
+          steps: [
+            { title: 'Back screen', text: '[1] comes off the screen to the right and [2] sets the **back screen** on [x5]. This time [x2] does not help on the roller and stays attached to [2].' },
+            { title: 'Roll & lob', text: '[x5] is stuck on the back screen and [x2] only follows [2], so nobody is in front of the rolling [5]. [1] throws a **lob** and [5] finishes with a dunk.' },
+          ],
+        },
+        {
+          label: 'Avoid the back screen', why: 'If the big drops early to dodge the back screen, the handler has space. Shoot right off the screen.',
+          steps: [
+            { title: 'Dodge & pull-up', text: '[x5] reads the back screen and drops into the paint early. The screen from [2] hits nothing, but now nobody is in front of [1], who rises for a **pull-up three** right off the screen.' },
+          ],
+        },
+        {
+          label: 'All switch', why: 'When every screen is switched, a screener who slips to the rim before contact is left open.',
+          steps: [
+            { title: 'Switch everything', text: 'The defense switches every screen. [x5] takes [1], [x1] takes [5], and they get ready to switch again when [2] comes to set the back screen.' },
+            { title: 'Slip & layup', text: 'A switch needs a screen to switch on. [2] fakes the screen and **slips** straight to the rim, while [x2] steps out toward [5]. A bounce pass from [1] and a layup for [2].' },
+          ],
+        },
+      ],
+    },
   },
 
   start: { o1: [0, 33], o5: [7, 19], o2: [-2, 15.5], o3: [-23, 3.5], o4: [23, 3.5] },
@@ -111,4 +137,114 @@ export default {
       },
     },
   ],
+
+  // 수비 대응별 분기: 셋업(1단계) 뒤에 갈라진다. 기본(위 2~4단계)은 [x2]가 롤맨을 도우러 내려가는 경우.
+  reads: {
+    at: 1,
+    prompt: '수비는 스페인 픽앤롤을 어떻게 막을까요?',
+    base: { id: 'help-roller', label: '롤맨 도움', why: '슈터의 수비가 롤맨을 도우러 내려가면, 백스크린을 걸고 팝한 슈터가 빕니다.' },
+    options: [
+      {
+        id: 'stay-home',
+        label: '슈터 고정',
+        why: '슈터를 끝까지 따라가면 롤맨을 막을 사람이 없습니다. 림으로 굴러가는 빅맨에게 띄웁니다.',
+        steps: [
+          {
+            title: '백스크린',
+            dur: 1.3,
+            text: '[1]이 스크린을 타고 오른쪽으로 나가고, [2]가 [x5]에게 **백스크린**을 겁니다. 이번에는 [x2]가 롤맨을 도우러 가지 않고 [2]에게 끝까지 붙어 있습니다.',
+            move: {
+              o1: [[1, 34.2], [5, 31.8], [8.5, 27.5]],
+              o2: { path: [[2.0, 22.6]], t: [0, 0.55] },
+              o5: { path: [[5.4, 26]], t: [0.35, 1] },
+            },
+            screens: [{ by: 'o2', face: [3, 25.4], hold: 0.45 }],
+            def: {
+              d1: { lag: 0.9 },
+              d5: { path: [[3, 25.4]], t: [0, 0.5] },
+              d2: { sag: 0 },
+            },
+          },
+          {
+            title: '롤 & 롭',
+            dur: 2.2,
+            text: '[x5]는 백스크린에 걸려 있고 [x2]는 [2]만 따라갑니다. 림으로 굴러가는 [5] 앞에 아무도 없으니 [1]이 **롭 패스**를 띄우고 [5]가 덩크로 마무리합니다.',
+            move: {
+              o5: { path: [[4, 18], [1, 8]], t: [0, 0.6] },
+              o2: { path: [[-1, 27], [-2.5, 30.5]], t: [0.1, 0.8] },
+              o1: { path: [[11, 23.5]], t: [0, 0.5] },
+            },
+            ball: [
+              { type: 'lob', to: 'o5', at: 0.38 },
+              { type: 'shot', at: 0.86, pts: 2, kind: 'dunk' },
+            ],
+            def: {
+              d2: { sag: 0 },
+              d1: { lag: 0.6 },
+              d5: { path: [[3.2, 24.2], [3.4, 19]], t: [0.3, 1] },
+            },
+          },
+        ],
+      },
+      {
+        id: 'avoid-back-screen',
+        label: '백스크린 피하기',
+        why: '빅맨이 백스크린을 피해 미리 물러나면 핸들러 앞이 빕니다. 스크린 바로 뒤에서 던집니다.',
+        steps: [
+          {
+            title: '백스크린 피하기 & 풀업',
+            dur: 1.9,
+            text: '[x5]가 백스크린을 미리 알아채고 일찍 페인트로 물러납니다. [2]의 스크린은 허공을 치지만, 그 대신 [1] 앞에 아무도 없습니다. [1]은 스크린을 타고 나오자마자 **풀업 3점**을 던집니다.',
+            move: {
+              o1: { path: [[1, 34.2], [5, 31.8], [7.2, 29.8]], t: [0, 0.6] },
+              o2: { path: [[2.0, 22.6]], t: [0, 0.55] },
+              o5: { path: [[4.8, 25.5]], t: [0.4, 1] },
+            },
+            screens: [{ by: 'o2', face: [3, 25.4], hold: 0.3 }],
+            ball: [{ type: 'shot', at: 0.75, pts: 3 }],
+            def: {
+              d5: { path: [[3.4, 21.4], [2.4, 18.6]], t: [0, 0.45] },
+              d1: { lag: 0.9 },
+            },
+          },
+        ],
+      },
+      {
+        id: 'all-switch',
+        label: '올 스위치',
+        why: '모든 스크린을 바꿔 막으면, 스크린을 걸기 직전에 림으로 빠지는 슬립이 비어 있습니다.',
+        steps: [
+          {
+            title: '올 스위치',
+            dur: 1.5,
+            text: '수비가 모든 스크린에 스위치하기로 합니다. [x5]가 [1]을, [x1]이 [5]를 맡고, 백스크린을 걸러 오는 [2] 쪽에서도 바꿀 준비를 합니다.',
+            move: {
+              o1: [[1, 34.2], [5, 31.8], [8.5, 27.5]],
+              o5: { path: [[4.6, 26.2]], t: [0.35, 1] },
+              o2: { path: [[2, 22.6]], t: [0, 0.5] },
+            },
+            def: {
+              d5: { guard: 'o1' },
+              d1: { guard: 'o5', lag: 0.5 },
+              d2: { path: [[1.4, 19.4]], t: [0, 0.5] },
+            },
+          },
+          {
+            title: '슬립 & 레이업',
+            dur: 1.8,
+            text: '바꿔 막으려면 스크린이 걸려야 합니다. [2]는 스크린을 거는 척하다 그대로 림으로 빠지고(**슬립**), [x2]는 엉뚱하게 [5] 쪽으로 나옵니다. [1]의 바운스 패스, [2]의 레이업.',
+            move: {
+              o2: { path: [[1.2, 15], [0.4, 8.4]], t: [0, 0.55] },
+              o5: { path: [[5.4, 25]], t: [0, 0.4] },
+            },
+            ball: [
+              { type: 'bounce', to: 'o2', at: 0.3 },
+              { type: 'shot', at: 0.76, pts: 2 },
+            ],
+            def: { d2: { path: [[3.6, 22.4]], t: [0.25, 0.6] } },
+          },
+        ],
+      },
+    ],
+  },
 };
