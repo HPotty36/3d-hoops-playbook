@@ -5,6 +5,7 @@ import { compilePlay, ballAir, OFF, DEF } from '../js/engine.js';
 import { PLAYS, SECTIONS } from '../js/plays/index.js';
 import { readIds, variant, branchTime } from '../js/reads.js';
 import { sampleMotion, peakDefenseSpeed } from './helpers.mjs';
+import { t as tr, setLang } from '../js/i18n.js';
 
 const ID = /^[a-z0-9-]+$/;
 const text = (s) => typeof s === 'string' && s.trim().length > 0;
@@ -92,6 +93,18 @@ test('search aliases contain no names from the famous examples', () => {
     .filter((a) => a.split(/[\s-]+/).some((w) => names.has(w.toLowerCase())))
     .map((a) => `${p.id}: ${a}`));
   assert.deepEqual(hits, []);
+});
+
+// 새 분류(얼리 오펜스, 시스템 오펜스 등)를 SECTIONS에 넣으면 두 언어 이름표가 있어야 한다
+test('every section and category has a label in both languages', () => {
+  for (const lang of ['ko', 'en']) {
+    setLang(lang);
+    for (const s of SECTIONS) {
+      assert.notEqual(tr(`section.${s.id}`), `section.${s.id}`, `${lang}: section.${s.id}`);
+      for (const c of s.cats) assert.notEqual(tr(`cat.${c}`), `cat.${c}`, `${lang}: cat.${c}`);
+    }
+  }
+  setLang('ko');
 });
 
 test('every play belongs to a library section', () => {

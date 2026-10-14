@@ -3,6 +3,9 @@ import pickAndRoll from './pick-and-roll.js';
 import pickAndPop from './pick-and-pop.js';
 import spainPickAndRoll from './spain-pick-and-roll.js';
 import horns from './horns.js';
+import sidePickAndRoll from './side-pick-and-roll.js';
+import ghostScreen from './ghost-screen.js';
+import weave from './weave.js';
 import floppy from './floppy.js';
 import elevatorDoors from './elevator-doors.js';
 import iversonCut from './iverson-cut.js';
@@ -23,6 +26,9 @@ export const PLAYS = [
   pickAndPop,
   spainPickAndRoll,
   horns,
+  sidePickAndRoll,
+  ghostScreen,
+  weave,
   floppy,
   elevatorDoors,
   iversonCut,

@@ -1,13 +1,13 @@
 <p align="center"><img src="assets/logo-mark.svg" width="72" alt="3D Hoops Playbook logo"></p>
 <h1 align="center">3D Hoops Playbook</h1>
 <p align="center">
-  10 offensive sets from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
+  13 offensive sets from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
   <a href="https://hpotty36.github.io/3d-hoops-playbook/"><b>Live demo →</b></a>
 </p>
 
-An interactive playbook that replays **10 offensive sets commonly run in pro basketball** on a 3D half court, step by step.
+An interactive playbook that replays **13 offensive sets commonly run in pro basketball** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
-Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 41 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
+Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 52 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
@@ -27,12 +27,15 @@ Every play also branches by **defensive read** — drop, switch, blitz, top lock
 | 8 | Chicago | Off-ball screens | ●●○ | Pin-down screen straight into a dribble handoff | Caught on screens · Trail · Switch the handoff · Deny the handoff |
 | 9 | Hammer | Motion & drive | ●●○ | Baseline drive + weak-side screen → corner three | Help · No help · Rotation switch · Take away the baseline |
 | 10 | Split Action | Motion & drive | ●●● | Post entry, then the two off-ball players screen for each other | Chase the cutter · Switch · Stay with the screener · No post help |
+| 11 | Side Pick and Roll | On-ball screens | ●●○ | Pick and roll on the wing, where ICE comes into play | ICE · Drop · Blitz · Switch |
+| 12 | Ghost Screen | On-ball screens | ●●○ | The screener fakes the screen and slips out | Pre-switch · Show · Stay home |
+| 13 | Weave | On-ball screens | ●●○ | Back-to-back dribble handoffs across the top | Trail · Switch · Under · Deny the handoff |
 
 Each play comes with **step-by-step breakdown · when to use it · key teaching points · how defenses counter it · famous examples**.
 
 ### Defensive reads
 
-A play is only half the story; the other half is what the defense does. Every play splits at a **branch point** into 4–5 reads:
+A play is only half the story; the other half is what the defense does. Every play splits at a **branch point** into 3–5 reads:
 
 - Watching from the start, playback stops at the branch point and asks how the defense plays it. Pick an answer and the play continues that way, with a one-line "why" under the caption.
 - The tabs above the timeline switch reads at any time (a ◆ on the timeline marks the branch point). Before the branch point the switch is seamless; after it, playback jumps back to the branch.
@@ -219,9 +222,9 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 3D Hoops Playbook
 
-프로 농구에서 자주 쓰이는 공격 작전 10가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
+프로 농구에서 자주 쓰이는 공격 작전 13가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
-작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 41가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
+작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 52가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
 
@@ -239,12 +242,15 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | 8 | 시카고 액션 | 오프볼 스크린 | ●●○ | 핀다운 스크린 → 드리블 핸드오프 | 스크린에 걸림 · 트레일 · 핸드오프 스위치 · 핸드오프 차단 |
 | 9 | 해머 | 모션 & 드라이브 | ●●○ | 베이스라인 돌파 + 약한 쪽 스크린 → 코너 3점 | 도움 수비 · 노 헬프 · 로테이션 스위치 · 베이스라인 차단 |
 | 10 | 스플릿 액션 | 모션 & 드라이브 | ●●● | 포스트 엔트리 후 공 없는 두 선수의 스크린 | 커터 쫓기 · 스위치 · 스크리너 고정 · 포스트 도움 금지 |
+| 11 | 사이드 픽앤롤 | 온볼 스크린 | ●●○ | 윙에서 거는 픽앤롤, 아이스 수비가 등장 | 아이스 · 드롭 · 블리츠 · 스위치 |
+| 12 | 고스트 스크린 | 온볼 스크린 | ●●○ | 스크린을 거는 척하다 빠지는 스크리너 | 미리 스위치 · 쇼 · 그대로 |
+| 13 | 위브 | 온볼 스크린 | ●●○ | 탑에서 이어지는 연속 핸드오프 | 트레일 · 스위치 · 언더 · 핸드오프 차단 |
 
 작전마다 **단계별 진행 · 이럴 때 쓴다 · 핵심 포인트 · 수비는 어떻게 막나 · 대표 사례**가 들어 있습니다.
 
 ### 수비 대응별 분기
 
-작전은 절반이고, 나머지 절반은 수비가 어떻게 나오느냐입니다. 모든 작전이 **분기점**에서 4~5가지 읽기로 갈라집니다.
+작전은 절반이고, 나머지 절반은 수비가 어떻게 나오느냐입니다. 모든 작전이 **분기점**에서 3~5가지 읽기로 갈라집니다.
 
 - 처음부터 보면 분기점에서 재생이 멈추고 "수비는 어떻게 막을까요?"라고 묻습니다. 답을 고르면 그 방식으로 이어지고, 설명 위에 '왜 이렇게 푸는지' 한 줄이 붙습니다.
 - 타임라인 위 탭으로 언제든 읽기를 바꿀 수 있습니다(타임라인의 ◆가 분기점). 분기점 전에는 끊김 없이 바뀌고, 지난 뒤라면 분기점으로 돌아갑니다.

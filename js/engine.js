@@ -231,38 +231,36 @@ export function compilePlay(play) {
   // 찾은 겹침 구간은 쌍(key)마다 저장해 다시 쓴다. 위치가 t만의 함수라 결과는 어떤 순서로 물어도 같다.
   const windows = new Map();
   const angleIn = (w, t) => (w.open ? w.a0 : w.a0 + w.da * clamp((t - w.te) / (w.tx - w.te), 0, 1));
+  // 분기점(수비 대응별 읽기가 갈라지는 시각)에서는 겹침 구간을 끊는다. 그래야 분기점 앞의 위치가
+  // 분기점 뒤의 움직임(읽기마다 다르다)에 영향을 받지 않는다. 분기점에서의 각도는 양쪽이 같아 끊김은 없다.
+  const splits = play.reads && steps[play.reads.at] ? [steps[play.reads.at].s0] : [];
   const aroundAngle = (key, rel, R, t) => {
     const list = windows.get(key);
     const hit = list?.find((w) => t >= w.te && t <= w.tx);
     if (hit) return angleIn(hit, t);
-    const tEnd = end;   // 슛이 늦게 끝나면 total + TAIL보다 길다
+    const lo = Math.max(0, ...splits.filter((s) => s <= t));
+    const split = splits.find((s) => s > t);
+    const tEnd = split ?? end;   // 슛이 늦게 끝나면 total + TAIL보다 길다
     const isIn = (s) => { const r = rel(s); return Math.hypot(r.x, r.z) < R; };
     const edge = (tIn, tOut) => {
       for (let i = 0; i < 14; i++) { const m = (tIn + tOut) / 2; if (isIn(m)) tIn = m; else tOut = m; }
       return (tIn + tOut) / 2;
     };
     const ang = (s) => { const r = rel(s); return Math.atan2(r.z, r.x); };
-    // 1/15초 간격으로 훑다가 바깥 점을 만나면 그 칸만 1/60초로 다시 훑고, 마지막으로 이분 탐색한다
-    const COARSE = 4 * SCAN;
-    let te = 0;
-    for (let g = Math.floor(t / COARSE) * COARSE; g > 0; g -= COARSE) {
-      if (isIn(g)) continue;
-      let gOut = g;
-      for (let f = g + SCAN; f < Math.min(g + COARSE, t); f += SCAN) { if (isIn(f)) break; gOut = f; }
-      te = edge(Math.min(gOut + SCAN, t), gOut);
-      break;
+    // 1/60초 격자로 훑어 진입·이탈 칸을 찾고 이분 탐색한다. (더 성긴 격자는 짧은 이탈을 묻는 시각에 따라
+    // 다르게 보아, 같은 겹침을 한 구간 또는 두 구간으로 나눠 순간이동을 만들었다.)
+    let te = lo;
+    for (let g = Math.floor(t / SCAN) * SCAN; g > lo; g -= SCAN) {
+      if (!isIn(g)) { te = edge(Math.min(g + SCAN, t), g); break; }
     }
     let tx = tEnd, open = true, lastIn = t;
-    for (let g = Math.floor(t / COARSE) * COARSE + COARSE; g < tEnd; g += COARSE) {
-      if (isIn(g)) { lastIn = g; continue; }
-      let gOut = g;
-      for (let f = g - SCAN; f > Math.max(g - COARSE, t); f -= SCAN) { if (isIn(f)) break; gOut = f; }
-      tx = edge(Math.max(gOut - SCAN, t), gOut);
-      open = false;
-      break;
+    for (let g = Math.floor(t / SCAN) * SCAN + SCAN; g < tEnd; g += SCAN) {
+      if (!isIn(g)) { tx = edge(Math.max(g - SCAN, t), g); open = false; break; }
+      lastIn = g;
     }
-    // 마지막 격자 점과 끝 사이에서 빠져나가는 경우도 찾는다
+    // 마지막 격자 점과 끝 사이에서 빠져나가는 경우도 찾는다. 분기점에서 끊긴 구간은 거기서 닫는다.
     if (open && !isIn(tEnd)) { tx = edge(lastIn, tEnd); open = false; }
+    if (open && split !== undefined) { tx = split; open = false; }
     const a0 = ang(te);
     let da = 0;
     if (!open) {
