@@ -1,13 +1,13 @@
 <p align="center"><img src="assets/logo-mark.svg" width="72" alt="3D Hoops Playbook logo"></p>
 <h1 align="center">3D Hoops Playbook</h1>
 <p align="center">
-  20 offensive sets from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
+  24 offensive sets from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
   <a href="https://hpotty36.github.io/3d-hoops-playbook/"><b>Live demo →</b></a>
 </p>
 
-An interactive playbook that replays **20 offensive sets commonly run in pro basketball** on a 3D half court, step by step.
+An interactive playbook that replays **24 offensive sets commonly run in pro basketball** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
-Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 74 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
+Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 86 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
@@ -37,6 +37,10 @@ Every play also branches by **defensive read** — drop, switch, blitz, top lock
 | 18 | Zipper | Off-ball screens | ●○○ | A cut from the block straight up the lane line to the top | Trail · Top lock · Switch |
 | 19 | UCLA Cut | Off-ball screens | ●●○ | Pass to the wing, then cut to the rim off a high-post back screen | Caught on the screen · Help · Switch |
 | 20 | Shuffle Cut | Off-ball screens | ●●○ | A diagonal cut from the far wing over a high-post screen | Caught on the screen · Switch · Help |
+| 21 | Flex | System offenses | ●●● | Ball reversal, a baseline cut off a block screen, then screen the screener | Caught on the screen · Help · Switch |
+| 22 | Princeton Chin | System offenses | ●●● | 2-2-1 set: slot pass, back-screen cut from the high post, then a flare screen | Caught on the screen · Help · Chase over |
+| 23 | Delay | System offenses | ●●● | The center at the top hands off to a wing coming up | Trail · Wing deny · Under |
+| 24 | Sideline Triangle | System offenses | ●●● | Post, wing and corner form a triangle; post entry, pinch post, blind pig | Play behind · Post deny · Full overplay |
 
 Each play comes with **step-by-step breakdown · when to use it · key teaching points · how defenses counter it · famous examples**.
 
@@ -146,7 +150,7 @@ Create a file in `js/plays/` and register it in `js/plays/index.js`. Coordinates
 
 ```js
 export default {
-  id: 'my-play', category: 'onball', difficulty: 1,   // category: onball | offball | motion | early
+  id: 'my-play', category: 'onball', difficulty: 1,   // category: onball | offball | motion | early | system
   aliases: ['MP', 'my set'],                          // extra search terms, any language
 
   // Korean content (default)
@@ -229,9 +233,9 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 3D Hoops Playbook
 
-프로 농구에서 자주 쓰이는 공격 작전 20가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
+프로 농구에서 자주 쓰이는 공격 작전 24가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
-작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 74가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
+작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 86가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
 
@@ -259,6 +263,10 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | 18 | 지퍼 | 오프볼 스크린 | ●○○ | 블록에서 페인트 옆 선을 따라 탑까지 곧장 올라오는 컷 | 트레일 · 탑 락킹 · 스위치 |
 | 19 | UCLA 컷 | 오프볼 스크린 | ●●○ | 윙에 패스한 뒤 하이포스트 백스크린을 타고 림으로 컷 | 스크린에 걸림 · 도움 수비 · 스위치 |
 | 20 | 셔플 컷 | 오프볼 스크린 | ●●○ | 먼 쪽 윙에서 하이포스트 스크린을 넘는 대각선 컷 | 스크린에 걸림 · 스위치 · 도움 수비 |
+| 21 | 플렉스 | 시스템 오펜스 | ●●● | 볼 리버설, 블록 스크린을 타는 베이스라인 컷, 스크리너 스크린 | 스크린에 걸림 · 도움 수비 · 스위치 |
+| 22 | 프린스턴 친 | 시스템 오펜스 | ●●● | 2-2-1 대형: 슬롯 패스, 하이포스트 백스크린 컷, 플레어 스크린 | 스크린에 걸림 · 도움 수비 · 위로 쫓기 |
+| 23 | 딜레이 | 시스템 오펜스 | ●●● | 탑의 센터가 올라오는 윙에게 건네는 핸드오프 | 트레일 · 윙 디나이 · 언더 |
+| 24 | 사이드라인 트라이앵글 | 시스템 오펜스 | ●●● | 포스트·윙·코너의 삼각형: 포스트 엔트리, 핀치 포스트, 블라인드 피그 | 뒤에서 수비 · 포스트 디나이 · 전원 오버플레이 |
 
 작전마다 **단계별 진행 · 이럴 때 쓴다 · 핵심 포인트 · 수비는 어떻게 막나 · 대표 사례**가 들어 있습니다.
 

@@ -46,6 +46,7 @@
 ## Library
 
 - `SECTIONS` in `js/plays/index.js` groups categories into offense sets, special situations and defensive schemes; empty sections are hidden.
+- System offenses (Flex, Princeton Chin, Delay, Sideline Triangle) show one representative cycle of their continuity with its reads, not the whole repeating loop.
 - Search matches Korean names, English names and `aliases` regardless of UI language, ignoring case, spaces and hyphens. Difficulty chips use the same dots as the list. Collapsed sections are remembered.
 - On screens up to 1100 px wide, the play title opens the same library in a bottom sheet instead of a horizontal strip.
 
