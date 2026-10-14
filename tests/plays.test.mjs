@@ -18,6 +18,11 @@ function assertPhysical(cp, label) {
   assert.ok(m.offGap >= 1.8, `${label}: defender inside an attacker: ${m.offGap.toFixed(2)} ft (${m.whereGap})`);
   assert.ok(m.defGap >= 1.35, `${label}: defenders overlap: ${m.defGap.toFixed(2)} ft`);
   for (const s of m.shots) assert.ok(s.pts === 3 ? s.dist >= 22 : s.dist < 23.75, `${label}: ${s.pts}pt from ${s.dist.toFixed(1)} ft`);
+  // 패스는 받는 사람이 다음 동작(패스·슛)을 하기 전에 도착해야 한다. 아니면 공의 위치가 거꾸로 튄다.
+  for (const [i, b] of cp.bsegs.entries()) {
+    if (b.type === 'hold' && i > 0 && b.t1 !== Infinity) assert.ok(b.t1 - b.t0 >= 0.08, `${label}: ${b.who} lets go ${(b.t1 - b.t0).toFixed(2)}s after the catch @ ${b.t0.toFixed(2)}s`);
+  }
+  assert.equal(m.offFrame, '', `${label}: a player leaves the coach camera: ${m.offFrame}`);
   assert.ok(m.attGap >= 1.35, `${label}: attackers overlap: ${m.attGap.toFixed(2)} ft (${m.whereAtt})`);
   // 핸드오프는 손에서 손으로: 몇 걸음 떨어져 던지면 건네는 사람의 몸이 스크린이 되지 못한다
   for (const h of m.handoffs) assert.ok(h.gap <= 4, `${label}: ${h.who}→${h.to} handoff from ${h.gap.toFixed(1)} ft apart @ ${h.at.toFixed(2)}s`);

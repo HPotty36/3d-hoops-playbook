@@ -1,13 +1,13 @@
 <p align="center"><img src="assets/logo-mark.svg" width="72" alt="3D Hoops Playbook logo"></p>
 <h1 align="center">3D Hoops Playbook</h1>
 <p align="center">
-  13 offensive sets from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
+  16 offensive sets from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
   <a href="https://hpotty36.github.io/3d-hoops-playbook/"><b>Live demo →</b></a>
 </p>
 
-An interactive playbook that replays **13 offensive sets commonly run in pro basketball** on a 3D half court, step by step.
+An interactive playbook that replays **16 offensive sets commonly run in pro basketball** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
-Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 52 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
+Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 62 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
@@ -30,6 +30,9 @@ Every play also branches by **defensive read** — drop, switch, blitz, top lock
 | 11 | Side Pick and Roll | On-ball screens | ●●○ | Pick and roll on the wing, where ICE comes into play | ICE · Drop · Blitz · Switch |
 | 12 | Ghost Screen | On-ball screens | ●●○ | The screener fakes the screen and slips out | Pre-switch · Show · Stay home |
 | 13 | Weave | On-ball screens | ●●○ | Back-to-back dribble handoffs across the top | Trail · Switch · Under · Deny the handoff |
+| 14 | Double Drag | Early offense | ●●○ | Two trailing bigs screen in a row: one pops, one rolls | Drop · Switch · Show |
+| 15 | Pistol (21) | Early offense | ●●○ | An early dribble handoff from the 1 to the 2 on the wing | Drop · Show · Deny the handoff · Switch |
+| 16 | Trailer Pop | Early offense | ●○○ | The trailing big screens for the ball, then pops for three | Drop · Up to touch · Switch |
 
 Each play comes with **step-by-step breakdown · when to use it · key teaching points · how defenses counter it · famous examples**.
 
@@ -139,7 +142,7 @@ Create a file in `js/plays/` and register it in `js/plays/index.js`. Coordinates
 
 ```js
 export default {
-  id: 'my-play', category: 'onball', difficulty: 1,   // category: onball | offball | motion
+  id: 'my-play', category: 'onball', difficulty: 1,   // category: onball | offball | motion | early
   aliases: ['MP', 'my set'],                          // extra search terms, any language
 
   // Korean content (default)
@@ -222,9 +225,9 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 3D Hoops Playbook
 
-프로 농구에서 자주 쓰이는 공격 작전 13가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
+프로 농구에서 자주 쓰이는 공격 작전 16가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
-작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 52가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
+작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 62가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
 
@@ -245,6 +248,9 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | 11 | 사이드 픽앤롤 | 온볼 스크린 | ●●○ | 윙에서 거는 픽앤롤, 아이스 수비가 등장 | 아이스 · 드롭 · 블리츠 · 스위치 |
 | 12 | 고스트 스크린 | 온볼 스크린 | ●●○ | 스크린을 거는 척하다 빠지는 스크리너 | 미리 스위치 · 쇼 · 그대로 |
 | 13 | 위브 | 온볼 스크린 | ●●○ | 탑에서 이어지는 연속 핸드오프 | 트레일 · 스위치 · 언더 · 핸드오프 차단 |
+| 14 | 더블 드래그 | 얼리 오펜스 | ●●○ | 뒤따라온 빅맨 둘의 연속 스크린: 한 명은 팝, 한 명은 롤 | 드롭 · 스위치 · 쇼 |
+| 15 | 피스톨 (21) | 얼리 오펜스 | ●●○ | 1번이 윙에서 2번에게 건네는 이른 핸드오프 | 드롭 · 쇼 · 핸드오프 차단 · 스위치 |
+| 16 | 트레일러 팝 | 얼리 오펜스 | ●○○ | 늦게 따라온 빅맨이 스크린을 건 뒤 3점 라인 밖으로 팝 | 드롭 · 업 투 터치 · 스위치 |
 
 작전마다 **단계별 진행 · 이럴 때 쓴다 · 핵심 포인트 · 수비는 어떻게 막나 · 대표 사례**가 들어 있습니다.
 

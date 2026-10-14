@@ -34,6 +34,7 @@
   - Defenders closer than 2.05 ft to an offensive player (1.8 ft to another defender) are kept out of that circle. Pushing straight out would flip a defender to the far side when its target passes through the center, so the engine finds the window during which the target is inside the circle (entry and exit times; positions are functions of `t`, so both can be searched) and slides the defender along the circle from the entry side to the exit side.
   - At step boundaries, positions are blended over 0.5 s from the previous spot to the new target. Blending uses the positions before collision handling, so the push is applied exactly once.
 - Because everything is a function of `t`, timeline scrubbing and step jumps always land on exactly the same frame.
+- Every player stays inside what the default coach camera shows on a 16:10 desktop screen: the full court width up to z = 36 ft and the middle (|x| ≤ 12 ft) up to z = 38.5 ft (z = 40 ft minus a margin for the floor rings). Early offense therefore starts as the ball crosses about 10 ft past the arc, with players already running in, rather than at half court. `npm test` checks it for every play and read.
 
 ## Reads (defensive branches)
 

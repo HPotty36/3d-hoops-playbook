@@ -12,10 +12,13 @@ import iversonCut from './iverson-cut.js';
 import chicago from './chicago.js';
 import hammer from './hammer.js';
 import splitAction from './split-action.js';
+import doubleDrag from './double-drag.js';
+import pistol from './pistol.js';
+import trailerPop from './trailer-pop.js';
 
 // 작전 목록의 큰 갈래. 표시 이름은 i18n.js의 section.* / cat.* 키. 작전이 없는 갈래는 목록에서 숨긴다.
 export const SECTIONS = [
-  { id: 'offense', cats: ['onball', 'offball', 'motion'] },
+  { id: 'offense', cats: ['onball', 'offball', 'motion', 'early'] },
   { id: 'situations', cats: [] },   // 특수 상황 (인바운드, ATO, 막판 작전)
   { id: 'defense', cats: [] },      // 수비 전술 (존, 매치업 존)
 ];
@@ -35,4 +38,7 @@ export const PLAYS = [
   chicago,
   hammer,
   splitAction,
+  doubleDrag,
+  pistol,
+  trailerPop,
 ];
