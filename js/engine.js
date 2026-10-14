@@ -228,7 +228,13 @@ export function compilePlay(play) {
   // 이탈 방향으로 원둘레를 따라 돌아가게 한다. 위치는 여전히 t만의 함수다.
   // rel(s): 시각 s에서 원 중심 → 수비 목표 벡터. 반환값은 원둘레 위의 각도.
   const SCAN = 1 / 60;
-  const aroundAngle = (rel, R, t) => {
+  // 찾은 겹침 구간은 쌍(key)마다 저장해 다시 쓴다. 위치가 t만의 함수라 결과는 어떤 순서로 물어도 같다.
+  const windows = new Map();
+  const angleIn = (w, t) => (w.open ? w.a0 : w.a0 + w.da * clamp((t - w.te) / (w.tx - w.te), 0, 1));
+  const aroundAngle = (key, rel, R, t) => {
+    const list = windows.get(key);
+    const hit = list?.find((w) => t >= w.te && t <= w.tx);
+    if (hit) return angleIn(hit, t);
     const tEnd = end;   // 슛이 늦게 끝나면 total + TAIL보다 길다
     const isIn = (s) => { const r = rel(s); return Math.hypot(r.x, r.z) < R; };
     const edge = (tIn, tOut) => {
@@ -236,48 +242,64 @@ export function compilePlay(play) {
       return (tIn + tOut) / 2;
     };
     const ang = (s) => { const r = rel(s); return Math.atan2(r.z, r.x); };
+    // 1/15초 간격으로 훑다가 바깥 점을 만나면 그 칸만 1/60초로 다시 훑고, 마지막으로 이분 탐색한다
+    const COARSE = 4 * SCAN;
     let te = 0;
-    for (let g = Math.floor(t / SCAN) * SCAN; g > 0; g -= SCAN) {
-      if (!isIn(g)) { te = edge(Math.min(g + SCAN, t), g); break; }
+    for (let g = Math.floor(t / COARSE) * COARSE; g > 0; g -= COARSE) {
+      if (isIn(g)) continue;
+      let gOut = g;
+      for (let f = g + SCAN; f < Math.min(g + COARSE, t); f += SCAN) { if (isIn(f)) break; gOut = f; }
+      te = edge(Math.min(gOut + SCAN, t), gOut);
+      break;
     }
-    let tx = tEnd;
-    for (let g = Math.floor(t / SCAN) * SCAN + SCAN; g < tEnd; g += SCAN) {
-      if (!isIn(g)) { tx = edge(Math.max(g - SCAN, t), g); break; }
+    let tx = tEnd, open = true, lastIn = t;
+    for (let g = Math.floor(t / COARSE) * COARSE + COARSE; g < tEnd; g += COARSE) {
+      if (isIn(g)) { lastIn = g; continue; }
+      let gOut = g;
+      for (let f = g - SCAN; f > Math.max(g - COARSE, t); f -= SCAN) { if (isIn(f)) break; gOut = f; }
+      tx = edge(Math.max(gOut - SCAN, t), gOut);
+      open = false;
+      break;
     }
+    // 마지막 격자 점과 끝 사이에서 빠져나가는 경우도 찾는다
+    if (open && !isIn(tEnd)) { tx = edge(lastIn, tEnd); open = false; }
     const a0 = ang(te);
-    if (tx >= tEnd) return a0;
-    let da = ang(tx) - a0;
-    da -= 2 * Math.PI * Math.round(da / (2 * Math.PI));
-    return a0 + da * clamp((t - te) / (tx - te), 0, 1);
+    let da = 0;
+    if (!open) {
+      da = ang(tx) - a0;
+      da -= 2 * Math.PI * Math.round(da / (2 * Math.PI));
+    }
+    const w = { te, tx, a0, da, open };
+    if (list) list.push(w); else windows.set(key, [w]);
+    return angleIn(w, t);
   };
 
+  // 겹침마다 '원둘레 위치 − 목표 위치'만큼 밀어내고, 그 밀어낸 양을 모두 더한다.
+  // 각 항은 겹침 구간의 시작·끝에서 0이므로, 수비가 여러 겹침에 동시에 걸려도 위치가 끊기지 않는다.
   const resolve = (raw, t) => {
-    const dp = { ...raw };
+    const disp = Object.fromEntries(DEF.map((d) => [d, v2(0, 0)]));
+    const push = (d, p) => { disp[d].x += p.x - raw[d].x; disp[d].z += p.z - raw[d].z; };
     // 수비끼리: 두 목표의 중점을 기준으로 서로 반대편에 R_DEF/2씩
     for (let i = 0; i < DEF.length; i++) for (let j = i + 1; j < DEF.length; j++) {
       const a = DEF[i], b = DEF[j];
       if (dist2(raw[a], raw[b]) >= R_DEF) continue;
       const rel = (s) => { const p = rawOf(a, s), q = rawOf(b, s); return v2(p.x - q.x, p.z - q.z); };
-      const ang = aroundAngle(rel, R_DEF, t);
+      const ang = aroundAngle(`${a}|${b}`, rel, R_DEF, t);
       const mid = lerp2(raw[a], raw[b], 0.5), h = R_DEF / 2;
-      dp[a] = v2(mid.x + Math.cos(ang) * h, mid.z + Math.sin(ang) * h);
-      dp[b] = v2(mid.x - Math.cos(ang) * h, mid.z - Math.sin(ang) * h);
+      push(a, v2(mid.x + Math.cos(ang) * h, mid.z + Math.sin(ang) * h));
+      push(b, v2(mid.x - Math.cos(ang) * h, mid.z - Math.sin(ang) * h));
     }
-    // 공격수와: 공격수 중심에서 R_OFF 떨어진 원둘레를 따라 돌아간다.
-    // 수비끼리 밀어낸 만큼(off)은 그대로 더해 두 처리 사이에서도 위치가 끊기지 않게 한다.
+    // 공격수와: 공격수 중심에서 R_OFF 떨어진 원둘레를 따라 돌아간다
     for (const d of DEF) {
-      const off = v2(dp[d].x - raw[d].x, dp[d].z - raw[d].z);
-      let p = raw[d];
       for (const id of OFF) {
         const o = offAt(id, t);
         if (dist2(raw[d], o) >= R_OFF) continue;
         const rel = (s) => { const r = rawOf(d, s), q = offAt(id, s); return v2(r.x - q.x, r.z - q.z); };
-        const ang = aroundAngle(rel, R_OFF, t);
-        p = v2(o.x + Math.cos(ang) * R_OFF, o.z + Math.sin(ang) * R_OFF);
+        const ang = aroundAngle(`${d}|${id}`, rel, R_OFF, t);
+        push(d, v2(o.x + Math.cos(ang) * R_OFF, o.z + Math.sin(ang) * R_OFF));
       }
-      dp[d] = v2(p.x + off.x, p.z + off.z);
     }
-    return dp;
+    return Object.fromEntries(DEF.map((d) => [d, v2(raw[d].x + disp[d].x, raw[d].z + disp[d].z)]));
   };
   const evalDefIn = (k, t) => resolve(evalRaw(k, t), t);
 

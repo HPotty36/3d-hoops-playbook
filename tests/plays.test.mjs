@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { compilePlay, ballAir, OFF, DEF } from '../js/engine.js';
 import { PLAYS, SECTIONS } from '../js/plays/index.js';
 import { readIds, variant, branchTime } from '../js/reads.js';
-import { sampleMotion } from './helpers.mjs';
+import { sampleMotion, peakDefenseSpeed } from './helpers.mjs';
 
 const ID = /^[a-z0-9-]+$/;
 const text = (s) => typeof s === 'string' && s.trim().length > 0;
@@ -24,6 +24,10 @@ for (const play of PLAYS) {
   for (const id of readIds(play).length ? readIds(play) : [null]) {
     const label = id ? `${play.id} [${id}]` : play.id;
     test(`${label}: motion stays physical`, () => assertPhysical(compilePlay(variant(play, id)), label));
+    test(`${label}: defenders never twitch (1/960 s)`, () => {
+      const p = peakDefenseSpeed(compilePlay(variant(play, id)), 1 / 960);
+      assert.ok(p.v <= 38, `${label}: defense ${p.v.toFixed(1)} ft/s at ${p.where}`);
+    });
   }
   if (!play.reads) continue;
   test(`${play.id}: every read shares the opening up to the branch point`, () => {
@@ -44,6 +48,30 @@ for (const play of PLAYS) {
     }
   });
 }
+
+// 겹침 구간 캐시가 있어도 위치는 t만의 함수여야 한다: 묻는 순서를 섞어도 같은 결과
+test('defense positions do not depend on query order', () => {
+  const cases = [['pick-and-roll', 'hedge'], ['spain-pick-and-roll', 'all-switch'], ['floppy', 'trail']];
+  for (const [pid, rid] of cases) {
+    const play = PLAYS.find((p) => p.id === pid);
+    const a = compilePlay(variant(play, rid)), b = compilePlay(variant(play, rid));
+    const ts = [];
+    for (let t = 0; t <= a.end; t += 1 / 60) ts.push(t);
+    const seq = ts.map((t) => a.defense(t));
+    let seed = 12345;
+    const rnd = () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
+    const order = ts.map((_, i) => i);
+    for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    const shuffled = [];
+    for (const i of order) shuffled[i] = b.defense(ts[i]);
+    ts.forEach((t, i) => {
+      for (const d of DEF) {
+        const l = Math.hypot(seq[i][d].x - shuffled[i][d].x, seq[i][d].z - shuffled[i][d].z);
+        assert.ok(l < 1e-4, `${pid} [${rid}] ${d} differs by ${l.toExponential(2)} ft at ${t.toFixed(3)}s`);
+      }
+    });
+  }
+});
 
 // ── 데이터 형식 ──
 test('play ids are unique and URL-safe', () => {

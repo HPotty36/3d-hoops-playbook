@@ -34,3 +34,18 @@ export function sampleMotion(cp, dt = 1 / 120) {
     .map((b, i) => ({ pts: cp.scores[i].pts, dist: dist2(b.from, BASKET) }));
   return { nan, maxOff, maxDef, whereDef, offGap, defGap, whereGap, shots };
 }
+
+// 수비만 촘촘하게 샘플링해 한 프레임짜리 튐(1/120초 간격에서는 안 보이는)을 잡는다
+export function peakDefenseSpeed(cp, dt) {
+  let v = 0, where = '';
+  let prev = cp.defense(0);
+  for (let t = dt; t <= cp.end; t += dt) {
+    const d = cp.defense(t);
+    for (const id of DEF) {
+      const s = dist2(d[id], prev[id]) / dt;
+      if (s > v) { v = s; where = `${id} @ ${t.toFixed(4)}s`; }
+    }
+    prev = d;
+  }
+  return { v, where };
+}
