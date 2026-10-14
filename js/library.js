@@ -17,6 +17,11 @@ export function filterPlays(plays, query, level) {
   });
 }
 
+// 조합 중인 검색어: 결과가 있으면 바로 쓰고, 중간 글자(혼ㅈ)로 0개가 되면 직전 검색어를 그대로 둔다
+export function composingQuery(plays, prev, next, level) {
+  return filterPlays(plays, next, level).length ? next : prev;
+}
+
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // onSelect(index): plays 배열의 인덱스. collapsed: 접힌 갈래 id의 Set. onCollapse(ids): 저장용.
@@ -39,8 +44,11 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
   let level = 0;
   let activeId = null;
 
-  // 한글 조합 중(혼ㅈ 같은 중간 글자)에는 다시 그리지 않고, 조합이 끝나면 그린다
-  input.addEventListener('input', (e) => { if (e.isComposing) return; query = input.value; renderList(); });
+  // 조합 중(한글 음절, Gboard의 영어 단어)에도 바로 거르되, 빈 결과는 조합이 끝난 뒤에만 보여 준다
+  input.addEventListener('input', (e) => {
+    query = e.isComposing ? composingQuery(plays, query, input.value, level) : input.value;
+    renderList();
+  });
   input.addEventListener('compositionend', () => { query = input.value; renderList(); });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && input.value) { e.preventDefault(); input.value = ''; query = ''; renderList(); }

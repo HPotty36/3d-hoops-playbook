@@ -6,6 +6,7 @@ const bad = (p) => !Number.isFinite(p.x) || !Number.isFinite(p.z);
 // 최고 속도(ft/s)는 연속한 두 샘플 사이 이동 거리로 잰다.
 export function sampleMotion(cp, dt = 1 / 120) {
   let nan = false, maxOff = 0, maxDef = 0, whereDef = '', offGap = Infinity, defGap = Infinity, whereGap = '';
+  let attGap = Infinity, whereAtt = '';
   let prevO = cp.offense(0), prevD = cp.defense(0);
   for (let t = dt; t <= cp.end; t += dt) {
     const o = cp.offense(t), d = cp.defense(t);
@@ -27,12 +28,25 @@ export function sampleMotion(cp, dt = 1 / 120) {
         }
         for (const b of DEF) if (a < b) defGap = Math.min(defGap, dist2(d[a], d[b]));
       }
+      for (const a of OFF) {
+        for (const b of OFF) {
+          if (a >= b) continue;
+          const l = dist2(o[a], o[b]);
+          if (l < attGap) { attGap = l; whereAtt = `${a}-${b} @ ${t.toFixed(3)}s`; }
+        }
+      }
     }
     prevO = o; prevD = d;
   }
-  const shots = cp.bsegs.filter((b) => b.type === 'shot')
-    .map((b, i) => ({ pts: cp.scores[i].pts, dist: dist2(b.from, BASKET) }));
-  return { nan, maxOff, maxDef, whereDef, offGap, defGap, whereGap, shots };
+  // 슛: 거리와, 공이 손을 떠나는 순간 가장 가까운 수비까지의 거리
+  const shots = cp.bsegs.filter((b) => b.type === 'shot').map((b, i) => {
+    const d = cp.defense(b.t0), p = cp.offAt(b.who, b.t0);
+    return { pts: cp.scores[i].pts, dist: dist2(b.from, BASKET), near: Math.min(...DEF.map((k) => dist2(d[k], p))), at: b.t0 };
+  });
+  // 핸드오프: 공을 건네는 순간 두 사람 사이 거리
+  const handoffs = cp.bsegs.filter((b) => b.type === 'flight' && b.kind === 'handoff')
+    .map((b) => ({ who: b.who, to: b.target, at: b.t0, gap: dist2(cp.offAt(b.who, b.t0), cp.offAt(b.target, b.t0)) }));
+  return { nan, maxOff, maxDef, whereDef, offGap, defGap, whereGap, attGap, whereAtt, shots, handoffs };
 }
 
 // 수비만 촘촘하게 샘플링해 한 프레임짜리 튐(1/120초 간격에서는 안 보이는)을 잡는다

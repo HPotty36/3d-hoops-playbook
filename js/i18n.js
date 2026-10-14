@@ -162,6 +162,9 @@ export function setLang(l) {
   if (LANGS.includes(l)) lang = l;
 }
 
+// 그 언어 표에 문구가 직접 있는지 (t()는 없으면 한국어로 대신 보여 준다)
+export const hasLabel = (l, key) => Object.hasOwn(UI[l] || {}, key);
+
 export function t(key, vars) {
   let s = UI[lang][key] ?? UI.ko[key] ?? key;
   if (vars) s = s.replace(/\{(\w+)\}/g, (_, k) => vars[k]);

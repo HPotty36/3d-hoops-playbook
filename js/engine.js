@@ -382,9 +382,12 @@ export function compilePlay(play) {
       return Object.fromEntries(OFF.map((id) => [id, offAt(id, t)]));
     },
     defense(t) {
-      const tt = Math.max(0, t);
+      // 끝난 뒤에는 아무도 움직이지 않는다. 범위를 묶어 두면 끝에서 멈춘 화면이 캐시를 키우지 않는다.
+      const tt = clamp(t, 0, end);
       return evalDefIn(stepIndexAt(tt), tt);
     },
+    // 겹침 구간 캐시의 크기 (성능 진단용)
+    windowCount: () => [...windows.values()].reduce((n, list) => n + list.length, 0),
     screenAt(id, t) {
       return screenWindows.find((w) => w.who === id && t >= w.t0 && t <= w.t1) || null;
     },

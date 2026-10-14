@@ -10,6 +10,7 @@ import { t as tr, applyStatic, localize, initLang, setLang, getLang } from './i1
 import { createLibrary } from './library.js';
 import { readIds, variant, branchTime, readMeta } from './reads.js';
 import { createReadsUI } from './reads-ui.js';
+import { keyBelongsToTarget } from './shortcuts.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -710,10 +711,10 @@ function bindUI() {
   $$('.lang-bar button').forEach((b) => b.addEventListener('click', () => { if (b.dataset.lang !== getLang()) setLanguage(b.dataset.lang); }));
 
   window.addEventListener('keydown', (e) => {
-    if (e.target.closest('input, select, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (keyBelongsToTarget(e.target, e.key) || e.metaKey || e.ctrlKey || e.altKey) return;
     const cams = ['coach', 'broadcast', 'top', 'baseline', 'follow'];
     if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-    else if (e.key === 'Enter') { if (!e.target.closest('button, a')) { e.preventDefault(); skipWait(); } }
+    else if (e.key === 'Enter') { e.preventDefault(); skipWait(); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); nextStep(); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); selectPlay((state.idx - 1 + PLAYS.length) % PLAYS.length, true); }

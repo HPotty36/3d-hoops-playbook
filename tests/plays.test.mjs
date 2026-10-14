@@ -5,7 +5,7 @@ import { compilePlay, ballAir, OFF, DEF } from '../js/engine.js';
 import { PLAYS, SECTIONS } from '../js/plays/index.js';
 import { readIds, variant, branchTime } from '../js/reads.js';
 import { sampleMotion, peakDefenseSpeed } from './helpers.mjs';
-import { t as tr, setLang } from '../js/i18n.js';
+import { LANGS, hasLabel } from '../js/i18n.js';
 
 const ID = /^[a-z0-9-]+$/;
 const text = (s) => typeof s === 'string' && s.trim().length > 0;
@@ -18,6 +18,11 @@ function assertPhysical(cp, label) {
   assert.ok(m.offGap >= 1.8, `${label}: defender inside an attacker: ${m.offGap.toFixed(2)} ft (${m.whereGap})`);
   assert.ok(m.defGap >= 1.35, `${label}: defenders overlap: ${m.defGap.toFixed(2)} ft`);
   for (const s of m.shots) assert.ok(s.pts === 3 ? s.dist >= 22 : s.dist < 23.75, `${label}: ${s.pts}pt from ${s.dist.toFixed(1)} ft`);
+  assert.ok(m.attGap >= 1.35, `${label}: attackers overlap: ${m.attGap.toFixed(2)} ft (${m.whereAtt})`);
+  // 핸드오프는 손에서 손으로: 몇 걸음 떨어져 던지면 건네는 사람의 몸이 스크린이 되지 못한다
+  for (const h of m.handoffs) assert.ok(h.gap <= 4, `${label}: ${h.who}→${h.to} handoff from ${h.gap.toFixed(1)} ft apart @ ${h.at.toFixed(2)}s`);
+  // 15 ft 밖 점프슛은 작전이 만든 빈 슛이다. 손을 떠날 때 수비가 3.5 ft 안에 있으면 막힌 슛으로 보인다.
+  for (const s of m.shots) if (s.dist >= 15) assert.ok(s.near >= 3.5, `${label}: open jumper contested at ${s.near.toFixed(2)} ft @ ${s.at.toFixed(2)}s`);
 }
 
 // ── 움직임 ──
@@ -74,6 +79,19 @@ test('defense positions do not depend on query order', () => {
   }
 });
 
+// 재생이 끝나 멈춰 있어도 화면은 매 프레임 defense(end + 앞보기)를 묻는다. 그때마다 캐시가 자라면 안 된다.
+test('idling past the end does not grow the collision cache', () => {
+  for (const play of PLAYS) {
+    for (const id of readIds(play)) {
+      const cp = compilePlay(variant(play, id));
+      for (let t = 0; t <= cp.end; t += 1 / 60) cp.defense(t);
+      const before = cp.windowCount();
+      for (let i = 0; i < 100; i++) cp.defense(cp.end + 0.05);
+      assert.equal(cp.windowCount(), before, `${play.id} [${id}]: cache grew past the end`);
+    }
+  }
+});
+
 // ── 데이터 형식 ──
 test('play ids are unique and URL-safe', () => {
   const ids = PLAYS.map((p) => p.id);
@@ -96,15 +114,14 @@ test('search aliases contain no names from the famous examples', () => {
 });
 
 // 새 분류(얼리 오펜스, 시스템 오펜스 등)를 SECTIONS에 넣으면 두 언어 이름표가 있어야 한다
+// t()는 없는 영어 문구를 한국어로 대신 보여 주므로, 각 언어 표에 키가 직접 있는지 본다
 test('every section and category has a label in both languages', () => {
-  for (const lang of ['ko', 'en']) {
-    setLang(lang);
+  for (const lang of LANGS) {
     for (const s of SECTIONS) {
-      assert.notEqual(tr(`section.${s.id}`), `section.${s.id}`, `${lang}: section.${s.id}`);
-      for (const c of s.cats) assert.notEqual(tr(`cat.${c}`), `cat.${c}`, `${lang}: cat.${c}`);
+      assert.ok(hasLabel(lang, `section.${s.id}`), `${lang}: section.${s.id}`);
+      for (const c of s.cats) assert.ok(hasLabel(lang, `cat.${c}`), `${lang}: cat.${c}`);
     }
   }
-  setLang('ko');
 });
 
 test('every play belongs to a library section', () => {

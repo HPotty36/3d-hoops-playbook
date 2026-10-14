@@ -1,7 +1,7 @@
 // library.js: 작전 목록 검색과 난이도 필터
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalize, filterPlays } from '../js/library.js';
+import { normalize, filterPlays, composingQuery } from '../js/library.js';
 import { PLAYS } from '../js/plays/index.js';
 
 const ids = (list) => list.map((p) => p.id);
@@ -38,4 +38,21 @@ test('blank query with level 0 returns everything', () => {
 
 test('no match returns an empty list', () => {
   assert.equal(filterPlays(PLAYS, 'zzz', 0).length, 0);
+});
+
+// 조합 중(한글 음절, 안드로이드 Gboard의 영어 단어)에도 목록은 바로 거른다. 다만 중간 글자(혼ㅈ)로
+// 결과가 0개가 되면 "찾는 작전이 없습니다"를 번쩍 띄우지 않고 직전 결과를 둔다.
+test('while composing, a query with hits filters right away', () => {
+  assert.equal(composingQuery(PLAYS, '', 'hor', 0), 'hor');
+  assert.equal(composingQuery(PLAYS, '', '혼', 0), '혼');
+});
+
+test('while composing, a half-typed syllable with no hits keeps the last list', () => {
+  assert.equal(composingQuery(PLAYS, '혼', '혼ㅈ', 0), '혼');
+});
+
+test('while composing, the difficulty filter counts when deciding', () => {
+  const lvl = PLAYS.find((p) => p.id === 'horns').difficulty;
+  const other = [1, 2, 3].find((n) => n !== lvl);
+  assert.equal(composingQuery(PLAYS, 'ho', 'horns', other), 'ho');
 });
