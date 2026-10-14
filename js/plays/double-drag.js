@@ -18,7 +18,7 @@ export default {
   counters: [
     { name: '드롭', desc: '두 번째 스크리너의 수비가 페인트로 물러나 돌파를 기다립니다. 그 빅맨이 공을 막으러 올라서는 순간 롤하는 [5]가 빕니다.', read: 'drop' },
     { name: '스위치', desc: '스크린마다 마크를 바꿉니다. 바꾸는 순간 3점 라인 밖으로 빠지는 첫 번째 스크리너를 놓치기 쉽습니다.', read: 'switch' },
-    { name: '쇼', desc: '두 번째 스크리너의 수비가 미리 튀어나와 [1]을 막아섭니다. 스크린을 걸기도 전에 [5]가 림으로 빠집니다.', read: 'show' },
+    { name: '쇼', desc: '두 번째 스크리너의 수비가 미리 튀어나와 [1]을 막아섭니다. [1]이 스크린에 닿기도 전에 [5]가 림으로 빠집니다.', read: 'show' },
   ],
 
   en: {
@@ -36,12 +36,12 @@ export default {
     counters: [
       { name: 'Drop', desc: 'The second screener\'s defender sinks into the paint to wait for the drive. The moment that big steps up to the ball, the rolling [5] is open.' },
       { name: 'Switch', desc: 'Trade assignments on every screen. In the moment of the switch, the first screener popping out to the arc is easy to lose.' },
-      { name: 'Show', desc: 'The second screener\'s defender jumps out early to stop [1], so [5] slips to the rim before the screen is even set.' },
+      { name: 'Show', desc: 'The second screener\'s defender jumps out early to stop [1], so [5] slips to the rim before [1] ever reaches the screen.' },
     ],
     steps: [
       { title: 'Double drag', text: 'Right after the change of possession, [1] brings the ball up while [4] and [5] trail in and set two screens in a row on the right side of [x1] (the **drag screens**). [2] and [3] sprint to the corners and stay wide.' },
       { title: 'Off both screens & roll', text: '[1] comes off both screens and heads right. [4] **pops** out beyond the arc on the left, and [5] **rolls** to the rim. [x5] sinks into the paint to wait (the **drop**).' },
-      { title: 'Lob & dunk', text: 'The moment [x5] steps up to stop the drive, [1] lobs it to [5] running at the rim, and [5] finishes with a dunk. [x4] cannot leave [4], who popped out, so no help comes.' },
+      { title: 'Lob & dunk', text: 'The moment [x5] steps up to stop the drive, [1] lobs it to [5] running at the rim, and [5] finishes with a dunk. [x4] cannot leave [4], who popped out, and [x2] rotates over from the far side a step too late.' },
     ],
     reads: {
       prompt: 'How does the defense play the two drag screens?',
@@ -50,14 +50,14 @@ export default {
         {
           label: 'Switch', why: 'When the defense trades on the screen, the first screener is free for a moment. Pop out and shoot the three.',
           steps: [
-            { title: 'Switch', text: 'On the first screen [x4] takes [1] (the **switch**) and [x1] is supposed to take [4]. But [x1] is on the wrong side of the screen and cannot get to [4] popping out to the arc.' },
+            { title: 'Switch', text: '[x1] chases [1] over the top of the first screen, and [x4] takes [1] (the **switch**). Now [x1] has to guard [4], but [x1] is on the wrong side of the screen and has to come all the way back around as [4] pops out to the arc.' },
             { title: 'Pop three', text: '[1] swings it straight back to [4], who fires the three. [x1] runs at [4] but is too late.' },
           ],
         },
         {
-          label: 'Show', why: 'If the second screener\'s defender jumps out early, the way to the rim behind is empty. Skip the screen and slip.',
+          label: 'Show', why: 'If the second screener\'s defender jumps out early, the way to the rim behind is empty. Slip out before the screen is used.',
           steps: [
-            { title: 'Show', text: '[x5] jumps out above the second screen to stop [1] early (the **show**). [5] never sets the screen and slips straight to the rim.' },
+            { title: 'Show', text: '[x5] jumps out above the second screen to stop [1] early (the **show**). Before [1] gets there, [5] slips out of the screen and heads straight to the rim (the **slip**).' },
             { title: 'Slip layup', text: '[1] bounces it to [5] diving to the rim, and [5] lays it in. [x5], caught up high, and [x2], helping from the far side, are both too late.' },
           ],
         },
@@ -101,7 +101,7 @@ export default {
     {
       title: '롭 & 덩크',
       dur: 1.8,
-      text: '[x5]가 [1]의 돌파를 막으려고 한 발 올라서는 순간, [1]이 림으로 달려드는 [5]에게 공을 띄워 주고 [5]가 덩크로 마무리합니다. [x4]는 팝한 [4]를 떠날 수 없어 도와주지 못합니다.',
+      text: '[x5]가 [1]의 돌파를 막으려고 한 발 올라서는 순간, [1]이 림으로 달려드는 [5]에게 공을 띄워 주고 [5]가 덩크로 마무리합니다. [x4]는 팝한 [4]를 떠날 수 없고, 반대쪽에서 도우러 온 [x2]는 한발 늦었습니다.',
       move: {
         o1: { path: [[11, 22.8]], t: [0, 0.4] },
         o5: { path: [[0.8, 9.8], [0.4, 7.2]], t: [0, 0.55] },
@@ -131,7 +131,7 @@ export default {
           {
             title: '스위치',
             dur: 1.8,
-            text: '첫 번째 스크린에서 [x4]가 [1]을 넘겨받고(**스위치**), [x1]이 [4]를 맡기로 합니다. 하지만 [x1]은 스크린 반대편에 있어 3점 라인 밖으로 빠지는 [4]를 바로 따라가지 못합니다.',
+            text: '[x1]이 [1]을 따라 첫 번째 스크린 위로 넘어가고, [x4]가 [1]을 넘겨받습니다(**스위치**). 이제 [x1]이 [4]를 맡아야 하지만, 스크린 반대편까지 와 버린 [x1]은 3점 라인 밖으로 빠지는 [4]에게 한참 돌아가야 합니다.',
             move: {
               o1: { path: [[0.2, 33.4], [3.4, 33]], t: [0, 0.6] },
               o4: { path: [[-4.4, 31.4], [-9.6, 27.8]], t: [0.15, 0.8] },
@@ -139,7 +139,7 @@ export default {
             },
             def: {
               d4: { guard: 'o1', path: [[1.8, 31.2]], t: [0, 0.4] },
-              d1: { guard: 'o4', path: [[-2.2, 28.6], [-4.4, 26.4]], t: [0.3, 1] },
+              d1: { guard: 'o4', path: [[-2.4, 32], [0.6, 32.6], [-2.4, 29.8], [-5.2, 27.2]], t: [0.05, 1] },
             },
           },
           {
@@ -150,19 +150,19 @@ export default {
               { type: 'pass', to: 'o4', at: 0.05 },
               { type: 'shot', at: 0.4, pts: 3 },
             ],
-            def: { d1: { path: [[-7.6, 26.2]], t: [0.3, 0.9] } },
+            def: { d1: { path: [[-7.6, 26.2]], t: [0.35, 0.9] } },
           },
         ],
       },
       {
         id: 'show',
         label: '쇼',
-        why: '두 번째 스크리너의 수비가 미리 튀어나오면 그 뒤 림까지가 빕니다. 스크린을 걸지 않고 바로 빠집니다.',
+        why: '두 번째 스크리너의 수비가 미리 튀어나오면 그 뒤 림까지가 빕니다. 스크린이 쓰이기 전에 바로 빠집니다.',
         steps: [
           {
             title: '쇼',
             dur: 1.6,
-            text: '[x5]가 [1]을 막으려고 두 번째 스크린 위로 미리 튀어나옵니다(**쇼**). [5]는 스크린을 걸지 않고 곧장 림으로 빠집니다(**슬립**).',
+            text: '[x5]가 [1]을 막으려고 두 번째 스크린 위로 미리 튀어나옵니다(**쇼**). [1]이 오기 전에 [5]는 스크린에서 빠져나와 곧장 림으로 향합니다(**슬립**).',
             move: {
               o1: { path: [[0.2, 33.4], [3, 33.2]], t: [0, 0.6] },
               o5: { path: [[3.6, 25.2], [2.2, 17.8]], t: [0.15, 0.9] },
