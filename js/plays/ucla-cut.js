@@ -6,7 +6,7 @@ export default {
   difficulty: 2,
   aliases: ['high post back screen', '하이포스트 백스크린', '백스크린 컷'],
   summary:
-    '탑의 [1]이 윙으로 패스한 뒤, 하이포스트(엘보)에 선 [5]의 **백스크린**을 스치며 곧장 림으로 컷하는 동작입니다. 패스하고 멈춰 서 있던 가드의 수비수는 등 뒤에서 오는 스크린을 보지 못해 걸리기 쉽습니다.',
+    '탑의 [1]이 윙으로 패스한 뒤, 하이포스트(자유투 라인 바로 위)에 선 [5]의 **백스크린**을 스치며 곧장 림으로 컷하는 동작입니다. 패스하고 멈춰 서 있던 가드의 수비수는 등 뒤에서 오는 스크린을 보지 못해 걸리기 쉽습니다.',
   when:
     '하이포스트에 빅맨을 두는 세트에서 공격을 시작할 때, 가드의 수비수가 패스한 뒤 공 쪽으로 고개를 돌리는 습관이 있을 때 씁니다.',
   keys: [
@@ -26,7 +26,7 @@ export default {
   en: {
     name: 'UCLA Cut',
     summary:
-      '[1] passes from the top to the wing, then cuts straight to the rim off a **back screen** from [5] at the high post (the elbow). The guard\'s defender, standing still after the pass, cannot see the screen coming from behind.',
+      '[1] passes from the top to the wing, then cuts straight to the rim off a **back screen** from [5] at the high post, just above the free-throw line. The guard\'s defender, standing still after the pass, cannot see the screen coming from behind.',
     when:
       'To start a set with a big at the high post, or when the guard\'s defender likes to turn and watch the ball after the pass.',
     keys: [
@@ -43,7 +43,7 @@ export default {
     famous:
       'Named after the UCLA teams of John Wooden in the 1960s and 70s, who used it as the first move of their high-post offense.',
     steps: [
-      { title: 'Wing entry', text: '[1] passes to [2] on the right wing, and [5] steps up to the right elbow behind [x1].' },
+      { title: 'Wing entry', text: '[1] passes to [2] on the right wing, and [5] steps up above the free-throw line, behind [x1] on the rim side.' },
       { title: 'UCLA cut', text: '[1] cuts off [5]\'s **back screen** straight toward the rim. [x1], who was watching the ball, runs into [5] and is left behind.' },
       { title: 'Layup', text: '[2] hits [1] cutting to the rim, and [1] lays it in.' },
     ],
@@ -75,7 +75,7 @@ export default {
     {
       title: '윙 엔트리',
       dur: 1.6,
-      text: '[1]이 오른쪽 윙의 [2]에게 패스하고, [5]는 오른쪽 엘보로 올라와 [x1]의 뒤쪽에 섭니다.',
+      text: '[1]이 오른쪽 윙의 [2]에게 패스하고, [5]는 자유투 라인 위로 올라와 [x1]의 뒤쪽, 림 쪽에 섭니다.',
       move: {
         o2: { path: [[20.6, 21]], t: [0, 0.4] },
         o5: { path: [[6.2, 20.4], [1.8, 23.2]], t: [0.3, 1] },
@@ -89,6 +89,7 @@ export default {
       dur: 2.0,
       text: '[1]이 [5]의 **백스크린**을 스치며 림을 향해 곧장 컷합니다. 공을 보고 있던 [x1]은 [5]에게 부딪혀 뒤처집니다.',
       move: { o1: { path: [[3.4, 28.8], [4.8, 25.2], [5.2, 17], [3.4, 9.6]], t: [0.05, 1] } },
+      screens: [{ by: 'o5', face: [0.4, 25.8], hold: 0.3, on: 'd1' }],
       def: { d1: { path: [[1, 26.6], [-0.6, 23.6], [1.2, 19]], t: [0.2, 1] } },
     },
     {
@@ -120,12 +121,12 @@ export default {
             dur: 2.0,
             text: '[x5]가 [1]의 컷을 막으려고 페인트로 내려옵니다(**도움 수비**). [x5]가 떠나자마자 [5]는 3점 라인 밖 탑으로 빠집니다.',
             move: {
-              o1: { path: [[3.4, 28.8], [4.8, 25.2], [5.2, 17], [3.4, 9.6]], t: [0.05, 1] },
+              o1: { path: [[3.4, 28.8], [4.8, 25.2], [5.2, 17], [4.6, 13.4]], t: [0.05, 0.85] },
               o5: { path: [[2, 26.4], [1.2, 29.6]], t: [0.5, 0.95] },
             },
             def: {
               d1: { path: [[1, 26.6], [-0.6, 23.6], [1.2, 19]], t: [0.2, 1] },
-              d5: { path: [[6.8, 18.4], [5.6, 12.8]], t: [0.1, 0.8] },
+              d5: { path: [[6.4, 17.6], [4.4, 10.6]], t: [0.1, 0.7] },
             },
           },
           {
@@ -136,7 +137,10 @@ export default {
               { type: 'pass', to: 'o5', at: 0.05 },
               { type: 'shot', at: 0.6, pts: 3 },
             ],
-            def: { d5: { path: [[3.6, 20.8]], t: [0.15, 0.8] } },
+            def: {
+              d5: { path: [[7.4, 13.4], [5, 20.6]], t: [0.15, 0.8] },
+              d1: { path: [[3.2, 16.4]], t: [0, 0.5] },
+            },
           },
         ],
       },
@@ -167,7 +171,7 @@ export default {
               { type: 'pass', to: 'o5', at: 0.12 },
               { type: 'shot', at: 0.82, pts: 2 },
             ],
-            def: { d1: { sag: 0 } },
+            def: { d1: { path: [[8.2, 15.6], [6.6, 11.8]], t: [0, 0.75] } },
           },
         ],
       },

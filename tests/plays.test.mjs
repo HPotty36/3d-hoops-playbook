@@ -39,6 +39,24 @@ function assertPhysical(cp, label) {
       break;
     }
   }
+  // 스크린이 막는 수비(on)를 적어 둔 스크린은, 스크린이 서 있는 동안 그 수비가 실제로 스크리너에게 닿아야 한다
+  for (const st of cp.steps) {
+    for (const sc of st.screens || []) {
+      if (!sc.on) continue;
+      let w = null;
+      for (let t = st.s0; t <= st.s1 && !w; t += 0.02) {
+        const x = cp.screenAt(sc.by, t);
+        if (x && x.t0 >= st.s0 - 1e-9 && x.t0 <= st.s1) w = x;
+      }
+      assert.ok(w, `${label}: no screen window for ${sc.by}`);
+      let near = Infinity;
+      for (let t = w.t0; t <= w.t1; t += 1 / 60) {
+        const d = cp.defense(t)[sc.on], p = cp.offAt(sc.by, t);
+        near = Math.min(near, Math.hypot(d.x - p.x, d.z - p.z));
+      }
+      assert.ok(near <= 2.6, `${label}: ${sc.on} never reaches ${sc.by}'s screen while it stands (closest ${near.toFixed(1)} ft)`);
+    }
+  }
   // 15 ft 밖 점프슛은 작전이 만든 빈 슛이다. 손을 떠날 때 수비가 3.5 ft 안에 있으면 막힌 슛으로 보인다.
   for (const s of m.shots) if (s.dist >= 15) assert.ok(s.near >= 3.5, `${label}: open jumper contested at ${s.near.toFixed(2)} ft @ ${s.at.toFixed(2)}s`);
 }
