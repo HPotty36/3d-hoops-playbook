@@ -49,7 +49,7 @@ export default {
     ],
     reads: {
       prompt: 'How does the defense handle [4], the shooting screener?',
-      base: { label: 'Show', why: 'When the big follows the ball, the screener is left open. Kick it back to the shooter who popped beyond the arc.' },
+      base: { label: 'Hedge', why: 'When the big follows the ball, the screener is left open. Kick it back to the shooter who popped beyond the arc.' },
       options: [
         {
           label: 'Switch', why: 'The switch takes away the three but puts a big in front of the handler. Attack that one-on-one.',
@@ -119,11 +119,11 @@ export default {
     },
   ],
 
-  // 수비 대응별 분기: 스크린이 걸린 뒤(1단계 끝) 갈라진다. 기본(위 2·3단계)은 빅맨이 공을 따라 나오는 쇼.
+  // 수비 대응별 분기: 스크린이 걸린 뒤(1단계 끝) 갈라진다. 기본(위 2·3단계)은 빅맨이 공을 따라 나오는 헤지.
   reads: {
     at: 1,
     prompt: '수비는 슈터 스크리너 [4]를 어떻게 막을까요?',
-    base: { id: 'show', label: '쇼', why: '빅맨이 공을 막으러 따라 나오면 스크리너가 비어 있습니다. 3점 라인 밖으로 팝한 슈터에게 되돌려 줍니다.' },
+    base: { id: 'hedge', label: '헤지', why: '빅맨이 공을 막으러 따라 나오면 스크리너가 비어 있습니다. 3점 라인 밖으로 팝한 슈터에게 되돌려 줍니다.' },
     options: [
       {
         id: 'switch',

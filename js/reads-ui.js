@@ -11,6 +11,10 @@ export function createReadsUI({ tabs, prompt, tr, fmt, onTab, onPick }) {
     current = currentId;
     bar.hidden = !meta;
     if (!meta) { tabs.innerHTML = ''; return; }
+    // 같은 읽기 목록이면 버튼을 다시 만들지 않는다(키보드 포커스가 그대로 남도록)
+    const same = tabs.children.length === meta.reads.length
+      && meta.reads.every((r, i) => tabs.children[i].dataset.read === r.id && tabs.children[i].textContent === r.label);
+    if (same) { setCurrent(currentId); return; }
     tabs.innerHTML = meta.reads.map((r) =>
       `<button type="button" data-read="${r.id}" aria-pressed="${r.id === currentId}">${esc(r.label)}</button>`).join('');
     tabs.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => onTab(b.dataset.read)));

@@ -7,7 +7,7 @@
 
 An interactive playbook that replays **10 offensive sets commonly run in pro basketball** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
-Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 31 in all — so you see not just the play but how to beat each way of guarding it.
+Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 41 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
@@ -18,7 +18,7 @@ Every play also branches by **defensive read** — drop, switch, blitz, top lock
 | # | Play | Category | Difficulty | In one line | Defensive reads |
 |---|------|----------|:---:|------|------|
 | 1 | Pick and Roll | On-ball screens | ●○○ | Screen → drive → hit the roller. The basic two-man game | Drop · Hedge · Switch · Blitz · Under |
-| 2 | Pick and Pop | On-ball screens | ●○○ | The screener pops to the arc instead of rolling | Show · Switch · Up to touch · Rotation |
+| 2 | Pick and Pop | On-ball screens | ●○○ | The screener pops to the arc instead of rolling | Hedge · Switch · Up to touch · Rotation |
 | 3 | Spain Pick and Roll | On-ball screens | ●●● | P&R plus a back screen on the roller's defender | Help on the roller · Stay home · Avoid the back screen · All switch |
 | 4 | Horns (High-Low) | On-ball screens | ●●○ | Two bigs at the elbows: high P&R into a high-low pass | Big helps · Switch · Elbow denial · Force |
 | 5 | Floppy | Off-ball screens | ●●○ | Shooter under the rim picks a single or staggered screen | Caught on screens · Trail · Top lock · Switch |
@@ -32,7 +32,7 @@ Each play comes with **step-by-step breakdown · when to use it · key teaching 
 
 ### Defensive reads
 
-A play is only half the story; the other half is what the defense does. Every play splits at a **branch point** into 3–5 reads:
+A play is only half the story; the other half is what the defense does. Every play splits at a **branch point** into 4–5 reads:
 
 - Watching from the start, playback stops at the branch point and asks how the defense plays it. Pick an answer and the play continues that way, with a one-line "why" under the caption.
 - The tabs above the timeline switch reads at any time (a ◆ on the timeline marks the branch point). Before the branch point the switch is seamless; after it, playback jumps back to the branch.
@@ -98,7 +98,7 @@ npx serve .
 
 Then open `http://localhost:8000`.
 
-Checks for the play data (motion limits, KO/EN parity, read structure) run on Node 20+:
+Checks for the play data (motion limits, KO/EN parity, read structure) run on Node 21+:
 
 ```bash
 npm install
@@ -221,7 +221,7 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 프로 농구에서 자주 쓰이는 공격 작전 10가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
-작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 모두 31가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
+작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 41가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
 
@@ -230,7 +230,7 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | # | 작전 | 분류 | 난이도 | 한 줄 요약 | 수비 대응별 분기 |
 |---|------|------|:---:|------|------|
 | 1 | 픽 앤 롤 | 온볼 스크린 | ●○○ | 스크린 → 돌파 → 롤맨에게 패스, 가장 기본적인 2인 공격 | 드롭 · 헤지 · 스위치 · 블리츠 · 언더 |
-| 2 | 픽 앤 팝 | 온볼 스크린 | ●○○ | 스크리너가 림 대신 3점 라인으로 빠져 슈팅 | 쇼 · 스위치 · 업 투 터치 · 로테이션 |
+| 2 | 픽 앤 팝 | 온볼 스크린 | ●○○ | 스크리너가 림 대신 3점 라인으로 빠져 슈팅 | 헤지 · 스위치 · 업 투 터치 · 로테이션 |
 | 3 | 스페인 픽앤롤 | 온볼 스크린 | ●●● | 픽앤롤 + 롤맨 수비에게 거는 백스크린 | 롤맨 도움 · 슈터 고정 · 백스크린 피하기 · 올 스위치 |
 | 4 | 혼즈 | 온볼 스크린 | ●●○ | 엘보의 두 빅맨, 하이 픽앤롤 → 하이-로우 | 빅맨 도움 · 스위치 · 엘보 디나이 · 한쪽으로 몰기 |
 | 5 | 플로피 | 오프볼 스크린 | ●●○ | 림 아래 슈터가 싱글/스태거 스크린 중 선택 | 스크린에 걸림 · 트레일 · 탑 락킹 · 스위치 |
@@ -244,7 +244,7 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 수비 대응별 분기
 
-작전은 절반이고, 나머지 절반은 수비가 어떻게 나오느냐입니다. 모든 작전이 **분기점**에서 3~5가지 읽기로 갈라집니다.
+작전은 절반이고, 나머지 절반은 수비가 어떻게 나오느냐입니다. 모든 작전이 **분기점**에서 4~5가지 읽기로 갈라집니다.
 
 - 처음부터 보면 분기점에서 재생이 멈추고 "수비는 어떻게 막을까요?"라고 묻습니다. 답을 고르면 그 방식으로 이어지고, 설명 위에 '왜 이렇게 푸는지' 한 줄이 붙습니다.
 - 타임라인 위 탭으로 언제든 읽기를 바꿀 수 있습니다(타임라인의 ◆가 분기점). 분기점 전에는 끊김 없이 바뀌고, 지난 뒤라면 분기점으로 돌아갑니다.
@@ -308,7 +308,7 @@ python -m http.server 8000
 
 그다음 브라우저에서 `http://localhost:8000`을 엽니다.
 
-작전 데이터 검사(움직임 한계, 한/영 짝, 분기 구조)는 Node 20 이상에서 `npm install` 후 `npm test`로 실행합니다.
+작전 데이터 검사(움직임 한계, 한/영 짝, 분기 구조)는 Node 21 이상에서 `npm install` 후 `npm test`로 실행합니다.
 
 ### 작전 추가하기
 

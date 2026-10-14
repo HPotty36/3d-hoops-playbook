@@ -39,7 +39,9 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
   let level = 0;
   let activeId = null;
 
-  input.addEventListener('input', () => { query = input.value; renderList(); });
+  // 한글 조합 중(혼ㅈ 같은 중간 글자)에는 다시 그리지 않고, 조합이 끝나면 그린다
+  input.addEventListener('input', (e) => { if (e.isComposing) return; query = input.value; renderList(); });
+  input.addEventListener('compositionend', () => { query = input.value; renderList(); });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && input.value) { e.preventDefault(); input.value = ''; query = ''; renderList(); }
   });
@@ -95,6 +97,7 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
     empty.hidden = hits.size > 0;
     list.querySelectorAll('.play-item').forEach((b) => b.addEventListener('click', () => onSelect(+b.dataset.idx)));
     list.querySelectorAll('.sec-head').forEach((h) => h.addEventListener('click', () => {
+      if (normalize(query)) return;   // 검색 중에는 갈래가 모두 펼쳐져 있으므로 접기 상태를 바꾸지 않는다
       const id = h.closest('.lib-sec').dataset.sec;
       if (collapsed.has(id)) collapsed.delete(id); else collapsed.add(id);
       onCollapse([...collapsed]);

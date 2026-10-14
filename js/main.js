@@ -214,6 +214,8 @@ function openPrompt() {
   if (state.readMode === 'step') {
     state.prompt = { wait: true };
     state.playing = false;
+    // 단계별 모드에서는 선택지가 기다리므로 지금 읽기 버튼으로 포커스를 옮긴다(스크린 리더가 질문을 읽도록)
+    $('#branch-prompt .bp-options button.current')?.focus();
   } else {
     const total = readTime(m.prompt) * READ_FACTOR[state.readMode];
     state.prompt = { remaining: total, total };
@@ -223,8 +225,10 @@ function openPrompt() {
 
 function closePrompt() {
   if (!state.prompt) return;
+  const hadFocus = $('#branch-prompt').contains(document.activeElement);
   state.prompt = null;
   readsUI.hidePrompt();
+  if (hadFocus) $('#btn-play').focus();
 }
 
 // auto: 자동 모드의 시간 초과나 읽기 모드 끄기로 넘어간 경우. 직접 고른 게 아니므로 다시 보면 또 묻는다.
@@ -250,6 +254,8 @@ function syncReadParam() {
 function watchRead(id) {
   selectRead(id);
   seekStep(curPlay().reads.at - 1, true);
+  // 대응 수비 목록이 다시 그려졌으므로 같은 '보기' 버튼에 포커스를 돌려준다
+  $(`#info-counters .watch[data-read="${id}"]`)?.focus();
 }
 
 // ── 작전 목록 (js/library.js) ────────────────────────────────
@@ -645,6 +651,7 @@ function nextStep() {
   const cp = state.cp;
   const k = currentStep();
   if (k >= cp.steps.length - 1) {
+    closePrompt();
     state.t = cp.end; state.playing = false; state.hold = null; state.waiting = false; syncPlayBtn();
   } else seekStep(k + 1);
 }
