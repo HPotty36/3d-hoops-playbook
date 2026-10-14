@@ -10,6 +10,10 @@ import floppy from './floppy.js';
 import elevatorDoors from './elevator-doors.js';
 import iversonCut from './iverson-cut.js';
 import chicago from './chicago.js';
+import flareScreen from './flare-screen.js';
+import zipper from './zipper.js';
+import uclaCut from './ucla-cut.js';
+import shuffleCut from './shuffle-cut.js';
 import hammer from './hammer.js';
 import splitAction from './split-action.js';
 import doubleDrag from './double-drag.js';
@@ -36,6 +40,10 @@ export const PLAYS = [
   elevatorDoors,
   iversonCut,
   chicago,
+  flareScreen,
+  zipper,
+  uclaCut,
+  shuffleCut,
   hammer,
   splitAction,
   doubleDrag,

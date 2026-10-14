@@ -1,13 +1,13 @@
 <p align="center"><img src="assets/logo-mark.svg" width="72" alt="3D Hoops Playbook logo"></p>
 <h1 align="center">3D Hoops Playbook</h1>
 <p align="center">
-  16 offensive sets from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
+  20 offensive sets from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
   <a href="https://hpotty36.github.io/3d-hoops-playbook/"><b>Live demo →</b></a>
 </p>
 
-An interactive playbook that replays **16 offensive sets commonly run in pro basketball** on a 3D half court, step by step.
+An interactive playbook that replays **20 offensive sets commonly run in pro basketball** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
-Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 62 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
+Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 74 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
@@ -33,6 +33,10 @@ Every play also branches by **defensive read** — drop, switch, blitz, top lock
 | 14 | Double Drag | Early offense | ●●○ | Two trailing bigs screen in a row: one pops, one rolls | Drop · Switch · Show |
 | 15 | Pistol (21) | Early offense | ●●○ | An early dribble handoff from the 1 to the 2 on the wing | Drop · Show · Deny the handoff · Switch |
 | 16 | Trailer Pop | Early offense | ●○○ | The trailing big screens for the ball, then pops for three | Drop · Up to touch · Switch |
+| 17 | Flare Screen | Off-ball screens | ●●○ | A screen that lets the shooter fade away from the ball for a skip pass | Trail · Switch · Shortcut |
+| 18 | Zipper | Off-ball screens | ●○○ | A cut from the block straight up the lane line to the top | Trail · Top lock · Switch |
+| 19 | UCLA Cut | Off-ball screens | ●●○ | Pass to the wing, then cut to the rim off a high-post back screen | Caught on the screen · Help · Switch |
+| 20 | Shuffle Cut | Off-ball screens | ●●○ | A diagonal cut from the far wing over a high-post screen | Caught on the screen · Switch · Help |
 
 Each play comes with **step-by-step breakdown · when to use it · key teaching points · how defenses counter it · famous examples**.
 
@@ -225,9 +229,9 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 3D Hoops Playbook
 
-프로 농구에서 자주 쓰이는 공격 작전 16가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
+프로 농구에서 자주 쓰이는 공격 작전 20가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
-작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 62가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
+작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 74가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
 
@@ -251,6 +255,10 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | 14 | 더블 드래그 | 얼리 오펜스 | ●●○ | 뒤따라온 빅맨 둘의 연속 스크린: 한 명은 팝, 한 명은 롤 | 드롭 · 스위치 · 쇼 |
 | 15 | 피스톨 (21) | 얼리 오펜스 | ●●○ | 1번이 윙에서 2번에게 건네는 이른 핸드오프 | 드롭 · 쇼 · 핸드오프 차단 · 스위치 |
 | 16 | 트레일러 팝 | 얼리 오펜스 | ●○○ | 늦게 따라온 빅맨이 스크린을 건 뒤 3점 라인 밖으로 팝 | 드롭 · 업 투 터치 · 스위치 |
+| 17 | 플레어 스크린 | 오프볼 스크린 | ●●○ | 슈터가 공에서 멀어지며 스킵 패스를 받게 해 주는 스크린 | 트레일 · 스위치 · 지름길 |
+| 18 | 지퍼 | 오프볼 스크린 | ●○○ | 블록에서 페인트 옆 선을 따라 탑까지 곧장 올라오는 컷 | 트레일 · 탑 락킹 · 스위치 |
+| 19 | UCLA 컷 | 오프볼 스크린 | ●●○ | 윙에 패스한 뒤 하이포스트 백스크린을 타고 림으로 컷 | 스크린에 걸림 · 도움 수비 · 스위치 |
+| 20 | 셔플 컷 | 오프볼 스크린 | ●●○ | 먼 쪽 윙에서 하이포스트 스크린을 넘는 대각선 컷 | 스크린에 걸림 · 스위치 · 도움 수비 |
 
 작전마다 **단계별 진행 · 이럴 때 쓴다 · 핵심 포인트 · 수비는 어떻게 막나 · 대표 사례**가 들어 있습니다.
 

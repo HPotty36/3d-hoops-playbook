@@ -122,8 +122,8 @@ test('play ids are unique and URL-safe', () => {
 test('search aliases contain no names from the famous examples', () => {
   const names = new Set();
   for (const p of PLAYS) {
-    // 문장 첫 단어(The, Shooting …)는 고유명사가 아니므로 뺀다
-    for (const w of (p.en?.famous || '').match(/(?<!(?:^|[.!?])\s*)\b[A-Z][a-z]{2,}\b/g) || []) names.add(w.toLowerCase());
+    // 문장 첫 단어(The, Shooting …)는 고유명사가 아니므로 뺀다. 대문자 약칭(학교·구단 이름)도 잡는다.
+    for (const w of (p.en?.famous || '').match(/(?<!(?:^|[.!?])\s*)\b[A-Z][A-Za-z]{2,}\b/g) || []) names.add(w.toLowerCase());
   }
   const hits = PLAYS.flatMap((p) => (p.aliases || [])
     .filter((a) => a.split(/[\s-]+/).some((w) => names.has(w.toLowerCase())))
