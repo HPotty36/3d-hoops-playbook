@@ -77,6 +77,7 @@ export default {
         o1: { path: [[-15.6, 23.4], [-20, 18]], t: [0.5, 1] },
       },
       ball: [{ type: 'pass', to: 'o5', at: 0.42 }],
+      def: { d2: { sag: 0.1 } },
     },
     {
       title: '핸드오프',

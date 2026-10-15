@@ -45,7 +45,7 @@ export default {
     steps: [
       { title: 'Triangle set', text: '[1] dribbles to the right slot. On the right, the post [5], the wing [3] and the corner [2] form the triangle, with [4] on the far side.' },
       { title: 'Post entry', text: '[1] passes to [3] on the wing. Seeing [x5] behind [5], [3] feeds the post right away (the **post entry**).' },
-      { title: 'Split cuts', text: 'After the entry, [3] goes down and screens [x2], and [2] comes off it around the top of [5] toward the rim (the **split**). [5] feeds [2], who lays it in.' },
+      { title: 'Split cuts', text: 'After the entry, [3] cuts down toward the corner while [2] comes up the other way, and the two cross (the **split cuts**). While [x2] gets rubbed off on [3], [2] curls around the top of [5] to the rim, and [5] feeds [2] for the layup.' },
     ],
     reads: {
       prompt: 'How does the defense play [5] in the post?',
@@ -95,18 +95,17 @@ export default {
     {
       title: '스플릿 컷',
       dur: 2.6,
-      text: '공을 넣은 [3]이 코너 쪽으로 내려가 [x2]에게 스크린을 걸고, [2]가 그 스크린을 타고 [5]의 위쪽을 돌아 림으로 파고듭니다(**스플릿**). [5]가 건네준 공을 [2]가 레이업으로 마무리합니다.',
+      text: '공을 넣은 [3]이 코너 쪽으로 내려가고 [2]가 반대로 올라오며 두 사람이 엇갈립니다(**스플릿 컷**). [x2]가 엇갈리는 [3]에게 걸린 사이, [2]가 [5]의 위쪽을 돌아 림으로 파고들고 [5]가 건네준 공을 레이업으로 마무리합니다.',
       move: {
-        o3: { path: [[18.6, 8.2]], t: [0, 0.3] },
-        o2: { path: [[21.6, 9.6], [18.4, 13.2], [11.6, 13.2], [4.6, 8.8]], t: [0.2, 0.86] },
+        o3: { path: [[16.6, 11], [20.6, 4.4]], t: [0, 0.55] },
+        o2: { path: [[22, 9.8], [18.6, 13.4], [11.6, 13.2], [4.6, 8.8]], t: [0.15, 0.86] },
       },
-      screens: [{ by: 'o3', face: [20.6, 6.4], hold: 0.5, on: 'd2' }],
       ball: [
         { type: 'pass', to: 'o2', at: 0.72 },
         { type: 'shot', at: 0.93, pts: 2 },
       ],
       def: {
-        d2: { path: [[20.4, 8], [19.4, 10.8], [14.4, 13]], t: [0.15, 0.95] },
+        d2: { path: [[19.8, 8.4], [17.8, 11.6], [12.4, 12.8]], t: [0.25, 0.95] },
         d5: { path: [[7.4, 6.4]], t: [0, 0.3] },
       },
     },
@@ -132,7 +131,7 @@ export default {
               { type: 'pass', to: 'o3', at: 0.12 },
               { type: 'pass', to: 'o4', at: 0.82 },
             ],
-            def: { d5: { path: [[9.8, 10.6]], t: [0, 0.4] }, d3: { sag: 0.2 } },
+            def: { d5: { path: [[9.8, 10.6]], t: [0, 0.4] }, d3: { sag: 0.2 }, d2: { sag: 0.2 } },
           },
           {
             title: '핀치 포스트',
@@ -144,7 +143,7 @@ export default {
               { type: 'shot', at: 0.93, pts: 2 },
             ],
             screens: [{ by: 'o4', face: [10.6, 20.8], hold: 0.3, on: 'd3' }],
-            def: { d3: { path: [[15.4, 18.2], [10.8, 19.6], [8.6, 22.2]], t: [0, 0.6] } },
+            def: { d3: { path: [[15.4, 18.2], [10.8, 19.6], [8.6, 22.2]], t: [0, 0.6] }, d2: { sag: 0.2 } },
           },
         ],
       },
@@ -162,6 +161,7 @@ export default {
             def: {
               d3: { path: [[16.4, 21.4]], t: [0, 0.45] },
               d5: { path: [[9.8, 10.6]], t: [0, 0.4] },
+              d2: { sag: 0.2 },
             },
           },
           {
@@ -173,7 +173,11 @@ export default {
               { type: 'bounce', to: 'o3', at: 0.4 },
               { type: 'shot', at: 0.92, pts: 2 },
             ],
-            def: { d3: { path: [[17.6, 17.4], [12.4, 10.6]], t: [0.15, 0.9] } },
+            def: {
+              d3: { path: [[17.6, 17.4], [12.4, 10.6]], t: [0.15, 0.9] },
+              d5: { path: [[9.6, 10.8]], t: [0, 0.3] },
+              d2: { sag: 0.2 },
+            },
           },
         ],
       },

@@ -52,16 +52,16 @@ export default {
       base: { label: 'Caught on the screen', why: 'If [x1] runs into the back screen, [1] is open all the way to the rim.' },
       options: [
         {
-          label: 'Help', why: 'If [x5] drops to stop the cut, nobody is left to switch [5]\'s next screen. A flare screen frees a three up top.',
+          label: 'Help', why: 'If [x5] drops to stop the cut, nobody is left to switch [5]\'s next screen. A flare screen frees a three on the wing.',
           steps: [
-            { title: 'Help', text: '[x5] leaves [5] to cut off [1] in the lane (the **help**). [5] heads straight for [x3] on the left wing to set the next screen.' },
-            { title: 'Flare & top three', text: '[3] fades off [5]\'s screen up to the left slot (the **flare**), catches the skip pass from [2] and shoots the three. [x3] is stuck on [5].' },
+            { title: 'Help', text: '[x5] leaves [5] to cut off [1] in the lane (the **help**). Meanwhile [3] moves up to the left slot that [1] just left, and [5] goes to set a screen on the left side of [x3].' },
+            { title: 'Flare & three', text: '[3] fades away from the ball off [5]\'s screen to the left wing (the **flare**), catches [2]\'s skip pass across the floor and shoots the three. [x3] is stuck on [5].' },
           ],
         },
         {
           label: 'Chase over', why: 'If [x1] chases tight over the top, the cut is gone. Pop out instead and drive past [x1] rushing out.',
           steps: [
-            { title: 'Chase over', text: '[x1] stays on [1]\'s hip and chases over the top of the screen (the **chase over**). [1] stops the cut and pops out to the left wing, and [3] slides down to the corner to make room.' },
+            { title: 'Chase over', text: '[x1] stays tight on [1] and chases over the top of the screen (the **chase over**). [1] stops the cut and pops out to the left wing, and [x1] sinks back a step toward the lane. [3] slides down to the corner to make room.' },
             { title: 'Attack the closeout', text: 'As [1] catches the pass from [2], [x1] rushes out (the **closeout**). [1] drives past along the baseline and lays it in.' },
           ],
         },
@@ -111,15 +111,16 @@ export default {
       {
         id: 'help',
         label: '도움 수비',
-        why: '[x5]가 컷을 막으러 내려오면, [5]의 다음 스크린을 바꿔 막을 사람이 없습니다. 플레어 스크린으로 탑에서 3점을 만듭니다.',
+        why: '[x5]가 컷을 막으러 내려오면, [5]의 다음 스크린을 바꿔 막을 사람이 없습니다. 플레어 스크린으로 윙에서 3점을 만듭니다.',
         steps: [
           {
             title: '도움 수비',
             dur: 1.9,
-            text: '[x5]가 [5]를 떠나 [1]의 컷 앞을 막습니다(**도움 수비**). [5]는 곧바로 왼쪽 윙의 [x3] 쪽으로 가서 스크린을 겁니다.',
+            text: '[x5]가 [5]를 떠나 [1]의 컷 앞을 막습니다(**도움 수비**). 그 사이 [3]은 [1]이 비운 왼쪽 슬롯으로 올라오고, [5]는 [x3]의 왼쪽으로 가서 스크린을 겁니다.',
             move: {
               o1: { path: [[-6.4, 25.6], [-3.6, 21.4], [-2.4, 13.6]], t: [0.05, 0.8] },
-              o5: { path: [[-11.2, 20], [-14.6, 20.4]], t: [0.45, 1] },
+              o3: { path: [[-18.4, 21.6], [-12.6, 26.8]], t: [0.3, 1] },
+              o5: { path: [[-10.4, 20.2], [-13.4, 22]], t: [0.45, 1] },
             },
             def: {
               d1: { path: [[-7.4, 23.4], [-5.4, 21.6], [-4.4, 17.2]], t: [0.15, 1] },
@@ -128,19 +129,19 @@ export default {
             },
           },
           {
-            title: '플레어 & 탑 3점',
+            title: '플레어 & 3점',
             dur: 1.9,
-            text: '[3]이 [5]의 스크린을 끼고 공에서 멀어지며 왼쪽 슬롯으로 퍼지고(**플레어**), [2]의 스킵 패스를 받아 3점을 던집니다. [x3]는 [5]에게 막혔습니다.',
+            text: '[3]이 [5]의 스크린을 끼고 공에서 멀어지며 왼쪽 윙으로 퍼지고(**플레어**), 코트를 가로지르는 [2]의 스킵 패스를 받아 3점을 던집니다. [x3]는 [5]에게 막혔습니다.',
             move: {
-              o3: { path: [[-19.8, 22], [-14.4, 26.2]], t: [0, 0.6] },
+              o3: { path: [[-17, 25.4], [-21.4, 19.8]], t: [0, 0.6] },
               o1: { path: [[-7.6, 7.4]], t: [0, 0.5] },
             },
-            screens: [{ by: 'o5', face: [-17.6, 16.6], hold: 0.4, on: 'd3' }],
+            screens: [{ by: 'o5', face: [-10.4, 22.6], hold: 0.4, on: 'd3' }],
             ball: [
-              { type: 'skip', to: 'o3', at: 0.5 },
-              { type: 'shot', at: 0.93, pts: 3 },
+              { type: 'skip', to: 'o3', at: 0.4 },
+              { type: 'shot', at: 0.95, pts: 3 },
             ],
-            def: { d3: { path: [[-16.8, 18.4], [-16.6, 21.6]], t: [0.1, 0.8] } },
+            def: { d3: { path: [[-12.4, 23.4], [-14.6, 24], [-16.6, 23]], t: [0.05, 0.8] } },
           },
         ],
       },
@@ -152,23 +153,23 @@ export default {
           {
             title: '위로 쫓기',
             dur: 1.8,
-            text: '[x1]이 [1]의 엉덩이에 붙어 스크린 위로 쫓아옵니다(**위로 쫓기**). [1]은 컷을 멈추고 왼쪽 윙으로 빠지고, [3]은 코너로 내려가 자리를 비워 줍니다.',
+            text: '[x1]이 [1]에게 바짝 붙어 스크린 위로 쫓아옵니다(**위로 쫓기**). [1]은 컷을 멈추고 왼쪽 윙으로 빠지고, [x1]은 페인트 쪽으로 한 발 물러섭니다. [3]은 코너로 내려가 자리를 비워 줍니다.',
             move: {
               o1: { path: [[-7.4, 25.2], [-10.6, 22.8], [-17.8, 20.6]], t: [0.05, 0.9] },
               o3: { path: [[-22.6, 5.6]], t: [0, 0.6] },
             },
-            def: { d1: { path: [[-8.6, 25.4], [-11.2, 24.8], [-14.6, 22.8]], t: [0.05, 0.85] }, d3: { sag: 0.2 } },
+            def: { d1: { path: [[-8.6, 25.4], [-11.2, 24.8], [-12.6, 21.8]], t: [0.05, 0.85] }, d3: { sag: 0.2 } },
           },
           {
             title: '클로즈아웃 공략',
             dur: 2.6,
             text: '[2]의 패스를 받는 순간 [x1]이 급하게 달려 나옵니다(**클로즈아웃**). [1]은 그 옆을 지나 베이스라인으로 파고들어 레이업을 올립니다.',
-            move: { o1: { path: [[-17.6, 14.6], [-12.6, 8.4], [-7.2, 6.8]], t: [0.38, 0.92] } },
+            move: { o1: { path: [[-17.6, 14.6], [-12.6, 8.4], [-4.6, 6.2]], t: [0.36, 0.94] } },
             ball: [
               { type: 'skip', to: 'o1', at: 0.05 },
               { type: 'shot', at: 0.96, pts: 2 },
             ],
-            def: { d1: { path: [[-15.8, 22.2], [-14.8, 17.4], [-9.6, 10.4]], t: [0.1, 1] } },
+            def: { d1: { path: [[-15.4, 21.2], [-14.8, 17.4], [-9.6, 10.4]], t: [0.15, 1] } },
           },
         ],
       },
