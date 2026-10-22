@@ -1,13 +1,13 @@
 <p align="center"><img src="assets/logo-mark.svg" width="72" alt="3D Hoops Playbook logo"></p>
 <h1 align="center">3D Hoops Playbook</h1>
 <p align="center">
-  24 offensive sets and 9 special-situation plays from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
+  24 offensive sets and 12 special-situation plays from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
   <a href="https://hpotty36.github.io/3d-hoops-playbook/"><b>Live demo →</b></a>
 </p>
 
-An interactive playbook that replays **24 offensive sets and 9 special-situation plays commonly run in pro basketball** on a 3D half court, step by step.
+An interactive playbook that replays **24 offensive sets and 12 special-situation plays commonly run in pro basketball** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
-Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 113 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
+Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 122 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
@@ -57,6 +57,9 @@ Inbound plays and end-of-game sets. Each one shows a broadcast-style score bug n
 | 31 | Beat the Deny | Sideline out of bounds | ●○○ | A down screen to get the guard open, straight into a pick and roll | Normal · Deny · Switch |
 | 32 | Ram | After timeout | ●●● | A wing screens the big's defender first, then the big sets the ball screen | Drop · Switch · Hedge |
 | 33 | Decoy and Counter | After timeout | ●●● | Show the pin-down the defense scouted, then cut the other way | Overplay · Normal · Switch |
+| 34 | Last Shot | End of game | ●●○ | Tied with 7.5 s left: hold, then a pick and roll timed to shoot with a second left | Drop · Blitz · Switch |
+| 35 | Down Three | End of game | ●●○ | Down three with 8 s left: a stagger for the tying three from the sideline | Trail · Switch · Top lock |
+| 36 | Under a Second | End of game | ●●● | 0.9 s left: the catch starts the clock, so catch and shoot or tip it in | Deny · Switch · Overplay |
 
 Each play comes with **step-by-step breakdown · when to use it · key teaching points · how defenses counter it · famous examples**.
 
@@ -249,9 +252,9 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 3D Hoops Playbook
 
-프로 농구에서 자주 쓰이는 공격 작전 24가지와 특수 상황 작전 9가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
+프로 농구에서 자주 쓰이는 공격 작전 24가지와 특수 상황 작전 12가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
-작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 113가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
+작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 122가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
 
@@ -299,6 +302,9 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | 31 | 디나이 깨기 | 사이드라인 인바운드 | ●○○ | 다운 스크린으로 가드를 빼내 곧바로 픽 앤 롤 | 기본 수비 · 디나이 · 스위치 |
 | 32 | 램 | 타임아웃 후 작전 | ●●● | 윙이 먼저 빅맨의 수비를 막고, 빅맨이 볼 스크린 | 드롭 · 스위치 · 헤지 |
 | 33 | 미끼 & 역습 | 타임아웃 후 작전 | ●●● | 상대가 준비한 핀다운을 보여 주고 반대로 끊어 들어가기 | 오버플레이 · 기본 수비 · 스위치 |
+| 34 | 마지막 슛 | 막판 작전 | ●●○ | 동점, 7.5초: 기다렸다가 1초 남기고 슛이 나오도록 맞춘 픽 앤 롤 | 드롭 · 블리츠 · 스위치 |
+| 35 | 동점 3점 | 막판 작전 | ●●○ | 3점 뒤진 채 8초: 사이드라인에서 스태거로 동점 3점 | 트레일 · 스위치 · 탑 락킹 |
+| 36 | 1초 미만 | 막판 작전 | ●●● | 0.9초: 공을 잡는 순간 시계가 흐르니 받아서 바로 던지거나 팁 인 | 디나이 · 스위치 · 오버플레이 |
 
 작전마다 **단계별 진행 · 이럴 때 쓴다 · 핵심 포인트 · 수비는 어떻게 막나 · 대표 사례**가 들어 있습니다.
 

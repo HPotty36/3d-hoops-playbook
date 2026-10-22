@@ -32,6 +32,9 @@ import sidelineLob from './sideline-lob.js';
 import beatTheDeny from './beat-the-deny.js';
 import ram from './ram.js';
 import decoyCounter from './decoy-counter.js';
+import lastShot from './last-shot.js';
+import downThree from './down-three.js';
+import underASecond from './under-a-second.js';
 
 // 작전 목록의 큰 갈래. 표시 이름은 i18n.js의 section.* / cat.* 키. 작전이 없는 갈래는 목록에서 숨긴다.
 export const SECTIONS = [
@@ -75,4 +78,7 @@ export const PLAYS = [
   beatTheDeny,
   ram,
   decoyCounter,
+  lastShot,
+  downThree,
+  underASecond,
 ];
