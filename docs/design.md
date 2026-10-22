@@ -48,6 +48,8 @@
 
 ## Special situations
 
+The section is complete with 12 plays: four baseline and three sideline out-of-bounds plays, two after-timeout sets and three end-of-game plays, each with a base read and two more.
+
 - Plays in the situations section (baseline and sideline out of bounds, end of game, after timeout) carry `situation: { period, clock, shotClock, score: [offense, defense] }`. It is numbers only, so it needs no translation; goals such as "must score a three" stay in the summary.
 - **After timeout:** these plays start as half-court sets with the ball at the top, so both clocks run from `t = 0`.
 - **End of game:** Last Shot is a half-court possession timed so every read releases with about one second left (the jumper then reaches the rim at the buzzer, and the bug shows `0.0` with the points added). Down Three and Under a Second inbound from the sideline; in Under a Second the clock starts on the catch, so every read catches with 0.9 s and releases within it.
