@@ -107,7 +107,7 @@ export default {
       move: { o3: { path: [[-22.4, 17.4]], t: [0.15, 0.55] } },
       ball: [
         { type: 'pass', to: 'o2', at: 0.05 },
-        { type: 'shot', at: 0.62, pts: 3 },
+        { type: 'shot', at: 0.66, pts: 3 },
       ],
       def: { d2: { path: [[-3.4, 24.4]], t: [0, 0.65] }, d4: { path: [[-11, 10]], t: [0, 0.2] }, d5: { path: [[-7.8, 18]], t: [0, 0.2] }, d1: { sag: 0.2 } },
     },

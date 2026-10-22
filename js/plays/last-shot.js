@@ -40,9 +40,9 @@ export default {
       { name: 'Switch', desc: '[x5] takes [1]. [1] drives past the slower big.' },
     ],
     steps: [
-      { title: 'Hold for one', text: '[1] holds the ball at the top and watches the clock while the others spread out. [5] comes up and sets a ball screen beside [x1].' },
+      { title: 'Hold for one', text: '[1] holds the ball at the top and watches the clock while the others spread out. With about four seconds left, [5] comes up and sets a ball screen beside [x1].' },
       { title: 'Pick and roll', text: '[1] goes right over [5]\'s screen, and [x1] runs into [5]. [x5] drops back toward the rim (the **drop**), and [5] rolls.' },
-      { title: 'Pull-up at the buzzer', text: 'With [x5] back and [x1] behind, [1] pulls up from the right elbow and lets it go with about one second left.' },
+      { title: 'Pull-up at the buzzer', text: 'With [x5] back and [x1] behind, [1] rises into a pull-up at the right elbow and lets it go with about one second left.' },
     ],
     reads: {
       prompt: 'How does the defense guard the last pick and roll?',
@@ -52,7 +52,7 @@ export default {
           label: 'Blitz', why: 'If two defenders trap [1], nobody is left between [5] and the basket. A pass to [5] makes it four on three.',
           steps: [
             { title: 'Blitz', text: '[x1] and [x5] trap [1] together at the right slot (the **blitz**). [1] passes out of it to [5], rolling to the free-throw line.' },
-            { title: 'Four on three', text: '[5] catches at the free-throw line and [x4] steps in to stop [5]. [5] kicks the ball out to [4] on the left wing, and [4] shoots the three with about one second left.' },
+            { title: 'Four on three', text: '[5] catches at the free-throw line and [x4] steps in to stop [5]. [5] kicks it straight out to [4] on the left wing, and [4] shoots the three with about one second left.' },
           ],
         },
         {
@@ -71,40 +71,40 @@ export default {
   steps: [
     {
       title: '시계 보기',
-      dur: 2.6,
-      text: '[1]이 탑에서 공을 잡고 시계를 보며 기다리고, 나머지는 넓게 퍼집니다. [5]가 올라와 [x1]의 옆에 볼 스크린을 세웁니다.',
+      dur: 3.8,
+      text: '[1]이 탑에서 공을 잡고 시계를 보며 기다리고, 나머지는 넓게 퍼집니다. 4초쯤 남았을 때 [5]가 올라와 [x1]의 옆에 볼 스크린을 세웁니다.',
       move: {
-        o1: { path: [[-1.4, 29.6]], t: [0, 0.4] },
-        o5: { path: [[5.6, 23.4], [1.2, 27]], t: [0.45, 0.95] },
+        o1: { path: [[-1.4, 29.6]], t: [0, 0.25] },
+        o5: { path: [[5.6, 23.4], [1.2, 27]], t: [0.6, 0.95] },
       },
       screens: [{ by: 'o5', face: [-1.2, 26.4], hold: 1, on: 'd1' }],
       def: { d1: { sag: 0 }, d5: { sag: 0 }, d2: { sag: 0.3 }, d3: { sag: 0.3 }, d4: { sag: 0.3 } },
     },
     {
       title: '픽 앤 롤',
-      dur: 2.4,
+      dur: 2,
       text: '[1]이 [5]의 스크린 위로 오른쪽으로 돌고, [x1]은 [5]에게 걸립니다. [x5]는 림 쪽으로 물러서고(**드롭**), [5]는 굴러 들어갑니다.',
       move: {
-        o1: { path: [[2.6, 29.6], [6.4, 25.4], [8.2, 21.4]], t: [0.05, 0.8] },
+        o1: { path: [[2.6, 29.6], [6.4, 25.4], [8.2, 21.4]], t: [0.1, 0.9] },
         o5: { path: [[2.4, 20], [1.8, 13.4]], t: [0.4, 1] },
       },
       def: {
-        d1: { path: [[-0.4, 28.4], [3.4, 26.6]], t: [0.1, 0.8] },
+        d1: { path: [[-0.4, 28.4], [3.4, 26.6]], t: [0.15, 0.9] },
         d5: { path: [[3, 20.2], [2.6, 15.4]], t: [0.05, 0.9] },
         d2: { sag: 0.3 }, d3: { sag: 0.3 }, d4: { sag: 0.3 },
       },
     },
     {
       title: '버저비터 풀업',
-      dur: 2,
-      text: '[x5]는 물러서 있고 [x1]은 뒤에 있습니다. [1]이 오른쪽 엘보에서 멈춰 1초쯤 남기고 풀업 점퍼를 던집니다.',
-      move: { o1: { path: [[8.4, 20.4]], t: [0, 0.3] } },
-      ball: [{ type: 'shot', at: 0.75, pts: 2 }],
-      def: { d1: { path: [[6.2, 24.2]], t: [0, 0.6] }, d5: { path: [[3.6, 15.6]], t: [0, 0.6] }, d2: { sag: 0.3 }, d3: { sag: 0.3 }, d4: { sag: 0.3 } },
+      dur: 1.4,
+      text: '[x5]는 물러서 있고 [x1]은 뒤에 있습니다. [1]이 오른쪽 엘보에서 그대로 풀업 점퍼로 올라가 1초쯤 남기고 던집니다.',
+      move: { o1: { path: [[8.4, 20.4]], t: [0, 0.35] } },
+      ball: [{ type: 'shot', at: 0.5, pts: 2 }],
+      def: { d1: { path: [[6, 24.4]], t: [0, 0.6] }, d5: { path: [[3.6, 15.6]], t: [0, 0.6] }, d2: { sag: 0.3 }, d3: { sag: 0.3 }, d4: { sag: 0.3 } },
     },
   ],
 
-  // 수비 대응별 분기: [5]가 볼 스크린을 세운 뒤(1단계) 갈라진다. 기본(위 2·3단계)은 드롭.
+  // 수비 대응별 분기: 4초쯤 남기고 [5]가 볼 스크린을 세운 뒤(1단계) 갈라진다. 기본(위 2·3단계)은 드롭.
   reads: {
     at: 1,
     prompt: '수비는 마지막 픽 앤 롤을 어떻게 막을까요?',
@@ -117,13 +117,13 @@ export default {
         steps: [
           {
             title: '블리츠',
-            dur: 2,
+            dur: 1.8,
             text: '[x1]과 [x5]가 오른쪽 슬롯에서 [1]을 함께 막습니다(**블리츠**). [1]은 트랩 너머로 자유투 라인까지 굴러 들어온 [5]에게 패스합니다.',
             move: {
               o1: { path: [[2.6, 29.6], [5.4, 28.4]], t: [0.05, 0.5] },
-              o5: { path: [[2.2, 22.4], [1.4, 19.4]], t: [0.35, 0.8] },
+              o5: { path: [[2.2, 22.4], [1.4, 19.4]], t: [0.3, 0.8] },
             },
-            ball: [{ type: 'pass', to: 'o5', at: 0.8 }],
+            ball: [{ type: 'pass', to: 'o5', at: 0.76 }],
             def: {
               d1: { path: [[-0.4, 28.4], [3.6, 30]], t: [0.1, 0.55] },
               d5: { path: [[3.6, 25.8], [7, 28]], t: [0.05, 0.55] },
@@ -132,15 +132,15 @@ export default {
           },
           {
             title: '4대3',
-            dur: 2.4,
-            text: '[5]가 자유투 라인에서 공을 잡자 [x4]가 [5]를 막으러 들어옵니다. [5]는 왼쪽 윙의 [4]에게 공을 빼 주고, [4]가 1초쯤 남기고 3점을 던집니다.',
+            dur: 1.8,
+            text: '[5]가 자유투 라인에서 공을 잡자 [x4]가 [5]를 막으러 들어옵니다. [5]는 곧바로 왼쪽 윙의 [4]에게 공을 빼 주고, [4]가 1초쯤 남기고 3점을 던집니다.',
             move: { o4: { path: [[-20.6, 18.8]], t: [0, 0.3] } },
             ball: [
-              { type: 'pass', to: 'o4', at: 0.5 },
-              { type: 'shot', at: 0.79, pts: 3 },
+              { type: 'pass', to: 'o4', at: 0.05 },
+              { type: 'shot', at: 0.53, pts: 3 },
             ],
             def: {
-              d4: { path: [[-8.4, 16.6], [-4.4, 15.6]], t: [0, 0.5] },
+              d4: { path: [[-8.4, 16.6], [-1.8, 17]], t: [0, 0.45] },
               d1: { path: [[4.4, 26.6]], t: [0, 0.6] },
               d5: { path: [[3.6, 23.2]], t: [0, 0.6] },
               d2: { sag: 0.3 }, d3: { sag: 0.3 },
@@ -155,25 +155,25 @@ export default {
         steps: [
           {
             title: '스위치',
-            dur: 1.8,
+            dur: 1.2,
             text: '[1]이 스크린을 돌아 나오자 [x5]가 [1]을 넘겨받습니다(**스위치**). [1]은 오른쪽 슬롯에서 빅맨과 마주 섭니다.',
             move: {
-              o1: { path: [[2.6, 29.6], [6.4, 27.4]], t: [0.05, 0.6] },
-              o5: { path: [[-1.2, 22.4]], t: [0.4, 0.9] },
+              o1: { path: [[2.6, 29.6], [6, 24.6]], t: [0.05, 0.8] },
+              o5: { path: [[-1.2, 22.4]], t: [0.4, 0.95] },
             },
             def: {
-              d5: { guard: 'o1', path: [[4.2, 25], [5.4, 24.4]], t: [0.1, 0.6] },
-              d1: { guard: 'o5', path: [[-0.6, 25.2], [-1.4, 20.6]], t: [0.2, 0.9] },
+              d5: { guard: 'o1', path: [[3.6, 23.4], [4.8, 21.8]], t: [0.1, 0.75] },
+              d1: { guard: 'o5', path: [[-0.6, 25.2], [-1.4, 20.6]], t: [0.2, 0.95] },
               d2: { sag: 0.3 }, d3: { sag: 0.3 }, d4: { sag: 0.3 },
             },
           },
           {
             title: '미스매치 공략',
-            dur: 2.6,
-            text: '[1]이 방향을 바꾸며 발이 느린 [x5]를 제치고 림까지 파고들어, 1초쯤 남기고 레이업을 올립니다.',
-            move: { o1: { path: [[4.4, 23.4], [3.4, 15], [1.6, 8.4], [0.8, 6.6]], t: [0.25, 0.78] } },
-            ball: [{ type: 'shot', at: 0.81, pts: 2 }],
-            def: { d5: { path: [[5.8, 21.6], [4.6, 14.6], [3.6, 10.4]], t: [0.3, 0.95] }, d1: { sag: 0.3 }, d2: { sag: 0.3 }, d3: { sag: 0.3 }, d4: { sag: 0.3 } },
+            dur: 2,
+            text: '[1]이 곧바로 방향을 바꾸며 발이 느린 [x5]를 제치고 림까지 파고들어, 1초쯤 남기고 레이업을 올립니다.',
+            move: { o1: { path: [[4.6, 20.6], [3.2, 14.6], [1.6, 8.6], [0.8, 6.6]], t: [0.1, 0.72] } },
+            ball: [{ type: 'shot', at: 0.75, pts: 2 }],
+            def: { d5: { path: [[5.6, 19.4], [4.4, 13.6], [3.4, 10.2]], t: [0.15, 0.95] }, d1: { sag: 0.3 }, d2: { sag: 0.3 }, d3: { sag: 0.3 }, d4: { sag: 0.3 } },
           },
         ],
       },

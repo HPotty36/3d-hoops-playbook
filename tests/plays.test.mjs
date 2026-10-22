@@ -296,6 +296,15 @@ for (const play of PLAYS.filter((p) => SECTIONS.find((s) => s.id === 'situations
     test(`${play.id} [${id}]: passes do not fly through a body`, () => {
       assert.deepEqual(passLaneViolations(compilePlay(variant(play, id))), []);
     });
+    // 받아서 던지는 점프슛은 공을 잡고 0.3초 이상 지나서 손을 떠난다 (엔진은 점프를 슛 0.28초 전에 시작한다)
+    test(`${play.id} [${id}]: a caught jumper is not rushed`, () => {
+      const cp = compilePlay(variant(play, id));
+      cp.bsegs.forEach((b, i) => {
+        if (b.type !== 'shot' || b.kind !== 'jumper' || i < 2) return;
+        const h = cp.bsegs[i - 1];
+        assert.ok(h.t1 - h.t0 >= 0.3, `${h.who} shoots ${(h.t1 - h.t0).toFixed(2)}s after the catch @ ${h.t1.toFixed(2)}s`);
+      });
+    });
   }
 }
 
