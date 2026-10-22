@@ -40,7 +40,7 @@ export default {
       { name: 'Top lock', desc: '[x2] gets above [2] first to cut off the path. [2] goes the other way, along the baseline to the rim (the **backdoor**).' },
     ],
     steps: [
-      { title: 'Inbound', text: '[1] pops out from the right block to the right slot and catches [2]\'s inbound pass. [2] steps onto the court on the left of the rim, while [4] and [5] stand one above the other along the left lane line (the **stagger**).' },
+      { title: 'Inbound', text: '[1] pops out from the right block to the right slot, ahead of the trailing [x1], and catches [2]\'s inbound pass. [2] steps onto the court on the left of the rim, while [4] and [5] stand one above the other along the left lane line (the **stagger**).' },
       { title: 'Stagger', text: '[2] runs up the left side off [4]\'s and then [5]\'s shoulders. [x2] follows behind (the **trail**) and runs into [5].' },
       { title: 'Three', text: '[1] passes cross-court to [2] at the left slot, and [2] shoots the three before [x2] can get there.' },
     ],
@@ -72,13 +72,13 @@ export default {
     {
       title: '인바운드',
       dur: 1.9,
-      text: '[1]이 오른쪽 블록 근처에서 오른쪽 슬롯으로 나와 [2]의 인바운드 패스를 받습니다. [2]는 림의 왼쪽으로 코트에 들어오고, [4]와 [5]는 왼쪽 레인 라인을 따라 위아래로 비스듬히 섭니다(**스태거**).',
+      text: '[1]이 오른쪽 블록 근처에서 오른쪽 슬롯으로 나와, 뒤따라오는 [x1]보다 먼저 [2]의 인바운드 패스를 받습니다. [2]는 림의 왼쪽으로 코트에 들어오고, [4]와 [5]는 왼쪽 레인 라인을 따라 위아래로 비스듬히 섭니다(**스태거**).',
       move: {
         o1: { path: [[8.4, 17.6], [9.4, 22.8]], t: [0.05, 0.5] },
         o2: { path: [[-8.6, 2.2]], t: [0.66, 1] },
       },
       ball: [{ type: 'pass', to: 'o1', at: 0.5 }],
-      def: { d2: { sag: 0.2 }, d4: { sag: 0 }, d5: { sag: 0 }, d1: { sag: 0.2 } },
+      def: { d2: { sag: 0.2 }, d4: { sag: 0 }, d5: { sag: 0 }, d1: { path: [[7.6, 13.4], [9.2, 17.8]], t: [0.15, 0.75] } },
     },
     {
       title: '스태거',

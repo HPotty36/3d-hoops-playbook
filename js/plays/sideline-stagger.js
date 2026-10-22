@@ -59,7 +59,7 @@ export default {
           label: 'Switch', why: 'If [x5] switches out onto [2], [x2] is left behind [5]. [5] slips to the rim for the inbound pass.',
           steps: [
             { title: 'Switch', text: 'At [5]\'s screen, [x5] comes out and takes [2] at the top (the **switch**), and [x2], held up on the screen, is left behind [5].' },
-            { title: 'Screener slip', text: '[5] rolls down the lane with [x2] behind (the **slip**), catches [3]\'s inbound pass and lays it in.' },
+            { title: 'Screener slip', text: '[5] rolls down the lane around the outside of [x2] (the **slip**), catches [3]\'s inbound pass with [x2] behind and lays it in.' },
           ],
         },
       ],
@@ -167,16 +167,16 @@ export default {
           {
             title: '스크리너 슬립',
             dur: 1.8,
-            text: '[5]가 [x2]를 등 뒤에 두고 레인을 따라 굴러 내려오며(**슬립**), [3]의 인바운드 패스를 받아 레이업을 올립니다.',
+            text: '[5]가 [x2]의 바깥쪽으로 돌아 레인을 따라 굴러 내려오며(**슬립**), [x2]를 등 뒤에 둔 채 [3]의 인바운드 패스를 받아 레이업을 올립니다.',
             move: {
-              o5: { path: [[-4.4, 14.4], [-2.6, 8.6]], t: [0, 0.5] },
+              o5: { path: [[-7.4, 16.6], [-6.6, 14.2], [-3.8, 9], [-2.2, 7]], t: [0, 0.62] },
               o3: { path: [[-22.4, 17.4]], t: [0.45, 0.85] },
             },
             ball: [
-              { type: 'pass', to: 'o5', at: 0.3 },
-              { type: 'shot', at: 0.82, pts: 2 },
+              { type: 'pass', to: 'o5', at: 0.05 },
+              { type: 'shot', at: 0.86, pts: 2 },
             ],
-            def: { d2: { path: [[-4.8, 15.4], [-4, 12.2]], t: [0.1, 0.85] }, d5: { sag: 0 }, d4: { path: [[-11, 10]], t: [0, 0.2] }, d1: { sag: 0.2 } },
+            def: { d2: { path: [[-4.6, 14.4], [-3.4, 10.6]], t: [0.25, 0.9] }, d3: { sag: 0.3 }, d5: { sag: 0 }, d4: { path: [[-11, 10]], t: [0, 0.2] }, d1: { sag: 0.2 } },
           },
         ],
       },

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { compilePlay, ballAir, OFF, DEF } from '../js/engine.js';
 import { PLAYS, SECTIONS } from '../js/plays/index.js';
 import { readIds, variant, branchTime } from '../js/reads.js';
-import { sampleMotion, peakDefenseSpeed, situationViolations, inCoachFrame } from './helpers.mjs';
+import { sampleMotion, peakDefenseSpeed, situationViolations, inCoachFrame, passLaneViolations } from './helpers.mjs';
 import { LANGS, hasLabel } from '../js/i18n.js';
 
 const ID = /^[a-z0-9-]+$/;
@@ -153,14 +153,16 @@ const slob = (start) => ({
 });
 
 test('situation rules: inbounds come from the end-line or left-sideline spot', () => {
-  assert.deepEqual(violations(slob([-26.5, 18])), []);
+  assert.deepEqual(violations(slob([-25.6, 18])), []);
+  // 휴대폰의 코치 카메라는 코트 폭만큼만 보여서, 선에서 1.5 ft 떨어진 인바운더는 바깥 어깨가 잘린다
+  onlyOne(slob([-26.5, 18]), /left sideline/);
   const p = blob();
   // 선 위(코트 안)에 서면 인바운드로 보지 않으므로 다른 인바운드 규칙이 모두 건너뛰어진다. 자리 규칙이 잡아야 한다
   onlyOne({ ...p, start: { ...p.start, o1: [5, 0] } }, /end line/);
   onlyOne({ ...p, start: { ...p.start, o1: [11, -1.5] } }, /end line/);
   onlyOne(slob([-25, 18]), /left sideline/);
   // 막판 작전도 인바운드라면 두 자리 중 하나에서 넣는다
-  onlyOne({ ...slob([-26.5, 26]), category: 'late', situation: { period: 4, clock: 8, shotClock: null, score: [97, 100] } }, /neither inbound spot/);
+  onlyOne({ ...slob([-25.6, 26]), category: 'late', situation: { period: 4, clock: 8, shotClock: null, score: [97, 100] } }, /neither inbound spot/);
 });
 
 test('situation rules: the inbound pass leaves within 5 s', () => {
@@ -287,6 +289,15 @@ test('every play belongs to a library section', () => {
   const cats = SECTIONS.flatMap((s) => s.cats);
   for (const p of PLAYS) assert.ok(cats.includes(p.category), `${p.id}: category ${p.category}`);
 });
+
+// 특수 상황 작전의 패스는 수비나 같은 편의 몸통을 뚫고 지나가지 않는다 (공격 세트의 오래된 사례는 엔진 과제로 미뤄 둠)
+for (const play of PLAYS.filter((p) => SECTIONS.find((s) => s.id === 'situations').cats.includes(p.category))) {
+  for (const id of readIds(play)) {
+    test(`${play.id} [${id}]: passes do not fly through a body`, () => {
+      assert.deepEqual(passLaneViolations(compilePlay(variant(play, id))), []);
+    });
+  }
+}
 
 // 특수 상황 작전에만 situation이 있고, 숫자가 경기 시계로 말이 되어야 한다
 const SITUATION_CATS = SECTIONS.find((s) => s.id === 'situations').cats;

@@ -1,5 +1,5 @@
 // 테스트 공용 도구: 컴파일된 작전을 일정 간격으로 샘플링해 움직임을 검사한다.
-import { OFF, DEF, BASKET, dist2 } from '../js/engine.js';
+import { OFF, DEF, BASKET, dist2, ballAir } from '../js/engine.js';
 import { isInbound, clockAt } from '../js/clock.js';
 
 const bad = (p) => !Number.isFinite(p.x) || !Number.isFinite(p.z);
@@ -31,12 +31,12 @@ export function situationViolations(play, cp) {
     if (release == null) out.push(`${play.ball} starts out of bounds but never passes the ball in`);
     else if (release > 5) out.push(`inbound pass released at ${release.toFixed(2)}s (5 s limit)`);
   }
-  // 인바운드 자리: 엔드라인 뒤(z −2~−1, |x| 4~10) 또는 왼쪽 사이드라인 밖(x −27~−25.4, z 16~20).
+  // 인바운드 자리: 엔드라인 뒤(z −2~−1, |x| 4~10) 또는 왼쪽 사이드라인 바로 밖(x −25.9~−25.4, z 16~20).
   // 휴대폰의 코치 카메라는 코트 폭만큼만 보여서, 사이드라인 인바운더는 선 바로 밖(x ≈ −25.6)에 서야 몸이 다 보인다.
   // 인바운더가 선 위에 서면 인바운드로 보지 않아 위 규칙이 모두 건너뛰어지므로, 분류로도 확인한다
   const [sx, sz] = play.start[play.ball];
   const atBlob = sz >= -2 && sz <= -1 && Math.abs(sx) >= 4 && Math.abs(sx) <= 10;
-  const atSlob = sx >= -27 && sx <= -25.4 && sz >= 16 && sz <= 20;
+  const atSlob = sx >= -25.9 && sx <= -25.4 && sz >= 16 && sz <= 20;
   if (play.category === 'blob' && !atBlob) out.push(`${play.ball} must inbound from behind the end line (z ≈ −1.5, |x| 4–10), not (${sx}, ${sz})`);
   else if (play.category === 'slob' && !atSlob) out.push(`${play.ball} must inbound from outside the left sideline (x ≈ −25.6, z ≈ 18), not (${sx}, ${sz})`);
   else if (inbound && !atBlob && !atSlob) out.push(`${play.ball} inbounds from (${sx}, ${sz}), which is neither inbound spot`);
@@ -120,6 +120,37 @@ export function sampleMotion(cp, dt = 1 / 120) {
   const handoffs = cp.bsegs.filter((b) => b.type === 'flight' && b.kind === 'handoff')
     .map((b) => ({ who: b.who, to: b.target, at: b.t0, gap: dist2(cp.offAt(b.who, b.t0), cp.offAt(b.target, b.t0)) }));
   return { nan, maxOff, maxDef, whereDef, offGap, defGap, whereGap, attGap, whereAtt, shots, handoffs, offFrame };
+}
+
+// 패스 길: 날아가는 공이 수비(또는 같은 편) 몸통을 뚫고 지나가면 안 된다.
+// 패스하는 선수를 막는 수비는 빼고(공을 놓는 순간 바로 앞에 있다), 공이 8 ft 위로 넘어가는 롭·스킵 구간과
+// 손을 떠난 직후(12%)는 보지 않는다. 공의 중심이 몸통 안(0.9 ft)을 지나면 위반이다.
+// 받는 선수 곁의 수비가 1~1.5 ft까지 다가오는 것은 정상적인 견제라 잡지 않는다. 핸드오프는 손에서 손으로 건네므로 뺀다.
+export function passLaneViolations(cp) {
+  const out = [];
+  for (const b of cp.bsegs) {
+    if (b.type !== 'flight' || b.kind === 'handoff') continue;
+    const guard = DEF.find((d) => cp.guardOf(d, b.t0) === b.who);
+    let near = { g: Infinity };
+    for (let u = 0.12; u <= 0.99; u += 0.01) {
+      const t = b.t0 + u * (b.t1 - b.t0);
+      const ball = ballAir(b, t);
+      if (ball.y > 8) continue;
+      const d = cp.defense(t);
+      for (const id of DEF) {
+        if (id === guard) continue;
+        const g = Math.hypot(d[id].x - ball.x, d[id].z - ball.z);
+        if (g < near.g) near = { g, id, t };
+      }
+      for (const id of OFF) {
+        if (id === b.who || id === b.target) continue;
+        const p = cp.offAt(id, t), g = Math.hypot(p.x - ball.x, p.z - ball.z);
+        if (g < near.g) near = { g, id, t };
+      }
+    }
+    if (near.g < 0.9) out.push(`${b.who}→${b.target} ${b.kind} passes ${near.g.toFixed(2)} ft from ${near.id} @ ${near.t.toFixed(2)}s`);
+  }
+  return out;
 }
 
 // 수비만 촘촘하게 샘플링해 한 프레임짜리 튐(1/120초 간격에서는 안 보이는)을 잡는다
