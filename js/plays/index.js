@@ -27,6 +27,11 @@ import box from './box.js';
 import stack from './stack.js';
 import inbounderStagger from './inbounder-stagger.js';
 import backScreenLob from './back-screen-lob.js';
+import sidelineStagger from './sideline-stagger.js';
+import sidelineLob from './sideline-lob.js';
+import beatTheDeny from './beat-the-deny.js';
+import ram from './ram.js';
+import decoyCounter from './decoy-counter.js';
 
 // 작전 목록의 큰 갈래. 표시 이름은 i18n.js의 section.* / cat.* 키. 작전이 없는 갈래는 목록에서 숨긴다.
 export const SECTIONS = [
@@ -65,4 +70,9 @@ export const PLAYS = [
   stack,
   inbounderStagger,
   backScreenLob,
+  sidelineStagger,
+  sidelineLob,
+  beatTheDeny,
+  ram,
+  decoyCounter,
 ];

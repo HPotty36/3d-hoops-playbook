@@ -31,13 +31,14 @@ export function situationViolations(play, cp) {
     if (release == null) out.push(`${play.ball} starts out of bounds but never passes the ball in`);
     else if (release > 5) out.push(`inbound pass released at ${release.toFixed(2)}s (5 s limit)`);
   }
-  // 인바운드 자리: 엔드라인 뒤(z −2~−1, |x| 4~10) 또는 왼쪽 사이드라인 밖(x −27~−26, z 16~20).
+  // 인바운드 자리: 엔드라인 뒤(z −2~−1, |x| 4~10) 또는 왼쪽 사이드라인 밖(x −27~−25.4, z 16~20).
+  // 휴대폰의 코치 카메라는 코트 폭만큼만 보여서, 사이드라인 인바운더는 선 바로 밖(x ≈ −25.6)에 서야 몸이 다 보인다.
   // 인바운더가 선 위에 서면 인바운드로 보지 않아 위 규칙이 모두 건너뛰어지므로, 분류로도 확인한다
   const [sx, sz] = play.start[play.ball];
   const atBlob = sz >= -2 && sz <= -1 && Math.abs(sx) >= 4 && Math.abs(sx) <= 10;
-  const atSlob = sx >= -27 && sx <= -26 && sz >= 16 && sz <= 20;
+  const atSlob = sx >= -27 && sx <= -25.4 && sz >= 16 && sz <= 20;
   if (play.category === 'blob' && !atBlob) out.push(`${play.ball} must inbound from behind the end line (z ≈ −1.5, |x| 4–10), not (${sx}, ${sz})`);
-  else if (play.category === 'slob' && !atSlob) out.push(`${play.ball} must inbound from outside the left sideline (x ≈ −26.5, z ≈ 18), not (${sx}, ${sz})`);
+  else if (play.category === 'slob' && !atSlob) out.push(`${play.ball} must inbound from outside the left sideline (x ≈ −25.6, z ≈ 18), not (${sx}, ${sz})`);
   else if (inbound && !atBlob && !atSlob) out.push(`${play.ball} inbounds from (${sx}, ${sz}), which is neither inbound spot`);
   // 슛 뒤 여유 시간(cp.end까지)에도 수비는 움직이므로 끝까지 본다
   for (let t = 0; t <= cp.end; t += 1 / 60) {

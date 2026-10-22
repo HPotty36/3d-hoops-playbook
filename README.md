@@ -1,13 +1,13 @@
 <p align="center"><img src="assets/logo-mark.svg" width="72" alt="3D Hoops Playbook logo"></p>
 <h1 align="center">3D Hoops Playbook</h1>
 <p align="center">
-  24 offensive sets and 4 special-situation plays from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
+  24 offensive sets and 9 special-situation plays from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
   <a href="https://hpotty36.github.io/3d-hoops-playbook/"><b>Live demo →</b></a>
 </p>
 
-An interactive playbook that replays **24 offensive sets and 4 special-situation plays commonly run in pro basketball** on a 3D half court, step by step.
+An interactive playbook that replays **24 offensive sets and 9 special-situation plays commonly run in pro basketball** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
-Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 98 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
+Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 113 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
@@ -52,6 +52,11 @@ Inbound plays and end-of-game sets. Each one shows a broadcast-style score bug n
 | 26 | Stack | Baseline out of bounds | ●○○ | Four in a line break at once, and the screener rolls to the rim | Stay home · Switch · Packed paint |
 | 27 | Inbounder Stagger | Baseline out of bounds | ●●○ | The shooter inbounds, steps in and runs off a stagger for three | Trail · Switch · Top lock |
 | 28 | Back-Screen Lob | Baseline out of bounds | ●●● | A back screen at the top for an alley-oop at the rim | Deny · Switch · Help |
+| 29 | Sideline Stagger | Sideline out of bounds | ●●○ | The shooter runs the baseline, then comes up a stagger to the top for three | Trail · Top lock · Switch |
+| 30 | Sideline Lob | Sideline out of bounds | ●●○ | A back screen at the elbow for a lob from the sideline | Caught on the screen · Switch · Help |
+| 31 | Beat the Deny | Sideline out of bounds | ●○○ | A down screen to get the guard open, straight into a pick and roll | Normal · Deny · Switch |
+| 32 | Ram | After timeout | ●●● | A wing screens the big's defender first, then the big sets the ball screen | Drop · Switch · Hedge |
+| 33 | Decoy and Counter | After timeout | ●●● | Show the pin-down the defense scouted, then cut the other way | Overplay · Normal · Switch |
 
 Each play comes with **step-by-step breakdown · when to use it · key teaching points · how defenses counter it · famous examples**.
 
@@ -244,9 +249,9 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 3D Hoops Playbook
 
-프로 농구에서 자주 쓰이는 공격 작전 24가지와 특수 상황 작전 4가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
+프로 농구에서 자주 쓰이는 공격 작전 24가지와 특수 상황 작전 9가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
-작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 98가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
+작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 113가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
 
@@ -289,6 +294,11 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | 26 | 스택 | 베이스라인 인바운드 | ●○○ | 한 줄로 선 네 명이 한꺼번에 흩어지고 스크리너가 림으로 롤 | 그대로 · 스위치 · 페인트 몰림 |
 | 27 | 인바운더 스태거 | 베이스라인 인바운드 | ●●○ | 공을 넣은 슈터가 들어와 스태거를 타고 3점 | 트레일 · 스위치 · 탑 락킹 |
 | 28 | 백스크린 롭 | 베이스라인 인바운드 | ●●● | 탑의 백스크린으로 림 앞 앨리웁 | 디나이 · 스위치 · 도움 수비 |
+| 29 | 사이드라인 스태거 | 사이드라인 인바운드 | ●●○ | 슈터가 베이스라인을 건너와 스태거를 타고 탑에서 3점 | 트레일 · 탑 락킹 · 스위치 |
+| 30 | 사이드라인 롭 | 사이드라인 인바운드 | ●●○ | 엘보의 백스크린으로 사이드라인에서 롭 패스 | 스크린에 걸림 · 스위치 · 도움 수비 |
+| 31 | 디나이 깨기 | 사이드라인 인바운드 | ●○○ | 다운 스크린으로 가드를 빼내 곧바로 픽 앤 롤 | 기본 수비 · 디나이 · 스위치 |
+| 32 | 램 | 타임아웃 후 작전 | ●●● | 윙이 먼저 빅맨의 수비를 막고, 빅맨이 볼 스크린 | 드롭 · 스위치 · 헤지 |
+| 33 | 미끼 & 역습 | 타임아웃 후 작전 | ●●● | 상대가 준비한 핀다운을 보여 주고 반대로 끊어 들어가기 | 오버플레이 · 기본 수비 · 스위치 |
 
 작전마다 **단계별 진행 · 이럴 때 쓴다 · 핵심 포인트 · 수비는 어떻게 막나 · 대표 사례**가 들어 있습니다.
 
