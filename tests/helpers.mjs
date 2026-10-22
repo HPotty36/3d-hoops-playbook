@@ -16,6 +16,10 @@ export function sampleMotion(cp, dt = 1 / 120) {
   let nan = false, maxOff = 0, maxDef = 0, whereDef = '', offGap = Infinity, defGap = Infinity, whereGap = '';
   let attGap = Infinity, whereAtt = '', offFrame = '';
   let prevO = cp.offense(0), prevD = cp.defense(0);
+  // 화면 밖 검사는 첫 장면(t = 0)부터 한다
+  for (const [id, p] of [...Object.entries(prevO), ...Object.entries(prevD)]) {
+    if (!offFrame && !inCoachFrame(p)) offFrame = `${id} (${p.x.toFixed(1)}, ${p.z.toFixed(1)}) @ 0.00s`;
+  }
   for (let t = dt; t <= cp.end; t += dt) {
     const o = cp.offense(t), d = cp.defense(t);
     for (const [id, p] of [...Object.entries(o), ...Object.entries(d)]) {

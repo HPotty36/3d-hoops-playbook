@@ -21,7 +21,7 @@ export default {
     { name: '도움 수비', desc: '약한 쪽 수비가 림을 지키러 내려옵니다. 그 대신 그 수비가 떠난 코너가 빕니다.', read: 'help' },
   ],
   famous:
-    '1950년대 미국 공군사관학교의 밥 스피어 감독이 만든 셔플 오펜스의 대표 동작입니다.',
+    '1950년대 미국 공군사관학교의 밥 스피어 감독 팀이 널리 알린 셔플 오펜스의 대표 동작입니다.',
 
   en: {
     name: 'Shuffle Cut',
@@ -41,7 +41,7 @@ export default {
       { name: 'Help', desc: 'A weak-side defender drops to protect the rim, leaving the corner that defender came from open.' },
     ],
     famous:
-      'The signature cut of the shuffle offense that Bob Spear built at the Air Force Academy in the 1950s.',
+      'The signature cut of the shuffle offense, made famous by Bob Spear\'s Air Force Academy teams in the 1950s.',
     steps: [
       { title: 'Pass to the wing', text: '[1] passes to [2] on the right wing. [3] on the far wing and [5] at the left elbow get ready for the next move.' },
       { title: 'Shuffle cut', text: '[3] cuts over [5]\'s screen and dives diagonally toward the right block (the **shuffle cut**). [x3] runs into [5] and falls behind.' },

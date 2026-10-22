@@ -4,7 +4,7 @@ export default {
   name: '트레일러 팝',
   category: 'early',
   difficulty: 1,
-  aliases: ['trailer', 'drag and pop', '트레일러'],
+  aliases: ['trailer', 'drag and pop', '트레일러', '드래그 앤 팝'],
   summary:
     '공수 전환에서 먼저 림으로 달려간 [5] 뒤로, 늦게 따라오는 빅맨 [4](**트레일러**)가 [1]에게 스크린을 걸고 3점 라인 밖으로 빠집니다(**팝**). 수비 빅맨은 림을 지키느라 트레일러를 놓치기 쉽습니다.',
   when:
@@ -57,7 +57,7 @@ export default {
         {
           label: 'Switch', why: 'If the defense switches the screen, the small [x1] ends up on the big, [4]. [4] goes to the post.',
           steps: [
-            { title: 'Switch', text: '[x4] takes [1] (the **switch**) and [x1] takes [4]. Instead of popping, [4] heads down to the post and pins the smaller [x1] on the back (the **seal**).' },
+            { title: 'Switch', text: '[x4] takes [1] (the **switch**) and [x1] takes [4]. Instead of popping, [4] heads down to the post and seals the smaller [x1] behind (the **seal**).' },
             { title: 'Post-up', text: '[1] feeds [4] in the post, and [4] spins once and finishes at the rim.' },
           ],
         },

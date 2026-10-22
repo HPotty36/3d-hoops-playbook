@@ -11,7 +11,7 @@ export default {
     '빅맨도 패스를 잘하는 팀이, 수비가 패스 길을 공격적으로 막을 때 씁니다.',
   keys: [
     '[1]은 [2]에게 패스한 뒤 잠깐 멈춰, [x1]이 공 쪽을 보게 만듭니다.',
-    '[5]는 하이포스트에서 내려와 [x1]의 등 뒤, 림 쪽에 섭니다(**백스크린**).',
+    '[5]는 하이포스트에서 왼쪽 엘보 쪽으로 옆걸음해 [x1]의 등 뒤, 림 쪽에 섭니다(**백스크린**).',
     '[1]은 [5]의 어깨를 스치며 림으로 컷합니다. 막히면 멈추지 말고 빈자리로 빠집니다.',
     '[5]는 컷이 끝나면 바로 다음 스크린(**플레어 스크린**)을 찾아 움직입니다.',
   ],
@@ -31,7 +31,7 @@ export default {
       'For teams whose bigs can pass, especially against a defense that aggressively denies passing lanes.',
     keys: [
       '[1] passes to [2] and pauses for a moment so [x1] turns to look at the ball.',
-      '[5] steps down from the high post and stands behind [x1], on the rim side (the **back screen**).',
+      '[5] slides across from the high post to the left elbow and stands behind [x1], on the rim side (the **back screen**).',
       '[1] cuts off [5]\'s shoulder to the rim. If it is covered, keep moving into open space.',
       'As soon as the cut is over, [5] moves on to the next screen (the **flare screen**).',
     ],
@@ -41,9 +41,9 @@ export default {
       { name: 'Chase over', desc: '[x1] chases [1] tight over the top of the screen. It stops the cut, but [x1] has to rush out when [1] pops to the wing.' },
     ],
     famous:
-      'Refined by Pete Carril at Princeton University, and brought to the pro game by the Sacramento Kings of the early 2000s.',
+      'Refined by Pete Carril at Princeton University, and made famous in the pro game by the Sacramento Kings of the early 2000s.',
     steps: [
-      { title: 'Slot pass & back screen', text: '[1] passes from the left slot to [2] on the right, and [5] steps down from the high post to stand behind [x1], on the rim side (the **back screen**).' },
+      { title: 'Slot pass & back screen', text: '[1] passes from the left slot to [2] on the right, and [5] slides across from the high post to the left elbow, behind [x1] on the rim side (the **back screen**).' },
       { title: 'Chin cut', text: '[1] cuts off [5]\'s back screen toward the rim (the **chin cut**). [x1], who was watching the ball, runs into [5] and falls behind.' },
       { title: 'Layup', text: '[2] bounces it to [1] cutting to the rim, and [1] lays it in.' },
     ],
@@ -75,7 +75,7 @@ export default {
     {
       title: '슬롯 패스 & 백스크린',
       dur: 1.8,
-      text: '왼쪽 슬롯의 [1]이 오른쪽 슬롯의 [2]에게 패스하고, 하이포스트의 [5]가 내려와 [x1]의 등 뒤, 림 쪽에 섭니다(**백스크린**).',
+      text: '왼쪽 슬롯의 [1]이 오른쪽 슬롯의 [2]에게 패스하고, 하이포스트의 [5]가 왼쪽 엘보 쪽으로 옆걸음해 [x1]의 등 뒤, 림 쪽에 섭니다(**백스크린**).',
       move: { o5: { path: [[-3.6, 19.4], [-6.4, 19.8]], t: [0.35, 1] } },
       ball: [{ type: 'pass', to: 'o2', at: 0.3 }],
       screens: [{ by: 'o5', face: [-8, 22.6], hold: 0.5 }],

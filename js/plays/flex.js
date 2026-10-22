@@ -31,7 +31,7 @@ export default {
       'When you want to move the ball patiently for high-percentage shots, and both bigs and guards can screen and cut.',
     keys: [
       'The cut starts the moment [2] swings the ball to [1] (the **ball reversal**).',
-      '[5] holds the block and blocks the path of [x3] coming from the corner side.',
+      '[5] holds the block in [x3]\'s path from the corner side.',
       '[3] brushes [5]\'s shoulder and crosses the lane to the opposite block.',
       'After passing, [2] gets ready to come down and screen for [5] as the next move.',
     ],

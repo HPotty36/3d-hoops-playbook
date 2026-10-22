@@ -56,3 +56,8 @@ test('while composing, the difficulty filter counts when deciding', () => {
   const other = [1, 2, 3].find((n) => n !== lvl);
   assert.equal(composingQuery(PLAYS, 'ho', 'horns', other), 'ho');
 });
+
+// 영어 'drag'가 더블 드래그와 트레일러 팝을 함께 찾듯, 한국어 '드래그'도 둘 다 찾는다
+test('the Korean word for drag finds Trailer Pop too', () => {
+  assert.ok(ids(filterPlays(PLAYS, '드래그', 0)).includes('trailer-pop'));
+});

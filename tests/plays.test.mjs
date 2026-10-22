@@ -92,28 +92,31 @@ for (const play of PLAYS) {
 }
 
 // 겹침 구간 캐시가 있어도 위치는 t만의 함수여야 한다: 묻는 순서를 섞어도 같은 결과
-test('defense positions do not depend on query order', () => {
-  const cases = [['pick-and-roll', 'hedge'], ['spain-pick-and-roll', 'all-switch'], ['floppy', 'trail']];
-  for (const [pid, rid] of cases) {
-    const play = PLAYS.find((p) => p.id === pid);
-    const a = compilePlay(variant(play, rid)), b = compilePlay(variant(play, rid));
-    const ts = [];
-    for (let t = 0; t <= a.end; t += 1 / 60) ts.push(t);
-    const seq = ts.map((t) => a.defense(t));
-    let seed = 12345;
-    const rnd = () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
-    const order = ts.map((_, i) => i);
-    for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
-    const shuffled = [];
-    for (const i of order) shuffled[i] = b.defense(ts[i]);
-    ts.forEach((t, i) => {
-      for (const d of DEF) {
-        const l = Math.hypot(seq[i][d].x - shuffled[i][d].x, seq[i][d].z - shuffled[i][d].z);
-        assert.ok(l < 1e-4, `${pid} [${rid}] ${d} differs by ${l.toExponential(2)} ft at ${t.toFixed(3)}s`);
-      }
+// 모든 작전 × 읽기: 1/60초 격자와 격자 밖 임의 시각 200개를, 순서대로 한 번, 섞어서 한 번 묻는다
+for (const play of PLAYS) {
+  for (const rid of readIds(play).length ? readIds(play) : [null]) {
+    const label = rid ? `${play.id} [${rid}]` : play.id;
+    test(`${label}: defense positions do not depend on query order`, () => {
+      const a = compilePlay(variant(play, rid)), b = compilePlay(variant(play, rid));
+      let seed = 12345;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
+      const ts = [];
+      for (let t = 0; t <= a.end; t += 1 / 60) ts.push(t);
+      for (let i = 0; i < 200; i++) ts.push(rnd() * a.end);
+      const seq = ts.map((t) => a.defense(t));
+      const order = ts.map((_, i) => i);
+      for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+      const shuffled = [];
+      for (const i of order) shuffled[i] = b.defense(ts[i]);
+      ts.forEach((t, i) => {
+        for (const d of DEF) {
+          const l = Math.hypot(seq[i][d].x - shuffled[i][d].x, seq[i][d].z - shuffled[i][d].z);
+          assert.ok(l < 1e-4, `${label} ${d} differs by ${l.toExponential(2)} ft at ${t.toFixed(3)}s`);
+        }
+      });
     });
   }
-});
+}
 
 // 재생이 끝나 멈춰 있어도 화면은 매 프레임 defense(end + 앞보기)를 묻는다. 그때마다 캐시가 자라면 안 된다.
 test('idling past the end does not grow the collision cache', () => {
@@ -140,8 +143,10 @@ test('play ids are unique and URL-safe', () => {
 test('search aliases contain no names from the famous examples', () => {
   const names = new Set();
   for (const p of PLAYS) {
-    // 문장 첫 단어(The, Shooting …)는 고유명사가 아니므로 뺀다. 대문자 약칭(학교·구단 이름)도 잡는다.
-    for (const w of (p.en?.famous || '').match(/(?<!(?:^|[.!?])\s*)\b[A-Z][A-Za-z]{2,}\b/g) || []) names.add(w.toLowerCase());
+    // 문장 첫 단어(The, Shooting …)는 고유명사가 아니므로 뺀다. 대문자 약칭(학교·구단 이름)은 문장 첫머리여도 잡는다.
+    const famous = p.en?.famous || '';
+    for (const w of famous.match(/(?<!(?:^|[.!?])\s*)\b[A-Z][A-Za-z]{2,}\b/g) || []) names.add(w.toLowerCase());
+    for (const w of famous.match(/\b[A-Z]{2,}\b/g) || []) names.add(w.toLowerCase());
   }
   const hits = PLAYS.flatMap((p) => (p.aliases || [])
     .filter((a) => a.split(/[\s-]+/).some((w) => names.has(w.toLowerCase())))

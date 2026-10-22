@@ -61,7 +61,7 @@ export default {
         {
           label: 'Switch', why: 'If the defense switches the screen, the small [x1] ends up on the big, [5]. [5] goes to the post.',
           steps: [
-            { title: 'Switch', text: '[x5] goes with [1] on the cut and [x1] takes [5] (the **switch**). [5] rolls down toward the block and pins the smaller [x1] on the back (the **seal**).' },
+            { title: 'Switch', text: '[x5] goes with [1] on the cut and [x1] takes [5] (the **switch**). [5] rolls down toward the block and seals the smaller [x1] behind (the **seal**).' },
             { title: 'Post seal', text: '[2] feeds [5] in the post, and [5] turns and finishes at the rim.' },
           ],
         },
