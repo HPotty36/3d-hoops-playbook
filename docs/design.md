@@ -16,6 +16,7 @@
 | `players.js` | Player model and poses, ball model | three |
 | `notation.js` | Turns notation data into floor ribbon meshes with per-step opacity | engine |
 | `camera.js` | Camera presets, aspect-ratio fitting, ball follow | OrbitControls |
+| `clock.js` | Game clock, shot clock and score at time `t` for special-situation plays, and the score bug's view. Pure, no DOM | — |
 | `reads.js` | Turns a play plus a read id into an ordinary play (shared steps + that read's steps); read labels per language. Pure, no DOM | — |
 | `reads-ui.js` | Read tabs above the timeline and the branch-point prompt over the court | — |
 | `library.js` | Searchable, sectioned play list (`filterPlays` is pure and tested) | reads |
@@ -36,7 +37,7 @@
   - Each compiled play caches the windows it has found, keyed by the pair, so a call costs about 0.1 ms on a desktop (three calls per frame). A window never spans the branch point (it is cut there, with the same angle on both sides), so every read shares the opening exactly, and `defense(t)` is clamped to the play's length so a paused last frame adds nothing to the cache.
   - At step boundaries, positions are blended over 0.5 s from the previous spot to the new target. Blending uses the positions before collision handling, so the push is applied exactly once.
 - Because everything is a function of `t`, timeline scrubbing and step jumps always land on exactly the same frame.
-- Every player stays inside what the default coach camera shows on a 16:10 desktop screen: the full court width up to z = 36 ft and the middle (|x| ≤ 12 ft) up to z = 38.5 ft (z = 40 ft minus a margin for the floor rings). Early offense therefore starts as the ball crosses about 6–9 ft past the arc, with players already running in, rather than at half court. `npm test` checks it for every play and read.
+- Every player stays inside what the default coach camera shows on a 16:10 desktop screen: the full court width up to z = 36 ft and the middle (|x| ≤ 12 ft) up to z = 38.5 ft (z = 40 ft minus a margin for the floor rings). Early offense therefore starts as the ball crosses about 6–9 ft past the arc, with players already running in, rather than at half court. Behind the end line the frame reaches z = −2.5 ft, and beyond the left sideline x = −26.6 ft up to z = 20 ft, for inbounders; the right sideline is cut off by the broadcast camera, which sits on that side, so nobody stands past it. `npm test` checks it for every play and read, from `t = 0`.
 
 ## Reads (defensive branches)
 
@@ -45,10 +46,18 @@
 - Playing from the start stops at the branch point and asks how the defense plays it. Step mode waits, Auto/Relaxed continue with the current tab after the reading time, Off never asks. While the prompt is open the caption stays on the last shared step so it does not give the answer away.
 - Tabs above the timeline switch reads at any time; a ◆ marks the branch point. The first step after the branch shows a one-line "why". Counters with an animated read get a Watch button. `?read=<id>` links to a read.
 
+## Special situations
+
+- Plays in the situations section (baseline and sideline out of bounds, end of game, after timeout) carry `situation: { period, clock, shotClock, score: [offense, defense] }`. It is numbers only, so it needs no translation; goals such as "must score a three" stay in the summary.
+- **Inbounds:** the play's starting ball holder starts out of bounds: behind the end line at z ≈ −1.5 ft beside the rim (|x| 4–10 ft) for baseline plays, or outside the left sideline at x ≈ −26.5 ft, z ≈ 18 ft for sideline plays. The first ball event is the inbound pass, and the inbounder steps onto the court within 1 s of releasing it. Automatic defense needs nothing new: the inbounder's defender already stands about 3 ft toward the rim, and off-ball defenders never go below z = 1.2 ft.
+- **Clock (`clock.js`):** the game clock starts at the first catch on the court (the end of the first ball flight) for inbound plays, and at `t = 0` otherwise. It stops when the last shot reaches the rim and never goes below 0.0. The offense's points go up at each scoring time. The shot clock runs from the same start and is hidden when it is null or longer than the game clock. All of it is a function of `t`, so reading pauses and the branch prompt freeze it.
+- **Score bug:** a pill next to the play title, `4Q · 7.5 · 98 – 98`, with the scores on jersey-colored chips (offense orange, defense blue) and the shot clock small at the right end. Under 60 s the clock shows tenths, truncated as broadcasts do; under 5 s it turns the accent color. Overtime reads `OT` / `연장`. It is never drawn over the court. When the toolbar row is too narrow for the title, the bug and the camera and language buttons, the bug moves under the title and the buttons wrap below; on phones it takes its own row.
+- **Rule checks** (`npm test`, every play and read): the inbound pass leaves within 5 s; only the inbounder is ever out of bounds, and only until 1 s after the pass; defenders never leave the court; nobody uses the right sideline; a shown shot clock never runs out before the shot; in end-of-game plays the last shot leaves before the buzzer, and a catch with under 0.3 s left allows only a finish at the rim.
+
 ## Library
 
 - `SECTIONS` in `js/plays/index.js` groups categories into offense sets, special situations and defensive schemes; empty sections are hidden.
-- Offense sets have five categories, in this order: on-ball screens, off-ball screens, motion & drive, early offense, and system offenses.
+- Offense sets have five categories, in this order: on-ball screens, off-ball screens, motion & drive, early offense, and system offenses. Special situations have four: baseline out of bounds, sideline out of bounds, end of game, and after timeout.
 - System offenses (Flex, Princeton Chin, Delay, Sideline Triangle) show one representative cycle of their continuity with its reads, not the whole repeating loop.
 - Search matches Korean names, English names and `aliases` regardless of UI language, ignoring case, spaces and hyphens. Difficulty chips use the same dots as the list. Collapsed sections are remembered.
 - On screens up to 1100 px wide, the play title opens the same library in a bottom sheet instead of a horizontal strip.
