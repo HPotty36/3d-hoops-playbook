@@ -61,8 +61,8 @@ export default {
         {
           label: 'Switch', why: 'If the defense switches the screen, the small [x3] ends up on the big, [5]. [5] attacks that mismatch in the post.',
           steps: [
-            { title: 'Switch', text: '[x5] takes [3] on the cut and [x3] takes [5] (the **switch**). [5] steps into the lane and keeps the smaller [x3] behind.' },
-            { title: 'Post mismatch', text: '[1] lofts the entry over [x3] to [5], who finishes at the rim.' },
+            { title: 'Switch', text: '[x5] takes [3] on the cut and [x3] takes [5] (the **switch**). Now the smaller [x3] is stuck behind the big, [5].' },
+            { title: 'Post mismatch', text: '[5] steps into the lane with the smaller [x3] behind, catches [1]\'s lob over [x3] and finishes at the rim.' },
           ],
         },
       ],
@@ -120,7 +120,10 @@ export default {
               o3: { path: [[12.6, 8.8], [6.2, 10.2], [0.2, 8.6], [-3.8, 7.6]], t: [0.05, 0.9] },
               o2: { path: [[8.6, 18.6], [5.8, 12]], t: [0.2, 0.9] },
             },
-            screens: [{ by: 'o2', face: [3.6, 10.6], hold: 0.5 }],
+            screens: [
+              { by: 'o2', face: [3.6, 10.6], hold: 0.5 },
+              { by: 'o5', face: [11.6, 6.4], hold: 0.4 },
+            ],
             def: {
               d3: { path: [[11.4, 7.4], [8.6, 8.6], [4.6, 9.4]], t: [0.15, 1] },
               d5: { path: [[3.4, 8.4], [-1.4, 7.6]], t: [0.25, 0.8] },
@@ -153,11 +156,11 @@ export default {
           {
             title: '스위치',
             dur: 1.9,
-            text: '[x5]가 컷하는 [3]을 넘겨받고, [x3]가 [5]를 맡습니다(**스위치**). [5]는 페인트 쪽으로 한 걸음 들어서며 작은 [x3]를 등 뒤에 둡니다.',
+            text: '[x5]가 컷하는 [3]을 넘겨받고, [x3]가 [5]를 맡습니다(**스위치**). 이제 작은 [x3]가 빅맨 [5]의 등 뒤에 붙어 있습니다.',
             move: {
               o3: { path: [[12.6, 8.8], [6.2, 10.2], [0.2, 8.6], [-3.8, 7.6]], t: [0.05, 0.9] },
-              o5: { path: [[4.6, 7.4]], t: [0.6, 0.95] },
             },
+            screens: [{ by: 'o5', face: [11.6, 6.4], hold: 0.4, on: 'd3' }],
             def: {
               d5: { guard: 'o3', path: [[4.4, 10.6], [-1.6, 9.4]], t: [0.2, 0.9] },
               d3: { guard: 'o5', path: [[11.4, 7.6], [8.4, 9.8], [5.6, 10.2]], t: [0.15, 1] },
@@ -166,13 +169,13 @@ export default {
           {
             title: '포스트 미스매치',
             dur: 1.8,
-            text: '[1]이 [x3] 머리 위로 [5]에게 공을 띄워 넣고, [5]가 림 앞에서 마무리합니다.',
-            move: { o5: { path: [[2.4, 6.6]], t: [0.45, 0.72] } },
+            text: '[5]가 페인트 쪽으로 한 걸음 들어서며 작은 [x3]를 등 뒤에 두고, [1]이 [x3] 머리 위로 띄워 준 공을 받아 림 앞에서 마무리합니다.',
+            move: { o5: { path: [[4.6, 7.4], [2.4, 6.6]], t: [0, 0.72] } },
             ball: [
-              { type: 'lob', to: 'o5', at: 0.1 },
+              { type: 'lob', to: 'o5', at: 0.12 },
               { type: 'shot', at: 0.84, pts: 2 },
             ],
-            def: { d3: { path: [[4.4, 9.8]], t: [0, 0.6] } },
+            def: { d3: { path: [[4.6, 9.8]], t: [0, 0.6] } },
           },
         ],
       },

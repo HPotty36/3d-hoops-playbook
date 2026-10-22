@@ -215,8 +215,11 @@ function openPrompt() {
   if (state.readMode === 'step') {
     state.prompt = { wait: true };
     state.playing = false;
-    // 단계별 모드에서는 선택지가 기다리므로 지금 읽기 버튼으로 포커스를 옮긴다(스크린 리더가 질문을 읽도록)
-    $('#branch-prompt .bp-options button.current')?.focus();
+    // 단계별 모드에서는 선택지가 기다리므로 지금 읽기 버튼으로 포커스를 옮긴다(스크린 리더가 질문을 읽도록).
+    // 검색창 같은 입력란에 타이핑 중이면 포커스를 빼앗지 않는다
+    if (!document.activeElement?.closest('input, textarea, select')) {
+      $('#branch-prompt .bp-options button.current')?.focus();
+    }
   } else {
     const total = readTime(m.prompt) * READ_FACTOR[state.readMode];
     state.prompt = { remaining: total, total };

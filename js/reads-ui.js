@@ -29,6 +29,8 @@ export function createReadsUI({ tabs, prompt, tr, fmt, onTab, onPick }) {
   function showPrompt(meta, currentId) {
     current = currentId;
     const cur = meta.reads.find((r) => r.id === currentId) || meta.reads[0];
+    // 먼저 보이게 한 뒤 내용을 채운다: 보이는 영역에 새로 들어온 내용이어야 스크린 리더가 읽는다
+    prompt.hidden = false;
     prompt.innerHTML = `
       <p class="bp-eyebrow">${esc(tr('branch.title'))}</p>
       <p class="bp-q" id="bp-q">${fmt(meta.prompt)}</p>
@@ -39,7 +41,6 @@ export function createReadsUI({ tabs, prompt, tr, fmt, onTab, onPick }) {
         <span class="bp-hint">${esc(tr('branch.continue', { label: cur.label }))} <kbd>Enter</kbd></span>
       </div>`;
     prompt.querySelectorAll('.bp-options button').forEach((b) => b.addEventListener('click', () => onPick(b.dataset.read)));
-    prompt.hidden = false;
   }
 
   function hidePrompt() {
