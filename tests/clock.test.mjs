@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { compilePlay } from '../js/engine.js';
-import { isInbound, clockStart, clockStop, clockAt, formatClock } from '../js/clock.js';
+import { isInbound, clockStart, clockStop, clockAt, formatClock, scoreBugView } from '../js/clock.js';
 
 const near = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-6, `${msg}: ${a} vs ${b}`);
 
@@ -95,4 +95,20 @@ test('the shot clock runs with the game clock, and hides when it is longer', () 
   assert.equal(clockAt(short, compilePlay(short), 1).shot, null);
   const none = halfCourt({ period: 4, clock: 30, shotClock: null, score: [90, 90] });
   assert.equal(clockAt(none, compilePlay(none), 1).shot, null);
+});
+
+test('scoreBugView: what the broadcast-style bug shows', () => {
+  const none = halfCourt(undefined);
+  assert.equal(scoreBugView(none, compilePlay(none), 0), null);
+  const play = halfCourt({ period: 4, clock: 7.5, shotClock: null, score: [98, 98] });
+  const cp = compilePlay(play);
+  assert.deepEqual(scoreBugView(play, cp, 0), { period: 4, clock: '7.5', urgent: false, shot: null, score: [98, 98] });
+  assert.equal(scoreBugView(play, cp, 2).urgent, false);
+  assert.equal(scoreBugView(play, cp, 2.6).urgent, true);
+  assert.equal(scoreBugView(play, cp, 2.6).clock, '4.9');
+  const sc = halfCourt({ period: 2, clock: 400, shotClock: 14, score: [40, 40] });
+  assert.equal(scoreBugView(sc, compilePlay(sc), 0).shot, '14');
+  assert.equal(scoreBugView(sc, compilePlay(sc), 0.5).shot, '14');
+  assert.equal(scoreBugView(sc, compilePlay(sc), 1.2).shot, '13');
+  assert.equal(scoreBugView(sc, compilePlay(sc), 0).clock, '6:40');
 });

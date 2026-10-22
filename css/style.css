@@ -209,9 +209,29 @@ kbd {
   display: flex; align-items: center; justify-content: space-between; gap: 8px 16px;
   padding: 0 4px 0 8px;
 }
-.play-head { min-width: 0; }
-.play-meta { margin: 0; font-size: 13px; line-height: 1.4; color: var(--text-3); }
-.play-head h2 { margin: 1px 0 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.play-head { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; }
+.play-meta { flex-basis: 100%; margin: 0; font-size: 13px; line-height: 1.4; color: var(--text-3); }
+.play-head h2 { min-width: 0; margin: 1px 0 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 스코어 버그: 중계 화면의 알약 모양. 코트 위가 아니라 제목 옆에 둔다 */
+.score-bug { flex: none; margin: 2px 0 0; }
+.score-bug[hidden] { display: none; }
+/* 버그가 보이면 제목 칸이 내용보다 좁아지지 않는다. 자리가 모자라면 카메라·언어 버튼 줄이 아래로 내려간다 */
+.toolbar:has(#score-bug:not([hidden])) { flex-wrap: wrap; }
+.play-head:has(#score-bug:not([hidden])) { flex: 1 0 auto; width: min-content; max-width: 100%; }
+.sb-vis {
+  display: inline-flex; align-items: center; gap: 7px; padding: 3px 4px 3px 12px; border-radius: 999px;
+  background: var(--panel); color: var(--text-2); font-size: 13px; font-weight: 600; line-height: 1;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.sb-vis i { font-style: normal; color: var(--text-3); }
+.sb-clock { color: var(--text); }
+.sb-clock.urgent { color: var(--accent-text); }
+.sb-o, .sb-d { min-width: 30px; padding: 5px 8px; border-radius: 999px; text-align: center; font-weight: 600; }
+.sb-o { background: var(--accent); color: var(--on-accent); }
+.sb-d { background: var(--def); color: #fff; }
+.sb-shot { padding: 0 6px 0 2px; font-size: 11px; color: var(--text-3); }
+.sb-shot[hidden] { display: none; }
 .tool-right { display: flex; align-items: center; gap: 8px; }
 .toolbar .seg { padding: 4px; background: var(--panel); }
 .toolbar .seg button { min-height: 36px; min-width: 44px; padding: 0 12px; }
@@ -493,6 +513,7 @@ kbd {
   .view { flex: none; height: 60vh; min-height: 320px; }
   .toolbar { padding: 0 4px; }
   .play-meta { display: block; }
+  .play-head h2 { flex-basis: 100%; }
   #info { overflow: visible; padding: 22px 18px 28px; }
 }
 @media (max-width: 680px) {
@@ -500,8 +521,10 @@ kbd {
   .brand-sub { display: none; }
   .brand-mark { width: 34px; height: 34px; }
   .toolbar { flex-wrap: wrap; }
-  .play-head { flex: 1; }
-  .play-head h2 { font-size: 22px; white-space: normal; }
+  /* 제목 줄 옆에 언어·테마 버튼이 붙고, 스코어 버그는 그 아래 한 줄을 따로 쓴다 (버튼 밑으로 넘치지 않게) */
+  .play-head { display: contents; }
+  .play-head h2 { flex: 1 1 0; font-size: 22px; white-space: normal; }
+  .score-bug { order: 2; flex-basis: 100%; margin: 0; }
   .tool-right { display: contents; }
   .toolbar .cam-bar { order: 3; flex: 1 0 100%; overflow-x: auto; scrollbar-width: none; }
   .toolbar .cam-bar::-webkit-scrollbar { display: none; }

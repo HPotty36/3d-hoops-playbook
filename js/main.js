@@ -7,6 +7,7 @@ import { Notation } from './notation.js';
 import { CameraRig } from './camera.js';
 import { PLAYS, SECTIONS } from './plays/index.js';
 import { t as tr, applyStatic, localize, initLang, setLang, getLang } from './i18n.js';
+import { scoreBugView } from './clock.js';
 import { createLibrary } from './library.js';
 import { readIds, variant, branchTime, readMeta } from './reads.js';
 import { createReadsUI } from './reads-ui.js';
@@ -582,7 +583,22 @@ function checkScore(prev, t) {
 }
 
 // ── UI 갱신 ───────────────────────────────────────────────────
-const ui = { status: null, statusText: '', bar: -1, time: '' };
+const ui = { status: null, statusText: '', bar: -1, time: '', bug: null };
+
+// 스코어 버그: situation이 있는 작전만 보인다. 연장(5쿼터부터)은 '연장' / 'OT'
+function renderScoreBug(bug) {
+  $('#score-bug').hidden = !bug;
+  if (!bug) return;
+  const period = bug.period > 4 ? tr('bug.ot') : tr('bug.period', { n: bug.period });
+  $('#sb-period').textContent = period;
+  $('#sb-clock').textContent = bug.clock;
+  $('#sb-clock').classList.toggle('urgent', bug.urgent);
+  $('#sb-o').textContent = bug.score[0];
+  $('#sb-d').textContent = bug.score[1];
+  $('#sb-shot').hidden = bug.shot == null;
+  $('#sb-shot').textContent = bug.shot ?? '';
+  $('#sb-sr').textContent = tr('aria.scorebug', { period, clock: bug.clock, o: bug.score[0], d: bug.score[1] });
+}
 const RING = 2 * Math.PI * 8;   // 캡션 옆 원형 카운트다운의 둘레 (r = 8)
 function updateUI() {
   const cp = state.cp;
@@ -612,6 +628,11 @@ function updateUI() {
   if (text !== ui.statusText) { $('#cap-status-text').textContent = text; ui.statusText = text; }
   if (Math.abs(bar - ui.bar) > 0.002) { $('#cap-ring-fill').style.strokeDashoffset = `${RING * (1 - bar)}`; ui.bar = bar; }
   if (state.prompt) readsUI.setPromptProgress(state.prompt.wait ? null : 1 - state.prompt.remaining / state.prompt.total);
+
+  // 스코어 버그는 타임라인 시각을 따르므로 읽는 시간·분기점에서 멈춰 있으면 시계도 멈춘다. 바뀔 때만 다시 쓴다
+  const bug = scoreBugView(cp.play, cp, t);
+  const bugKey = bug && `${getLang()}|${bug.period}|${bug.clock}|${bug.urgent}|${bug.shot}|${bug.score}`;
+  if (bugKey !== ui.bug) { renderScoreBug(bug); ui.bug = bugKey; }
 }
 
 // ── 이벤트 ───────────────────────────────────────────────────

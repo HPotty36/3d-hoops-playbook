@@ -40,3 +40,19 @@ export function formatClock(seconds) {
   }
   return (Math.floor(s * 10 + 1e-9) / 10).toFixed(1);
 }
+
+// 샷 클락은 실제 경기장 시계처럼 5초 이상은 올림한 정수, 그 아래는 소수 첫째 자리
+const formatShot = (s) => (s >= 5 ? String(Math.ceil(s - 1e-9)) : formatClock(s));
+
+// 스코어 버그에 그릴 값. situation이 없으면 null. 5초 미만이면 urgent
+export function scoreBugView(play, cp, t) {
+  const c = clockAt(play, cp, t);
+  if (!c) return null;
+  return {
+    period: play.situation.period,
+    clock: formatClock(c.game),
+    urgent: c.game < 5,
+    shot: c.shot == null ? null : formatShot(c.shot),
+    score: c.score,
+  };
+}

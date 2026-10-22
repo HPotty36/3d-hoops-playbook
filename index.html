@@ -82,6 +82,11 @@
         <div class="play-head">
           <p id="hud-cat" class="play-meta"></p>
           <h2><button id="btn-library" class="title-btn" type="button" data-i18n-title="lib.open"><span id="hud-title"></span><svg class="chev" aria-hidden="true"><use href="#i-chevron" /></svg></button></h2>
+          <!-- 특수 상황 작전의 중계식 스코어 버그: 쿼터 · 남은 시간 · 공격 – 수비 점수 · 샷 클락 -->
+          <p id="score-bug" class="score-bug" hidden>
+            <span class="sb-vis" aria-hidden="true"><span id="sb-period"></span><i>·</i><span id="sb-clock" class="sb-clock"></span><i>·</i><b id="sb-o" class="sb-o"></b><i>–</i><b id="sb-d" class="sb-d"></b><span id="sb-shot" class="sb-shot" hidden></span></span>
+            <span id="sb-sr" class="sr-only"></span>
+          </p>
         </div>
         <div class="tool-right">
           <div class="seg cam-bar" role="group" data-i18n-aria="aria.camera">
