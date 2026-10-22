@@ -27,7 +27,7 @@ import sidelineTriangle from './sideline-triangle.js';
 // 작전 목록의 큰 갈래. 표시 이름은 i18n.js의 section.* / cat.* 키. 작전이 없는 갈래는 목록에서 숨긴다.
 export const SECTIONS = [
   { id: 'offense', cats: ['onball', 'offball', 'motion', 'early', 'system'] },
-  { id: 'situations', cats: [] },   // 특수 상황 (인바운드, ATO, 막판 작전)
+  { id: 'situations', cats: ['blob', 'slob', 'late', 'ato'] },   // 특수 상황: 베이스라인·사이드라인 인바운드, 막판 작전, 타임아웃 후 작전
   { id: 'defense', cats: [] },      // 수비 전술 (존, 매치업 존)
 ];
 export const CATEGORIES = SECTIONS.flatMap((s) => s.cats);

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { compilePlay, ballAir, OFF, DEF } from '../js/engine.js';
 import { PLAYS, SECTIONS } from '../js/plays/index.js';
 import { readIds, variant, branchTime } from '../js/reads.js';
-import { sampleMotion, peakDefenseSpeed } from './helpers.mjs';
+import { sampleMotion, peakDefenseSpeed, situationViolations, inCoachFrame } from './helpers.mjs';
 import { LANGS, hasLabel } from '../js/i18n.js';
 
 const ID = /^[a-z0-9-]+$/;
@@ -59,6 +59,8 @@ function assertPhysical(cp, label) {
   }
   // 15 ft 밖 점프슛은 작전이 만든 빈 슛이다. 손을 떠날 때 수비가 3.5 ft 안에 있으면 막힌 슛으로 보인다.
   for (const s of m.shots) if (s.dist >= 15) assert.ok(s.near >= 3.5, `${label}: open jumper contested at ${s.near.toFixed(2)} ft @ ${s.at.toFixed(2)}s`);
+  // 특수 상황 규칙(인바운드·코트 밖·버저·샷 클락): 상황이 없는 작전에도 코트 밖 규칙은 그대로다
+  assert.deepEqual(situationViolations(cp.play, cp), [], `${label}: situation rules`);
 }
 
 // ── 움직임 ──
@@ -90,6 +92,100 @@ for (const play of PLAYS) {
     }
   });
 }
+
+// ── 특수 상황 규칙 ──
+// 규칙마다 지키는 작은 작전 하나와, 그 규칙 하나만 어기는 작전을 만들어 본다
+const blob = (patch = {}) => ({
+  id: 'fx-blob', category: 'blob', ball: 'o1',
+  start: { o1: [-6, -1.5], o2: [-4, 8], o3: [8, 6], o4: [-20, 12], o5: [6, 14] },
+  steps: [
+    { dur: 2, move: { o1: { path: [[-6, 3]], t: [0.4, 0.8] } }, ball: [{ type: 'pass', to: 'o2', at: 0.3 }] },
+    { dur: 2, ball: [{ type: 'shot', at: 0.4, pts: 2 }] },
+  ],
+  situation: { period: 2, clock: 400, shotClock: 14, score: [40, 40] },
+  ...patch,
+});
+const half = (situation, category = 'late', shotAt = 0.5) => ({
+  id: 'fx-half', category, ball: 'o1',
+  start: { o1: [0, 28], o2: [-14, 18], o3: [18, 8], o4: [-20, 6], o5: [6, 12] },
+  steps: [
+    { dur: 1.5, ball: [{ type: 'pass', to: 'o2', at: 0.2 }] },
+    { dur: 3, ball: [{ type: 'shot', at: shotAt, pts: 3 }] },
+  ],
+  situation,
+});
+// 패스를 받은 지 0.1초 만에 슛하고, 받을 때 시계에는 0.2초가 남아 있다. o2의 자리(림까지 거리)만 바꾼다
+const lastTenths = (o2) => {
+  const base = {
+    id: 'fx-tenths', category: 'late', ball: 'o1',
+    start: { o1: [0, 28], o2, o3: [18, 8], o4: [-20, 6], o5: [10, 14] },
+    steps: [{ dur: 1.5, ball: [{ type: 'pass', to: 'o2', at: 0.2 }] }],
+  };
+  const c = compilePlay(base).bsegs.find((b) => b.type === 'flight').t1;
+  return {
+    ...base,
+    steps: [{ dur: 1.5, ball: [{ type: 'pass', to: 'o2', at: 0.2 }, { type: 'shot', at: (c + 0.1) / 1.5, pts: 2 }] }],
+    situation: { period: 4, clock: c + 0.2, shotClock: null, score: [90, 91] },
+  };
+};
+const violations = (play) => situationViolations(play, compilePlay(play));
+const onlyOne = (play, re) => {
+  const v = violations(play);
+  assert.equal(v.length, 1, JSON.stringify(v));
+  assert.match(v[0], re);
+};
+
+test('situation rules: valid fixtures pass', () => {
+  assert.deepEqual(violations(blob()), []);
+  assert.deepEqual(violations(half({ period: 4, clock: 30, shotClock: null, score: [90, 90] })), []);
+  assert.deepEqual(violations(lastTenths([0, 10])), []);
+});
+
+test('situation rules: the inbound pass leaves within 5 s', () => {
+  onlyOne(blob({ steps: [
+    { dur: 6, move: { o1: { path: [[-6, 3]], t: [0.92, 1] } }, ball: [{ type: 'pass', to: 'o2', at: 0.9 }] },
+    { dur: 2, ball: [{ type: 'shot', at: 0.4, pts: 2 }] },
+  ] }), /inbound/);
+});
+
+test('situation rules: the inbounder steps in within 1 s of the pass', () => {
+  onlyOne(blob({ steps: [
+    { dur: 2, ball: [{ type: 'pass', to: 'o2', at: 0.3 }] },
+    { dur: 2, ball: [{ type: 'shot', at: 0.4, pts: 2 }] },
+  ] }), /o1 .*out of bounds/);
+});
+
+test('situation rules: defenders never leave the court', () => {
+  onlyOne(blob({ steps: [
+    { dur: 2, move: { o1: { path: [[-6, 3]], t: [0.4, 0.8] } }, ball: [{ type: 'pass', to: 'o2', at: 0.3 }] },
+    { dur: 2, ball: [{ type: 'shot', at: 0.4, pts: 2 }], def: { d3: { path: [[8, -1]], t: [0, 1] } } },
+  ] }), /d3 .*out of bounds/);
+});
+
+test('situation rules: nobody uses the right sideline', () => {
+  const p = blob();
+  onlyOne({ ...p, start: { ...p.start, o3: [25.5, 10] } }, /o3 .*right sideline/);
+});
+
+test('situation rules: an end-of-game shot leaves before the buzzer', () => {
+  onlyOne(half({ period: 4, clock: 2, shotClock: null, score: [90, 91] }), /buzzer/);
+});
+
+test('situation rules: under 0.3 s at the catch only a finish at the rim counts', () => {
+  onlyOne(lastTenths([0, 17.25]), /0\.3 s/);
+});
+
+test('situation rules: a shown shot clock does not run out before the shot', () => {
+  onlyOne(half({ period: 2, clock: 400, shotClock: 3, score: [40, 40] }, 'ato', 0.6), /shot clock/);
+});
+
+test('the coach frame allows the inbound spots and nothing past them', () => {
+  assert.equal(inCoachFrame({ x: -6, z: -2.4 }), true);
+  assert.equal(inCoachFrame({ x: -26.5, z: 18 }), true);
+  assert.equal(inCoachFrame({ x: -6, z: -2.8 }), false);
+  assert.equal(inCoachFrame({ x: -26.5, z: 22 }), false);
+  assert.equal(inCoachFrame({ x: 25.5, z: 10 }), false);
+});
 
 // 겹침 구간 캐시가 있어도 위치는 t만의 함수여야 한다: 묻는 순서를 섞어도 같은 결과
 // 모든 작전 × 읽기: 1/60초 격자와 격자 밖 임의 시각 200개를, 순서대로 한 번, 섞어서 한 번 묻는다
@@ -169,6 +265,20 @@ test('every play belongs to a library section', () => {
   const cats = SECTIONS.flatMap((s) => s.cats);
   for (const p of PLAYS) assert.ok(cats.includes(p.category), `${p.id}: category ${p.category}`);
 });
+
+// 특수 상황 작전에만 situation이 있고, 숫자가 경기 시계로 말이 되어야 한다
+const SITUATION_CATS = SECTIONS.find((s) => s.id === 'situations').cats;
+for (const p of PLAYS) {
+  test(`${p.id}: situation data matches the category`, () => {
+    if (!SITUATION_CATS.includes(p.category)) return assert.equal(p.situation, undefined);
+    const s = p.situation;
+    assert.ok(s, 'situation');
+    assert.ok(Number.isInteger(s.period) && s.period >= 1, `period ${s.period}`);
+    assert.ok(typeof s.clock === 'number' && s.clock > 0, `clock ${s.clock}`);
+    assert.ok(Array.isArray(s.score) && s.score.length === 2 && s.score.every((n) => Number.isInteger(n) && n >= 0), `score ${s.score}`);
+    assert.ok(s.shotClock === null || (typeof s.shotClock === 'number' && s.shotClock > 0), `shotClock ${s.shotClock}`);
+  });
+}
 
 for (const p of PLAYS) {
   test(`${p.id}: Korean and English content line up`, () => {
