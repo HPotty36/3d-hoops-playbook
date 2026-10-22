@@ -588,6 +588,7 @@ const ui = { status: null, statusText: '', bar: -1, time: '', bug: null };
 // 스코어 버그: situation이 있는 작전만 보인다. 연장(5쿼터부터)은 '연장' / 'OT'
 function renderScoreBug(bug) {
   $('#score-bug').hidden = !bug;
+  $('header.toolbar').classList.toggle('has-bug', !!bug);
   if (!bug) return;
   const period = bug.period > 4 ? tr('bug.ot') : tr('bug.period', { n: bug.period });
   $('#sb-period').textContent = period;

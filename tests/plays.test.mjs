@@ -141,6 +141,28 @@ test('situation rules: valid fixtures pass', () => {
   assert.deepEqual(violations(lastTenths([0, 10])), []);
 });
 
+// 사이드라인 인바운드: 왼쪽 사이드라인 밖(x −26.5, z 18)에서 넣고 1초 안에 들어온다
+const slob = (start) => ({
+  id: 'fx-slob', category: 'slob', ball: 'o1',
+  start: { o1: start, o2: [-16, 21], o3: [-20, 6], o4: [14, 12], o5: [4, 14] },
+  steps: [
+    { dur: 2, move: { o1: { path: [[-21.6, 18]], t: [0.4, 0.8] } }, ball: [{ type: 'pass', to: 'o2', at: 0.3 }] },
+    { dur: 2, ball: [{ type: 'shot', at: 0.4, pts: 2 }] },
+  ],
+  situation: { period: 3, clock: 300, shotClock: 14, score: [60, 60] },
+});
+
+test('situation rules: inbounds come from the end-line or left-sideline spot', () => {
+  assert.deepEqual(violations(slob([-26.5, 18])), []);
+  const p = blob();
+  // 선 위(코트 안)에 서면 인바운드로 보지 않으므로 다른 인바운드 규칙이 모두 건너뛰어진다. 자리 규칙이 잡아야 한다
+  onlyOne({ ...p, start: { ...p.start, o1: [5, 0] } }, /end line/);
+  onlyOne({ ...p, start: { ...p.start, o1: [11, -1.5] } }, /end line/);
+  onlyOne(slob([-25, 18]), /left sideline/);
+  // 막판 작전도 인바운드라면 두 자리 중 하나에서 넣는다
+  onlyOne({ ...slob([-26.5, 26]), category: 'late', situation: { period: 4, clock: 8, shotClock: null, score: [97, 100] } }, /neither inbound spot/);
+});
+
 test('situation rules: the inbound pass leaves within 5 s', () => {
   onlyOne(blob({ steps: [
     { dur: 6, move: { o1: { path: [[-6, 3]], t: [0.92, 1] } }, ball: [{ type: 'pass', to: 'o2', at: 0.9 }] },

@@ -58,7 +58,7 @@ export default {
         {
           label: 'Top lock', why: 'If [x2] races above [2] to take away the curl up, the baseline behind is empty. [2] cuts back to the rim.',
           steps: [
-            { title: 'Top lock', text: 'Ahead of [2], [x2] sprints to the high side of the stagger and cuts off the way up (the **top lock**). [2] stops right at [4]\'s screen.' },
+            { title: 'Top lock', text: 'Ahead of [2], [x2] gets around to the high side, between [4]\'s and [5]\'s screens, and cuts off the way up (the **top lock**). [2] stops right at [4]\'s screen.' },
             { title: 'Backdoor', text: '[2] cuts back behind [x2] along the baseline to the rim (the **backdoor**), catches [1]\'s pass and lays it in.' },
           ],
         },
@@ -78,7 +78,7 @@ export default {
         o2: { path: [[-8.6, 2.2]], t: [0.66, 1] },
       },
       ball: [{ type: 'pass', to: 'o1', at: 0.5 }],
-      def: { d4: { sag: 0 }, d5: { sag: 0 }, d1: { sag: 0.2 } },
+      def: { d2: { sag: 0.2 }, d4: { sag: 0 }, d5: { sag: 0 }, d1: { sag: 0.2 } },
     },
     {
       title: '스태거',
@@ -90,7 +90,7 @@ export default {
         { by: 'o5', face: [-8.4, 11.2], hold: 0.4, on: 'd2' },
       ],
       def: {
-        d2: { path: [[-8, 4.4], [-10.2, 8.6], [-8.2, 12.4]], t: [0.1, 0.8] },
+        d2: { path: [[-8.4, 3.6], [-10.6, 6.6], [-10.4, 9.6], [-8.2, 12.4]], t: [0.02, 0.58] },
         d4: { sag: 0 }, d5: { sag: 0 }, d1: { sag: 0.2 },
       },
     },
@@ -127,7 +127,7 @@ export default {
               { by: 'o5', face: [-8.4, 11.2], hold: 0.3, on: 'd2' },
             ],
             def: {
-              d2: { guard: 'o5', path: [[-8, 4.4], [-10.2, 8.6], [-8.2, 12.4]], t: [0.1, 0.8] },
+              d2: { guard: 'o5', path: [[-8.4, 3.6], [-10.6, 6.6], [-10.4, 9.6], [-8.2, 12.4]], t: [0.02, 0.58] },
               d5: { guard: 'o2', path: [[-7.2, 17.2], [-9.4, 21.8]], t: [0.3, 0.95] },
               d4: { sag: 0 }, d1: { sag: 0.2 },
             },
@@ -153,10 +153,10 @@ export default {
           {
             title: '탑 락킹',
             dur: 1.4,
-            text: '[x2]가 [2]보다 먼저 스태거의 위쪽으로 달려가 올라갈 길을 막습니다(**탑 락킹**). [2]는 [4]의 스크린 옆에서 멈춰 섭니다.',
+            text: '[x2]가 [2]를 앞질러 위쪽으로 돌아가, [4]와 [5]의 스크린 사이에서 올라갈 길을 막습니다(**탑 락킹**). [2]는 [4]의 스크린 옆에서 멈춰 섭니다.',
             move: { o2: { path: [[-9.8, 6.8]], t: [0, 0.6] } },
             screens: [{ by: 'o4', face: [-9.4, 4.4], hold: 0.2 }],
-            def: { d2: { path: [[-11.2, 4.8], [-12, 9.6]], t: [0, 0.7] }, d4: { sag: 0 }, d5: { sag: 0 }, d1: { sag: 0.2 } },
+            def: { d2: { path: [[-11, 4.6], [-12, 8.8], [-10.8, 10.6]], t: [0, 0.75] }, d4: { sag: 0 }, d5: { sag: 0 }, d1: { sag: 0.2 } },
           },
           {
             title: '백도어',
