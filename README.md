@@ -163,6 +163,7 @@ tests/                Play data and engine checks (npm test)
 assets/logo-mark.svg  Logo mark (also the favicon)
 assets/icon-*.png     Install icons (192/512, maskable, Apple touch icon)
 docs/design.md        Design notes
+PRODUCT.md            Product context for design work: users, purpose, constraints
 ```
 
 ## Adding a play
