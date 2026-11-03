@@ -14,11 +14,11 @@ const COLORS = {
 export const SCENE_THEMES = {
   dark: {
     bg: '#1c1a18', apron: '#2a2622', outer: '#1c1a18',
-    ink: 'rgba(241, 236, 229, 1)', inkSoft: 'rgba(241, 236, 229, 0.62)', inkFaint: 'rgba(241, 236, 229, 0.36)',
+    ink: 'rgba(241, 236, 229, 1)', inkSoft: 'rgba(241, 236, 229, 0.62)',
   },
   light: {
     bg: '#e4e1dc', apron: '#cfcac3', outer: '#bdb8b1',
-    ink: 'rgba(42, 39, 36, 0.92)', inkSoft: 'rgba(42, 39, 36, 0.58)', inkFaint: 'rgba(42, 39, 36, 0.4)',
+    ink: 'rgba(42, 39, 36, 0.92)', inkSoft: 'rgba(42, 39, 36, 0.58)',
   },
 };
 
@@ -151,15 +151,6 @@ function drawCourt(size, theme) {
   g.fillStyle = tc.inkSoft;
   g.font = `400 ${fs}px "Rubik", sans-serif`;
   g.fillText('Playbook', x0 + markS + gap + w1, cy + 0.06 * k);
-  // 사이드라인 밖 문구
-  g.textAlign = 'center';
-  g.fillStyle = tc.inkFaint;
-  g.font = `500 ${1.3 * k}px "Rubik", sans-serif`;
-  g.save();
-  g.translate(X(-28), Z(23.5));
-  g.rotate(-Math.PI / 2);
-  g.fillText('Half-court sets', 0, 0);
-  g.restore();
   // 센터서클 안 마크
   g.globalAlpha = 0.92;
   drawMark(g, X(0), Z(44.2), 3.4 * k);

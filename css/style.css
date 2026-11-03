@@ -24,6 +24,8 @@
   --seg-on: #3a3632;
   --seg-on-text: #ede8e1;
   --seg-on-shadow: none;
+  --toggle-on: #3a3632;
+  --toggle-on-shadow: none;
   --tseg-track: var(--panel);   /* 상단 줄 세그먼트의 바탕: 페이지 위에 바로 놓이므로 패널색 */
   --track: #34302c;
   --track-done: #7c756d;
@@ -63,6 +65,8 @@
   --seg-on: #ffffff;
   --seg-on-text: #1e1d1b;
   --seg-on-shadow: 0 1px 2px rgba(30, 29, 27, 0.14);
+  --toggle-on: #ffffff;   /* 라이트: 다른 선택 표시처럼 흰 알약 + 그림자, 트랙이 없으니 가는 테두리로 가장자리를 잡는다 */
+  --toggle-on-shadow: 0 1px 2px rgba(30, 29, 27, 0.14), inset 0 0 0 1px rgba(30, 29, 27, 0.08);
   --tseg-track: #e6e4e0;   /* 라이트: 다른 세그먼트처럼 회색 바탕 위 흰 알약이 선택 표시가 되도록 */
   --track: #e3e1dd;
   --track-done: #8e8a84;
@@ -72,7 +76,6 @@
   --diff-on: #8e8a84;
   --legend: #2a2826;
   --legend-text: #dcd6ce;
-  --pop-shadow: 0 6px 28px rgba(255, 255, 255, 0.7);
   --float-shadow: 0 16px 48px rgba(30, 29, 27, 0.18);
   --backdrop: rgba(30, 29, 27, 0.25);
   color-scheme: light;
@@ -156,7 +159,7 @@ kbd {
   flex: 1; min-width: 0; height: 40px; border: 0; outline: 0; background: transparent;
   color: var(--text); font: inherit; font-size: 14.5px; caret-color: var(--accent);
 }
-.lib-search input::placeholder { color: var(--text-3); }
+.lib-search input::placeholder { color: var(--text-2); }
 .lib-search input::-webkit-search-cancel-button { filter: grayscale(1); opacity: 0.6; }
 .lib-levels { display: flex; margin: 10px 2px 4px; }
 .lib-levels button { flex: 1; display: grid; place-items: center; min-height: 30px; padding: 0 6px; font-size: 12.5px; }
@@ -199,10 +202,10 @@ kbd {
 .side-foot { margin-top: 12px; }
 .keys-btn {
   display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px;
-  border-radius: var(--r-lg); background: var(--raised); color: var(--text-2); font-size: 13.5px; text-align: left;
-  transition: color 150ms var(--ease);
+  border-radius: var(--r-lg); color: var(--text-2); font-size: 13.5px; text-align: left;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease);
 }
-.keys-btn:hover { color: var(--text); }
+.keys-btn:hover { background: var(--raised); color: var(--text); }
 .keys-btn svg { width: 18px; height: 18px; flex: none; }
 .keys-btn span { flex: 1; }
 
@@ -218,7 +221,8 @@ kbd {
 .play-meta { order: 1; flex-basis: 100%; margin: 0; font-size: 13px; line-height: 1.4; color: var(--text-3); }
 .play-head h2 { min-width: 0; margin: 1px 0 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* 스코어 버그: 중계 화면의 알약 모양. 코트 위가 아니라 제목 옆에 둔다 */
+/* 스코어 버그: 중계 화면처럼 칸이 이어진 띠(쿼터 | 시계 | 공격 점수 | 수비 점수 | 샷 클락). 코트 위가 아니라 제목 옆에 둔다.
+   점수는 둥근 칩이 아니라 칸을 채운 팀 색이다 (주황 원은 공격 선수 칩이라 겹치지 않게) */
 .score-bug { flex: none; margin: 2px 0 0; }
 .score-bug[hidden] { display: none; }
 /* 버그가 보이면(main.js가 .has-bug를 붙인다) 제목 칸이 내용보다 좁아지지 않는다. 자리가 모자라면 카메라·언어 버튼 줄이 아래로 내려간다.
@@ -226,17 +230,19 @@ kbd {
 .toolbar.has-bug { flex-wrap: wrap; }
 .toolbar.has-bug .play-head { flex: 1 0 auto; width: min-content; max-width: 100%; }
 .sb-vis {
-  display: inline-flex; align-items: center; gap: 7px; padding: 3px 4px 3px 12px; border-radius: 999px;
+  display: inline-flex; align-items: stretch; border-radius: 8px; overflow: hidden;
   background: var(--panel); color: var(--text-2); font-size: 13px; font-weight: 600; line-height: 1;
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.sb-vis i { font-style: normal; color: var(--text-3); }
+.sb-vis > span, .sb-vis > b { display: flex; align-items: center; justify-content: center; padding: 7px 10px; }
+.sb-vis i { display: none; }   /* 화면용 구분점은 칸 경계가 대신한다. 스크린 리더는 #sb-sr 문장을 읽는다 */
+#sb-period { border-right: 1px solid var(--line); }
 .sb-clock { color: var(--text); }
 .sb-clock.urgent { color: var(--accent-text); }
-.sb-o, .sb-d { min-width: 30px; padding: 5px 8px; border-radius: 999px; text-align: center; font-weight: 600; }
+.sb-o, .sb-d { min-width: 36px; font-weight: 600; }
 .sb-o { background: var(--accent); color: var(--on-accent); }
 .sb-d { background: var(--def); color: #fff; }
-.sb-shot { padding: 0 6px 0 2px; font-size: 11px; color: var(--text-3); }
+.sb-shot { font-size: 11px; color: var(--text-3); }
 .sb-shot[hidden] { display: none; }
 .tool-right { display: flex; align-items: center; gap: 8px; }
 .toolbar .seg { padding: 4px; background: var(--tseg-track); }
@@ -253,11 +259,12 @@ kbd {
 
 #score-pop {
   position: absolute; left: 50%; top: 36%; transform: translate(-50%, -50%) scale(0.7);
-  font-weight: 600; font-size: 88px; line-height: 1; letter-spacing: -0.02em; color: var(--text);
+  font-weight: 600; font-size: 88px; line-height: 1; letter-spacing: -0.02em;
+  color: #ede8e1;   /* 코트 나무 바닥은 두 테마가 같으므로 글자와 그림자도 하나로 */
   text-shadow: var(--pop-shadow); opacity: 0; pointer-events: none;
   transition: opacity 200ms var(--ease), transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-#score-pop small { font-size: 0.26em; font-weight: 600; letter-spacing: 0.06em; color: var(--accent-text); display: block; text-align: center; margin-top: 4px; }
+#score-pop small { font-size: 0.26em; font-weight: 600; color: #f4a271; display: block; text-align: center; margin-top: 4px; }
 #score-pop.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 #loading {
   position: absolute; inset: 0; display: grid; place-items: center; background: var(--scene);
@@ -268,9 +275,10 @@ kbd {
 /* 설명(캡션) */
 #caption { padding: 14px 22px 16px; min-height: 112px; }
 .cap-top { display: flex; align-items: center; gap: 12px; min-height: 36px; flex-wrap: wrap; }
+/* 지금 단계: 색을 채운 꼬리표가 아니라, 중계 화면의 쿼터 표시처럼 숫자와 가는 구분선 */
 .cap-step {
-  flex: none; padding: 3px 11px; border-radius: 999px; background: var(--accent-soft);
-  color: var(--accent-text); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums;
+  flex: none; padding-right: 12px; border-right: 1px solid var(--line); line-height: 1.3;
+  color: var(--accent-text); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
 }
 #cap-title { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; min-width: 0; }
 .cap-status {
@@ -343,8 +351,13 @@ kbd {
   padding-top: 10px; border-top: 1px solid var(--line);
 }
 #settings .seg button { padding: 0 11px; }
-.toggles { margin-left: auto; }
-.toggles button[aria-pressed="false"] { color: var(--text-3); text-decoration: line-through; text-decoration-thickness: 1px; }
+/* 표시 토글: 하나만 고르는 세그먼트가 아니라 각자 켜고 끄는 스위치라서, 한 트랙에 묶지 않고 따로 선 알약으로 */
+.seg.toggles { margin-left: auto; padding: 0; gap: 6px; background: transparent; }
+.toggles button[aria-pressed="true"] { background: var(--toggle-on); color: var(--text); box-shadow: var(--toggle-on-shadow); }
+.toggles button[aria-pressed="false"] {
+  background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--text-3);
+  text-decoration: line-through; text-decoration-thickness: 1px;
+}
 .set-group { display: flex; align-items: center; gap: 10px; }
 .set-label { font-size: 13px; color: var(--text-3); white-space: nowrap; }
 
@@ -357,8 +370,8 @@ kbd {
 }
 .legend > span { display: inline-flex; align-items: center; gap: 7px; }
 .legend svg { width: 26px; height: 10px; }
-.block { margin-top: 28px; }
-.block h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; color: var(--text); }
+.block { margin-top: 32px; }
+.block h3 { margin: 0 0 10px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: var(--text); }
 .block p { margin: 0; font-size: 14.5px; color: var(--text-sub); line-height: 1.8; }
 
 #info-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -368,14 +381,15 @@ kbd {
   transition: background-color 150ms var(--ease), color 150ms var(--ease);
 }
 #info-steps button:hover { background: var(--raised); color: var(--text); }
+/* 단계 번호: 주황 원은 공격 선수 칩이므로 여기서는 전술판에 적듯 숫자만 */
 #info-steps .n {
-  flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
-  font-size: 13px; font-weight: 500; background: var(--raised-2); color: var(--text-sub);
+  flex: none; width: 20px; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-3);
+  font-variant-numeric: tabular-nums;
 }
 #info-steps .st { flex: 1; min-width: 0; }
 #info-steps .now { display: none; font-size: 12.5px; color: var(--text-2); font-weight: 400; }
 #info-steps li.active button { background: var(--raised-2); color: var(--text); font-weight: 600; }
-#info-steps li.active .n { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+#info-steps li.active .n { color: var(--accent-text); }
 #info-steps li.active .now { display: inline; }
 
 .bullets { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; font-size: 14.5px; color: var(--text-sub); line-height: 1.75; }
@@ -438,6 +452,9 @@ kbd {
 .bp-options button:hover { background: var(--seg-on); }
 /* 지금 읽기(Enter로 계속할 선택지)는 반전된 알약. 주황 테두리는 키보드 포커스에만 쓴다 */
 .bp-options button.current { background: var(--text); color: var(--panel); }
+/* 단계별 모드에서는 지금 선택지로 포커스가 옮겨 오므로, 포커스는 알약 안쪽 선으로 (주황 테두리를 겹치지 않게) */
+.bp-options button:focus-visible { outline: 2px solid var(--text); outline-offset: -5px; }
+.bp-options button.current:focus-visible { outline-color: var(--panel); }
 .bp-foot { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
 .bp-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
 .bp-bar[hidden] { display: none; }

@@ -818,7 +818,7 @@ function frame(now) {
 
 // 캔버스 텍스처(바닥 로고, 번호 라벨)에 쓰는 웹폰트가 실제로 로드될 때까지 기다린다.
 // 스타일시트가 늦게 파싱되면 fonts.load()가 빈 결과로 바로 끝나므로, 로드된 FontFace를 직접 확인한다.
-const CANVAS_WEIGHTS = [400, 500, 600];
+const CANVAS_WEIGHTS = [400, 600];
 async function waitForFonts(timeout = 3000) {
   const loaded = (w) => [...document.fonts].some((f) => {
     if (f.family.replace(/["']/g, '') !== 'Rubik' || f.status !== 'loaded') return false;
