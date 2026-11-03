@@ -12,9 +12,10 @@ export default {
     '상대 득점이 두 선수에게 몰려 있고, 나머지 선수들의 슛이 약할 때 씁니다.',
   keys: [
     '번호: [x1]·[x2]는 에이스 [1]·[2]를 따라다니는 추격조, [x3]는 자유투 라인(삼각형 꼭대기), [x4]·[x5]는 왼쪽·오른쪽 블록입니다.',
-    '[x1]·[x2]는 도움 수비로 처지지 않고 자기 에이스에게 붙습니다. 에이스가 공을 잡아도 삼각형은 자기 자리를 지킵니다.',
+    '[x1]·[x2]는 도움 수비로 처지지 않고, 자기 에이스의 공 쪽 앞에 팔 길이로 붙어 패스 길을 막습니다. 에이스가 공을 잡아도 삼각형은 자기 자리를 지킵니다.',
     '공이 윙으로 가면 [x3]가 공으로 나가고, 공 쪽 블록은 숏코너로 내려가며, 다른 블록은 레인을 건너옵니다. 코너에서는 공 쪽 블록이 나가고 [x3]는 공 쪽 엘보로 갑니다.',
     '세 명으로 바깥까지 막을 수는 없습니다. 코너와 삼각형 안쪽(자유투 라인 아래)이 약점입니다.',
+    '아무도 막지 않은 채 레인에 3초를 넘게 있을 수 없으므로(수비 3초), 레인을 건너온 블록 수비는 레인 선 밖으로 나갔다가 다시 들어옵니다.',
   ],
   counters: [
     { name: '에이스 픽앤롤', desc: '에이스 둘이 서로 스크린을 걸면 추격조 둘이 바꾸거나 함께 덫을 놓아야 하고, 그 사이 굴러 들어가는 선수가 빕니다.', read: 'star-pnr' },
@@ -30,9 +31,10 @@ export default {
       'When the opponent\'s scoring runs through two players and the others are weak shooters.',
     keys: [
       'Numbering: [x1] and [x2] are the chasers who follow the stars [1] and [2]; [x3] is at the free-throw line (the top of the triangle), and [x4] and [x5] are on the left and right blocks.',
-      '[x1] and [x2] never sink to help: they stay on their stars. Even when a star has the ball, the triangle holds its spots.',
+      '[x1] and [x2] never sink to help: they stay within arm\'s reach of their stars, on the ball side, to take away the pass. Even when a star has the ball, the triangle holds its spots.',
       'When the ball goes to a wing, [x3] goes out to it, the ball-side block drops to the short corner and the far block slides across the lane. In the corner, the ball-side block comes out and [x3] moves to the ball-side elbow.',
       'Three defenders cannot cover the outside. The corners and the inside of the triangle (below the free-throw line) are its weak spots.',
+      'Nobody may stay in the lane for more than three seconds without guarding someone (defensive three seconds), so the block defender who slides across the lane steps out over the lane line and back in.',
     ],
     counters: [
       { name: 'Two-star pick and roll', desc: 'When the two stars screen for each other, the two chasers have to switch or trap together, and the roller is open in between.' },
@@ -53,7 +55,7 @@ export default {
           label: 'Open corner', why: 'The triangle cannot go out to the corners. Swing the ball and skip it to the far corner.',
           steps: [
             { title: 'Swing to the wing', text: '[1] passes to [5] on the right wing, and the triangle leans right: [x3] out to the ball, [x5] toward the short corner, [x4] across the lane.' },
-            { title: 'Corner three', text: '[5] throws it over the top to [3] in the left corner. [x4] has to run out from the middle of the lane and is too late, and [3] fires the three.' },
+            { title: 'Corner three', text: '[5] throws it over the top to [3] in the left corner. [x4] has to run out from the far side of the lane and is too late, and [3] fires the three.' },
           ],
         },
         {
@@ -92,18 +94,21 @@ export default {
         o1: { path: [[2.6, 27.4], [5.4, 25]], t: [0.55, 0.95] },
       },
       screens: [{ by: 'o2', face: [1.4, 27.2], hold: 0.5 }],
-      def: { d2: { path: [[-2, 23.4], [3.6, 23.2]], t: [0.45, 1] } },   // 스크리너를 버리고 공에 덫을 놓는다
+      def: { d2: { path: [[-11, 22.6], [-4.6, 23.4], [-2, 23.4], [3.6, 23.2]], t: [0, 1] } },   // [2]를 따라 올라왔다가, 스크리너를 버리고 공에 덫을 놓는다
     },
     {
       title: '롤 & 마무리',
       dur: 2.0,
       text: '[2]가 아무도 없는 레인으로 굴러 내려갑니다. [1]이 덫 너머로 패스하고, 블록의 [x4]가 건너오기 전에 [2]가 레이업합니다.',
-      move: { o2: { path: [[-3.6, 18], [-3.4, 9.8]], t: [0, 0.6] } },
+      move: { o2: { path: [[-2.6, 18], [-0.6, 8.4]], t: [0, 0.6] } },
       ball: [
         { type: 'lob', to: 'o2', at: 0.4 },
         { type: 'shot', at: 0.86, pts: 2 },
       ],
-      def: { d2: { path: [[4.2, 23.6]], t: [0, 0.3] } },
+      def: {
+        d2: { path: [[4.2, 23.6]], t: [0, 0.3] },
+        d4: { path: [[-6.6, 7.2], [-4.4, 7.6]], t: [0.65, 1] },   // 공이 [2]에게 닿은 뒤에야 블록에서 건너온다
+      },
     },
   ],
 
@@ -127,13 +132,13 @@ export default {
           {
             title: '코너 3점',
             dur: 2.4,
-            text: '[5]가 존 위로 왼쪽 코너의 [3]에게 넘깁니다. 레인 가운데에 있던 [x4]가 뛰어나와 보지만 늦고, [3]이 3점을 던집니다.',
+            text: '[5]가 존 위로 왼쪽 코너의 [3]에게 넘깁니다. 레인 반대쪽에 있던 [x4]가 뛰어나와 보지만 늦고, [3]이 3점을 던집니다.',
             ball: [
               { type: 'skip', to: 'o3', at: 0.1 },
               { type: 'shot', at: 0.68, pts: 3 },
             ],
             def: {
-              d4: { path: [[-6.6, 6.8], [-15.4, 5.6]], t: [0.35, 1] },   // 레인 가운데에서 뒤늦게 코너로
+              d4: { path: [[-6.6, 6.8], [-15.4, 5.6]], t: [0.35, 1] },   // 레인 반대쪽에서 뒤늦게 코너로
               d3: { path: [[4, 18.8], [-5.6, 18.2]], t: [0.25, 1] },      // 꼭대기는 공 쪽 엘보로 건너간다
             },
           },

@@ -15,6 +15,7 @@ const R_OFF = 2.05;        // 수비-공격 충돌 반경
 const R_DEF = 1.8;         // 수비-수비 충돌 반경
 const TAIL = 1.6;          // 마지막 단계 뒤 여유 시간
 const OWN_OUT = 0.45;      // 공을 놓은 수비 대상에게서 온볼 자세를 푸는 시간(초)
+const DENY_GAP = 2.6;      // 혼합 수비의 추격조가 공 없는 에이스 앞(공 쪽)에 붙는 거리(ft)
 
 // 수비 3초(프로 규칙): 레인 안에서 누구도 팔 길이 안에 두지 않은 채 3초를 넘게 머물 수 없다
 export const LANE_X = 8;          // 레인 폭의 절반(ft)
@@ -229,14 +230,20 @@ export function compilePlay(play) {
   };
 
   // sag: 도움 수비로 처지는 정도(1 = 기본, 0 = 자기 선수만 바짝 따라감)
-  const autoPos = (man, lag, t, sag = 1) => {
+  // 디나이: 공 없는 선수와 공을 잇는 선 쪽(림 쪽으로 조금 기울여)에 팔 길이로 붙어 패스 길을 막는다
+  const denySpot = (m, toB, tl) => {
+    const ball = ballXZ(tl), ub = norm2(v2(ball.x - m.x, ball.z - m.z));
+    const u = norm2(v2(ub.x * 0.65 + toB.x * 0.35, ub.z * 0.65 + toB.z * 0.35));
+    return v2(m.x + u.x * DENY_GAP, m.z + u.z * DENY_GAP);
+  };
+  const autoPos = (man, lag, t, sag = 1, deny = false) => {
     const tl = Math.max(0, t - lag);
     const m = offAt(man, tl);
     const toB = norm2(v2(BASKET.x - m.x, BASKET.z - m.z));
     const dm = dist2(m, BASKET);
     const w = ownW(man, tl);
     if (w >= 1) return onBallSpot(m, toB, dm);
-    const off = helpSpot(m, toB, dm, tl, sag);
+    const off = deny ? denySpot(m, toB, tl) : helpSpot(m, toB, dm, tl, sag);
     return w <= 0 ? off : lerp2(off, onBallSpot(m, toB, dm), w);
   };
 
@@ -339,9 +346,10 @@ export function compilePlay(play) {
     const spec = (st.def || {})[d] || {};
     if (defSegs[k][d]) return segAt(defSegs[k][d], t);
     const lag = spec.lag ?? DEF_LAG;
-    // 혼합 수비의 추격조(defense.man)는 도움 수비로 처지지 않고 에이스에게 붙는다(기본 sag 0)
-    const sag = spec.sag ?? (dz?.man?.[d] ? 0 : 1);
-    const raw = guards[k][d] === null ? zonePos(d, lag, t) : autoPos(guards[k][d], lag, t, sag);
+    // 혼합 수비의 추격조(defense.man)는 도움 수비로 처지지 않고, 공 없는 에이스 앞에 붙어 패스 길을 막는다(디나이).
+    // 단계에서 sag를 주면 보통 맨투맨처럼 움직인다
+    const chaser = !!dz?.man?.[d] && guards[k][d] === dz.man[d] && spec.sag === undefined;
+    const raw = guards[k][d] === null ? zonePos(d, lag, t) : autoPos(guards[k][d], lag, t, spec.sag ?? 1, chaser);
     if (k === 0 && !defStart[0]) return raw;
     // 앞 단계에서도 같은 존 자리를 따르던 수비는 이을 것이 없다 (섞으면 움직이는 존 자리를 늦게 쫓아 빨라진다)
     const prev = k > 0 ? (steps[k - 1].def || {})[d] || {} : null;

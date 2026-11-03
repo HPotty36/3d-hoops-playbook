@@ -15,6 +15,7 @@ export default {
     '[x1]은 도움 수비로 처지지 않고 [2]에게 붙어, 공을 받지 못하게 앞을 막습니다.',
     '박스는 공을 따라 기웁니다. 윙에서는 공 쪽 앞이 공을 맡고 공 쪽 뒤가 숏코너로 내려가며, 코너에서는 공 쪽 뒤가 나가고 공 쪽 앞이 내려섭니다.',
     '박스 한가운데(자유투 라인 아래)가 빕니다. 하이포스트로 공이 들어가면 뒤쪽 수비가 올라와야 합니다.',
+    '아무도 막지 않은 채 레인에 3초를 넘게 있을 수 없으므로(수비 3초), 레인을 건너온 뒤쪽 수비는 레인 선 밖으로 나갔다가 다시 들어옵니다.',
   ],
   counters: [
     { name: '에이스 스크린', desc: '스크린 두 개를 연달아 걸어 추격조를 떼어 냅니다. 박스 수비는 자기 자리를 떠나 에이스를 바꿔 막기 어렵습니다.', read: 'screen-star' },
@@ -33,6 +34,7 @@ export default {
       '[x1] never sinks to help: it stays on [2] and fronts the passing lane so [2] cannot catch.',
       'The box leans with the ball. On a wing, the ball-side front takes the ball and the ball-side back drops to the short corner; in the corner, the ball-side back comes out and the ball-side front sinks.',
       'The middle of the box (below the free-throw line) is empty. When the ball goes into the high post, a back defender has to step up.',
+      'Nobody may stay in the lane for more than three seconds without guarding someone (defensive three seconds), so the back defender who slides across the lane steps out over the lane line and back in.',
     ],
     counters: [
       { name: 'Screens for the star', desc: 'Two screens in a row shake the chaser loose. The box defenders cannot easily leave their spots to switch onto the star.' },
@@ -41,8 +43,8 @@ export default {
     ],
     steps: [
       { title: 'The box and the chaser', text: '[1] passes to [3] on the left wing. The box leans to the ball: [x2] takes [3], [x4] drops toward the short corner, [x5] slides across, and [x3] pinches in. [x1] stays glued to the star [2] on the left block.' },
-      { title: 'Ball back to the top', text: '[3] passes back to [1] at the top, and the box squares up again: [x2] steps up to [1], [x3] holds the right elbow, and [x4] and [x5] go back to the blocks. [x1] is still on [2].' },
-      { title: 'Stagger for the star', text: '[2] runs from the left block up through two screens in a row, set by [4] and [5] (a **stagger**). [x1] is a step late and runs into the screens.' },
+      { title: 'Ball back to the top', text: '[3] passes back to [1] at the top, and the box resets: [x2] steps up to [1], [x3] holds the right elbow, and [x4] and [x5] go back to the blocks. [x1] is still on [2].' },
+      { title: 'Stagger for the star', text: '[2] runs from the left block up through two screens in a row, set by [4] and [5] (a **stagger**). [x1] gets caught on the screens and falls well behind.' },
       { title: 'Catch & three', text: '[2] pops out to the right slot and catches from [1]. [x1] is still behind the screens, and [x3] does not leave the box to switch. [2] fires the three.' },
     ],
     reads: {
@@ -52,8 +54,8 @@ export default {
         {
           label: 'Star as decoy', why: 'When the star clears out, the chaser goes along. The other four play four on four against the box, and the box has a gap in the middle.',
           steps: [
-            { title: 'Star clears out', text: '[2] runs away to the right corner, and [x1] follows. Now four attackers face the four defenders of the box. [1] attacks the gap between [x2] and [x3] at the top of the box.' },
-            { title: 'Kick-out three', text: '[x2] steps in to stop [1], so [1] kicks it out to [3] on the left wing that [x2] just left. [3] fires the three before [x2] gets back out.' },
+            { title: 'Star clears out', text: '[2] runs away to the right corner, and [x1] follows. Now four attackers face the four defenders of the box. [1] drives down the left side of the top of the box, and [x2] backs up with the drive to stop it.' },
+            { title: 'Kick-out three', text: 'With [x2] busy stopping the drive, nobody is left with [3] on the left wing. [1] kicks it out, and [3] fires the three before [x2] can close out.' },
           ],
         },
         {
@@ -80,13 +82,13 @@ export default {
     {
       title: '다시 탑으로',
       dur: 2.6,
-      text: '[3]이 탑의 [1]에게 다시 패스하자 박스가 반듯해집니다. [x2]는 [1]에게 올라가고, [x3]는 오른쪽 엘보를 지키며, [x4]·[x5]는 블록으로 돌아갑니다. [x1]은 여전히 [2]에게 붙어 있습니다.',
+      text: '[3]이 탑의 [1]에게 다시 패스하자 박스가 제자리로 돌아갑니다. [x2]는 [1]에게 올라가고, [x3]는 오른쪽 엘보를 지키며, [x4]·[x5]는 블록으로 돌아갑니다. [x1]은 여전히 [2]에게 붙어 있습니다.',
       ball: [{ type: 'pass', to: 'o1', at: 0.3 }],
     },
     {
       title: '에이스를 위한 스태거',
       dur: 2.8,
-      text: '[2]가 왼쪽 블록에서 [4]와 [5]가 연달아 거는 스크린 두 개를 타고 올라옵니다(**스태거**). 한 발 늦은 [x1]이 스크린에 걸립니다.',
+      text: '[2]가 왼쪽 블록에서 [4]와 [5]가 연달아 거는 스크린 두 개를 타고 올라옵니다(**스태거**). [x1]은 스크린에 걸려 한참 뒤처집니다.',
       move: {
         o4: { path: [[-4.6, 10.6]], t: [0, 0.3] },
         o5: { path: [[4.6, 17.2]], t: [0, 0.3] },
@@ -103,7 +105,7 @@ export default {
         { type: 'pass', to: 'o2', at: 0.05 },
         { type: 'shot', at: 0.45, pts: 3 },
       ],
-      def: { d1: { path: [[-0.6, 14.6], [6.4, 20.6], [10, 23.2]], t: [0.15, 1] } },   // 스크린을 돌아 뒤늦게 쫓는다
+      def: { d1: { path: [[5.4, 19.8], [9.6, 23]], t: [0.1, 1] } },   // 스크린을 돌아 뒤늦게 쫓는다
     },
   ],
 
@@ -121,25 +123,25 @@ export default {
           {
             title: '에이스가 빠진다',
             dur: 2.8,
-            text: '[2]가 오른쪽 코너로 멀리 빠지고 [x1]이 따라갑니다. 이제 공격 넷이 박스의 수비 넷을 상대합니다. [1]이 박스 위쪽, [x2]와 [x3] 사이를 파고듭니다.',
+            text: '[2]가 오른쪽 코너로 멀리 빠지고 [x1]이 따라갑니다. 이제 공격 넷이 박스의 수비 넷을 상대합니다. [1]이 박스 위쪽의 왼편으로 파고들고, [x2]가 돌파를 따라 물러서며 막습니다.',
             move: {
               o2: { path: [[2, 3.4], [14, 2.8], [22.6, 4.6]], t: [0, 0.75] },
               o1: { path: [[-2.4, 25], [-4.6, 20.8]], t: [0.5, 0.95] },
             },
             def: {
               d1: { lag: 0.15 },
-              d2: { path: [[-8.6, 20.4]], t: [0.55, 0.95] },   // 박스 앞 왼쪽이 돌파를 막으러 들어온다
+              d2: { path: [[-3.6, 21.4], [-5.4, 17.8]], t: [0.45, 0.95] },   // [1]을 따라 안쪽으로 물러서며 돌파를 막는다
             },
           },
           {
             title: '킥아웃 3점',
             dur: 2.0,
-            text: '[1]을 막으러 [x2]가 들어오자, [1]이 [x2]가 비운 왼쪽 윙의 [3]에게 빼 줍니다. [x2]가 다시 나가기 전에 [3]이 3점을 던집니다.',
+            text: '[x2]가 돌파를 막느라 바빠 왼쪽 윙의 [3]에게는 아무도 없습니다. [1]이 빼 주고, [x2]가 나가기 전에 [3]이 3점을 던집니다.',
             ball: [
               { type: 'pass', to: 'o3', at: 0.1 },
               { type: 'shot', at: 0.5, pts: 3 },
             ],
-            def: { d2: { path: [[-9.2, 20.2], [-13.4, 20.6]], t: [0.3, 1] } },   // 뒤늦게 다시 나간다
+            def: { d2: { path: [[-8.6, 18.6], [-13.4, 20.2]], t: [0.3, 1] } },   // 돌파를 막고 있다가 뒤늦게 [3]에게 나간다
           },
         ],
       },

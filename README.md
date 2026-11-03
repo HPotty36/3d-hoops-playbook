@@ -252,7 +252,7 @@ To branch by defense, add a `reads` block. `at` is the number of shared steps; e
 
 Any field missing from the `en` block falls back to Korean. Unless you script them, defenders position themselves automatically: between their man and the rim, sagging toward the paint when they are far from the ball. Run `npm test` after editing: it fails on unrealistic speeds, overlapping players, shot distances that do not match the points, missing translations, reads that do not share the opening exactly, a defender in the lane for over three seconds without guarding anyone, and passes through a defender's body.
 
-A zone play adds a `defense` block: `defense: { zone: '2-3' }` puts every member of that zone (`js/zones.js`) in zone mode, and `man: { d1: 'o2' }` keeps listed defenders on a man. A step's `def` still wins for that step (`path`, `guard` for a man assignment in that step only, `lag`); `sag` applies to man defenders only. `npm test` also checks that zone defenders stay near their table spots while the ball sits at an anchor.
+A zone play adds a `defense` block: `defense: { zone: '2-3' }` puts every member of that zone (`js/zones.js`) in zone mode, and `man: { d1: 'o2' }` keeps listed defenders on a man (these chasers deny their man off the ball instead of sinking to help). A step's `def` still wins for that step (`path`, `guard` for a man assignment in that step only, `lag`); `sag` applies to man defenders only. `npm test` also checks that zone defenders stay near their table spots while the ball sits at an anchor.
 
 ## Tech
 

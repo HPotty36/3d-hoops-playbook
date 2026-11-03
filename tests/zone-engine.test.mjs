@@ -171,6 +171,19 @@ for (const [zone, man] of Object.entries(chasers)) {
       }
     }
   });
+  // 추격조는 공 없는 에이스 앞(공 쪽)에 팔 길이 안으로 붙어 패스 길을 막는다(디나이). 첫 단계: 에이스가 가만히 서 있다
+  test(`${zone} fixture: chasers deny their stars off the ball`, () => {
+    for (let t = 0.5; t < c.steps[0].s1; t += 0.1) {
+      const d = c.defense(t), o = c.offense(t), h = c.holderAt(t), ball = o[h];
+      for (const [id, a] of Object.entries(man)) {
+        if (a === h) continue;
+        const s = o[a], g = Math.hypot(d[id].x - s.x, d[id].z - s.z);
+        const ahead = Math.hypot(s.x - ball.x, s.z - ball.z) - Math.hypot(d[id].x - ball.x, d[id].z - ball.z);
+        assert.ok(g <= 3.5 && ahead >= 1.5, `${id} is ${g.toFixed(1)} ft from ${a} and only ${ahead.toFixed(1)} ft nearer the ball @ ${t.toFixed(2)}s`);
+      }
+    }
+  });
+
   test(`${zone} fixture: the zone part follows its table and the outline leaves out the chasers`, () => {
     assert.deepEqual(zoneDeviations(c), []);
     assert.deepEqual(c.zone.outline, ZONES[zone].outline);
