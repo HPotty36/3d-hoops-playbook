@@ -1,13 +1,13 @@
 <p align="center"><img src="assets/logo-mark.svg" width="72" alt="3D Hoops Playbook logo"></p>
 <h1 align="center">3D Hoops Playbook</h1>
 <p align="center">
-  24 offensive sets and 12 special-situation plays from pro basketball, each with the ways a defense plays it, replayed step by step on a 3D half court.<br>
+  24 offensive sets, 12 special-situation plays and 2 zone defenses from pro basketball, each with its counters, replayed step by step on a 3D half court.<br>
   <a href="https://hpotty36.github.io/3d-hoops-playbook/"><b>Live demo →</b></a>
 </p>
 
-An interactive playbook that replays **24 offensive sets and 12 special-situation plays commonly run in pro basketball** on a 3D half court, step by step.
+An interactive playbook that replays **24 offensive sets, 12 special-situation plays and 2 zone defenses commonly seen in pro basketball** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
-Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 122 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
+Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 128 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
@@ -63,6 +63,15 @@ Inbound plays and end-of-game sets. Each one shows a broadcast-style score bug n
 | 35 | Down Three | End of game | ●●○ | Down three with 8 s left: a stagger for the tying three from the sideline | Trail · Switch · Top lock |
 | 36 | Under a Second | End of game | ●●● | 0.9 s left: the catch starts the clock, so catch and shoot or tip it in | Deny · Switch · Overplay |
 
+### Defensive schemes
+
+Here the defense is the subject. Defenders guard areas instead of players: the shared steps show how the zone slides as the ball moves around, and each read is one way the offense breaks it. A thin blue line on the floor joins the zone defenders, so you can see the shape tilt and shrink toward the ball.
+
+| # | Play | Category | Difficulty | In one line | Attacks (reads) |
+|---|------|----------|:---:|------|------|
+| 37 | 2-3 Zone | Zone defenses | ●○○ | Two up top, three behind: the most common zone, strong at the rim | High post · Skip pass · Short corner |
+| 38 | 3-2 Zone (1-2-2) | Zone defenses | ●●○ | Three up front, two behind: covers the arc, thin at the high post and baseline | High-low · Baseline · Gap drive |
+
 Each play comes with **step-by-step breakdown · when to use it · key teaching points · how defenses counter it · famous examples**.
 
 ### Defensive reads
@@ -73,6 +82,7 @@ A play is only half the story; the other half is what the defense does. Every pl
 - The tabs above the timeline switch reads at any time (a ◆ on the timeline marks the branch point). Before the branch point the switch is seamless; after it, playback jumps back to the branch.
 - In the counters list, defenses with an animated read have a **Watch** button.
 - `?read=switch#pick-and-roll` opens a read directly.
+- In the defensive schemes the question flips: the branch point asks where the offense attacks the zone, and the list is headed **How to beat it**.
 
 ## Controls
 
@@ -118,6 +128,7 @@ A ring countdown and a **Play now** button appear next to the caption. Your read
 | Orange dashes | Pass |
 | Cyan line + T-bar | Screen |
 | Pink dots | Shot |
+| Thin blue loop | Zone shape (defensive schemes) |
 
 Offense is shown as orange numbered circles (1–5), defense as blue `X1`–`X5`. While a screen is being set, a translucent "wall" appears in front of the screener.
 
@@ -149,6 +160,7 @@ sw.js                 Service worker: offline cache (network first, cached copy 
 css/style.css         UI styles and light/dark theme tokens (3-column desktop / stacked mobile)
 js/main.js            Entry point: scene setup, playback loop, UI wiring
 js/engine.js          Compiles a play into a deterministic timeline (players, defense, ball)
+js/zones.js           Zone defense tables: where each zone defender stands for any ball spot (pure)
 js/court.js           Regulation half court (canvas texture) and the hoop
 js/players.js         Mannequin player model, poses (run, defend, screen, shoot), ball
 js/notation.js        Coach-board notation drawn on the floor
@@ -259,9 +271,9 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 3D Hoops Playbook
 
-프로 농구에서 자주 쓰이는 공격 작전 24가지와 특수 상황 작전 12가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
+프로 농구에서 자주 쓰이는 공격 작전 24가지, 특수 상황 작전 12가지, 존 수비 2가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
-작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 122가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
+작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 128가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
 
@@ -315,6 +327,15 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | 35 | 동점 3점 | 막판 작전 | ●●○ | 3점 뒤진 채 8초: 사이드라인에서 스태거로 동점 3점 | 트레일 · 스위치 · 탑 락킹 |
 | 36 | 1초 미만 | 막판 작전 | ●●● | 0.9초: 공을 잡는 순간 시계가 흐르니 받아서 바로 던지거나 팁 인 | 디나이 · 스위치 · 오버플레이 |
 
+### 수비 전술
+
+여기서는 수비가 주인공입니다. 수비가 사람 대신 구역을 지키는 존 수비로, 공유 단계에서는 공이 돌 때 존이 어떻게 미끄러지는지를 보여 주고, 읽기마다 공격이 그 존을 깨는 방법 하나를 보여 줍니다. 바닥에 존 수비수들을 잇는 가는 파란 선이 그려져, 존 모양이 공 쪽으로 기울고 좁아지는 것이 보입니다.
+
+| # | 작전 | 분류 | 난이도 | 한 줄 요약 | 공격 방법(읽기) |
+|---|------|------|:---:|------|------|
+| 37 | 2-3 존 | 존 수비 | ●○○ | 앞에 둘, 뒤에 셋: 가장 흔한 존, 골밑이 단단하다 | 하이포스트 · 스킵 패스 · 숏코너 |
+| 38 | 3-2 존(1-2-2) | 존 수비 | ●●○ | 앞에 셋, 뒤에 둘: 3점 라인을 넓게 막지만 하이포스트와 베이스라인이 약하다 | 하이-로 · 베이스라인 · 갭 돌파 |
+
 작전마다 **단계별 진행 · 이럴 때 쓴다 · 핵심 포인트 · 수비는 어떻게 막나 · 대표 사례**가 들어 있습니다.
 
 ### 수비 대응별 분기
@@ -325,6 +346,7 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 - 타임라인 위 탭으로 언제든 읽기를 바꿀 수 있습니다(타임라인의 ◆가 분기점). 분기점 전에는 끊김 없이 바뀌고, 지난 뒤라면 분기점으로 돌아갑니다.
 - '수비는 어떻게 막나' 목록에서 애니메이션이 있는 대응에는 **보기** 버튼이 있습니다.
 - `?read=switch#pick-and-roll`처럼 특정 읽기를 바로 열 수 있습니다.
+- 수비 전술 작전에서는 질문이 거꾸로입니다. 분기점에서 "공격은 이 존의 어디를 노릴까요?"라고 묻고, 대응 목록의 제목도 **공격은 어떻게 깨나**입니다.
 
 ### 사용법
 
@@ -370,6 +392,7 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 | 주황 점선 | 패스 |
 | 하늘색 선 + T자 | 스크린 |
 | 분홍 점선 | 슛 |
+| 가는 파란 고리 | 존 모양(수비 전술) |
 
 공격은 주황색 원형 번호(1–5), 수비는 파란색 `X1`–`X5`로 표시합니다. 스크린을 거는 순간에는 스크리너 앞에 반투명한 '벽'이 나타납니다.
 

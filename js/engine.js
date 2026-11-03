@@ -24,6 +24,7 @@ export const D3S_OUT_BY = 2.8;    // 세기가 이 시간(초)에 닿기 전에 
 export const D3S_STEP = 0.6;      // 레인 선 밖으로 나가 서는 거리(ft)
 export const D3S_SPEED = 10;      // 나갔다 오는 속도(ft/s, 가볍게 뛰는 정도)
 const D3S_HOLD = 0.4;             // 밖에서 머무는 시간(초)
+const D3S_CAP = 30;               // 원래 움직임과 합친 속도가 이보다 빨라지게는 비키지 않는다(ft/s)
 const ZONE_W = 0.6;               // 존 자리는 지난 0.6초 동안의 표 자리를 평균한다(패스를 따라 움직이되 공처럼 빠르지 않게)
 const ZONE_CLOSE = 0.6;          // 존의 공 담당은 공이 도착한 뒤 이만큼 더 걸려 다가선다(클로즈아웃)
 
@@ -450,6 +451,8 @@ export function compilePlay(play) {
       defStart[0] = evalBase(0, 0);
     } else {
       defStart[k] = evalBase(k - 1, steps[k - 1].s1 - 1e-6);
+      // 존 수비는 경계 시각 그대로(블렌딩 없이 이어 가는 읽기와 경로를 지시받은 읽기가 분기점에서 정확히 같도록)
+      for (const d of DEF) if (guards[k - 1][d] === null && !defSegs[k - 1][d]) defStart[k][d] = baseIn(k - 1, d, steps[k - 1].s1);
     }
     for (const [d, spec] of Object.entries(st.def || {})) {
       if (spec.path) defSegs[k][d] = makeSegment(defStart[k][d], spec.t ? { path: spec.path, t: spec.t } : spec.path, st.s0, st.dur);
@@ -473,43 +476,64 @@ export function compilePlay(play) {
   const maxStep = D3S_SPEED * SCAN;
   const MAN_GAP = 3;   // 자기 선수에게 붙을 때의 거리(ft): 팔 길이(D3S_GUARD) 안, 겹침 반경(R_OFF) 밖
   // 원래 자리 b에서 각 갈 곳까지의 어긋남
-  const wantsOf = (d, j) => {
+  // 존 수비는 맡은 선수가 없으니 레인 선 밖으로만 나간다(존 모양을 지킨다: 가운데 수비는 레인을 밟고 나갔다 들어온다)
+  const wantsMemo = Object.fromEntries(DEF.map((d) => [d, []]));
+  const wantsOf = (d, j) => wantsMemo[d][j] ?? (wantsMemo[d][j] = wantsCalc(d, j));
+  const wantsCalc = (d, j) => {
     const b = baseG[d][j], g = guards[stepIndexAt(j * SCAN)][d];
-    // 존 수비는 맡은 선수가 없으니 가장 가까운 공격수에게 붙는다
-    const m = g ? offG[g][j] : OFF.map((id) => offG[id][j]).reduce((x, y) => (dist2(y, b) < dist2(x, b) ? y : x));
-    const dm = dist2(b, m), k = dm > MAN_GAP ? (dm - MAN_GAP) / dm : 0;
-    return {
-      L: v2(-(b.x + LANE_X + D3S_STEP), 0), R: v2(LANE_X + D3S_STEP - b.x, 0), T: v2(0, LANE_Z + D3S_STEP - b.z),
-      M: v2((m.x - b.x) * k, (m.z - b.z) * k),
-    };
+    const out = { L: v2(-(b.x + LANE_X + D3S_STEP), 0), R: v2(LANE_X + D3S_STEP - b.x, 0), T: v2(0, LANE_Z + D3S_STEP - b.z) };
+    if (!g) return out;
+    const m = offG[g][j], dm = dist2(b, m), k = dm > MAN_GAP ? (dm - MAN_GAP) / dm : 0;
+    return { ...out, M: v2((m.x - b.x) * k, (m.z - b.z) * k) };
   };
   const exitSide = (d, i, cur, lim, posOf) => {
     const now = wantsOf(d, i);
     const score = Object.fromEntries(Object.entries(now).map(([k, w]) => [k, Math.hypot(w.x, w.z)]));
     for (let j = i + 6; j <= Math.min(i + 36, lim); j += 6) {
       if (!inLaneP(baseG[d][j])) break;
-      for (const [k, w] of Object.entries(wantsOf(d, j))) score[k] = Math.max(score[k], Math.hypot(w.x, w.z));
+      for (const [k, w] of Object.entries(wantsOf(d, j))) if (k in score) score[k] = Math.max(score[k], Math.hypot(w.x, w.z));
     }
     const later = Math.min(i + 24, lim);
     const blocked = (k) => [i, later].some((j) => {
-      const w = wantsOf(d, j)[k], q = v2(baseG[d][j].x + w.x, baseG[d][j].z + w.z);
+      // 앞을 볼 때 그 수비가 맨투맨↔존으로 바뀌어 있으면(단계의 guard) 지금 기준의 갈 곳으로 본다
+      const w = wantsOf(d, j)[k] ?? now[k], q = v2(baseG[d][j].x + w.x, baseG[d][j].z + w.z);
       return DEF.some((e) => e !== d && dist2(posOf(e, j), q) < R_DEF + 0.3)
         || (k !== 'M' && OFF.some((id) => dist2(offG[id][j], q) < R_OFF + 0.3));
     });
     const order = Object.keys(score).sort((x, y) => score[x] - score[y]);
     let side = order.find((k) => !blocked(k)) ?? order[0];
-    if (cur && side !== cur && !blocked(cur) && score[cur] < score[side] + 1) side = cur;
+    if (cur && cur in score && side !== cur && !blocked(cur) && score[cur] < score[side] + 1) side = cur;
     return { side, want: now[side] };
   };
-  const stepToward = (o, want) => {
+  // 어긋남 o를 want 쪽으로 한 칸(최대 D3S_SPEED) 옮기되, 원래 자리의 움직임(b0 → b1)과 합친 이동이 D3S_CAP을 넘지 않게 줄인다.
+  // 원래 자리만으로 이미 넘으면, 합친 이동이 가장 작아지는 만큼만 옮긴다(존이 크게 미끄러질 때 비키기가 속도를 더하지 않도록).
+  const stepToward = (o, want, b0, b1) => {
     const l = dist2(o, want), m = Math.min(l, maxStep);
-    return l > 0 ? v2(o.x + ((want.x - o.x) / l) * m, o.z + ((want.z - o.z) / l) * m) : o;
+    if (l === 0) return o;
+    const D = v2(((want.x - o.x) / l) * m, ((want.z - o.z) / l) * m);
+    const A = v2(b1.x - b0.x, b1.z - b0.z), R = D3S_CAP * SCAN;
+    const f = (k) => (A.x + k * D.x) ** 2 + (A.z + k * D.z) ** 2;
+    let k = 1;
+    if (f(1) > R * R) {
+      const a = D.x * D.x + D.z * D.z, bq = 2 * (A.x * D.x + A.z * D.z), c = A.x * A.x + A.z * A.z - R * R;
+      if (c > 0) k = clamp(-bq / (2 * a), 0, 1);
+      else k = clamp((-bq + Math.sqrt(Math.max(0, bq * bq - 4 * a * c))) / (2 * a), 0, 1);
+    }
+    return v2(o.x + D.x * k, o.z + D.z * k);
   };
   for (const d of DEF) {
     // 다른 수비의 자리: 먼저 계산한 수비는 어긋남까지, 아직이면 원래 자리
     const posOf = (e, j) => {
       const b = baseG[e][j], a = outOff[e];
       return a ? v2(b.x + a.x[Math.min(j, a.x.length - 1)], b.z + a.z[Math.min(j, a.z.length - 1)]) : b;
+    };
+    // 같은 (시각, 지금 쪽, 내다보는 끝)이면 갈 곳도 같다: 앞을 따라가 보는 계산이 겹치므로 기억해 둔다
+    const exMemo = new Map();
+    const exitOf = (i, cur, lim) => {
+      const key = `${i}|${cur}|${lim}`;
+      let ex = exMemo.get(key);
+      if (!ex) exMemo.set(key, (ex = exitSide(d, i, cur, lim, posOf)));
+      return ex;
     };
     // i에서 출발하면 몇 초 뒤 레인 밖에 서거나 누군가를 막게 되는지(겹침 처리 전). 1.5초 안에 못 하면 Infinity
     const timeToExit = (i, o0, side0) => {
@@ -518,8 +542,8 @@ export function compilePlay(play) {
       for (let j = i + 1; j <= i + 90; j++) {
         const jc = Math.min(j, lim), b = baseG[d][jc];
         let want = v2(0, 0);
-        if (inLaneP(b)) { const ex = exitSide(d, jc, side, lim, posOf); side = ex.side; want = ex.want; }
-        o = stepToward(o, want);
+        if (inLaneP(b)) { const ex = exitOf(jc, side, lim); side = ex.side; want = ex.want; }
+        o = stepToward(o, want, baseG[d][Math.min(j - 1, lim)], b);
         const p = v2(b.x + o.x, b.z + o.z);
         if (!inLaneP(p) || OFF.some((id) => dist2(offG[id][jc], p) <= D3S_GUARD - 0.2)) return (j - i) * SCAN;
       }
@@ -547,7 +571,7 @@ export function compilePlay(play) {
         const guarding = OFF.some((id) => dist2(offG[id][i], p) <= D3S_GUARD);
         if (!inLaneP(p) || guarding) runStart = null;
         else if (runStart === null) runStart = g;
-        if (runStart !== null && g - runStart >= 0.5 && (phase === 'idle' || phase === 'back')
+        if (runStart !== null && g - runStart >= D3S_OUT_BY - 0.15 - 1.5 && (phase === 'idle' || phase === 'back')
           && g - runStart + timeToExit(i, o, null) >= D3S_OUT_BY - 0.15
           && g - runStart + timeToSettle(i, o) >= D3S_OUT_BY - 0.15) phase = 'out';
       }
@@ -555,14 +579,14 @@ export function compilePlay(play) {
       if ((g >= firstShot || guardsAt(b, i)) && (phase === 'out' || phase === 'hold')) phase = 'back';
       let want = v2(0, 0);
       if ((phase === 'out' || phase === 'hold') && inLaneP(b)) {
-        const ex = exitSide(d, i, side, limOf(i), posOf);
+        const ex = exitOf(i, side, limOf(i));
         side = ex.side;
         want = ex.want;
       }
       if (phase === 'out' && (!inLaneP(b) || dist2(o, want) < 1e-6)) { phase = 'hold'; holdUntil = g + D3S_HOLD; }
       else if (phase === 'hold' && g >= holdUntil) phase = 'back';
       const was = o;
-      o = stepToward(o, want);
+      o = stepToward(o, want, b, baseG[d][Math.min(i + 1, nGrid - 1)]);
       if (phase === 'back' && was === o) { phase = 'idle'; side = null; }
     }
     if (xs.some((x, i) => x !== 0 || zs[i] !== 0)) outOff[d] = { x: xs, z: zs };

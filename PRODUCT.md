@@ -20,7 +20,7 @@ Success, as the owner defines it, is all of these:
 - viewers actually understand the plays and the reads;
 - people install it and keep using it (the Play Store app and the installable web app);
 - it stands as a portfolio piece;
-- the library keeps growing (zone defenses are the next planned part).
+- the library keeps growing (zone and combination defenses are being added now).
 
 ## Positioning
 
@@ -48,7 +48,7 @@ It is not a diagram sheet or a video clip. It is a 3D replay you can control, an
   - five camera views plus free orbit;
   - a reading mode that pauses so the caption can be read;
   - at a branch point the read is either chosen automatically or picked by the viewer, step by step.
-- **Defense:** automatic man-to-man today. Zone schemes are not built yet.
+- **Defense:** automatic man-to-man, and a zone mode driven by per-zone tables (the 2-3 and 3-2 zones so far). Every play keeps the pro defensive three-second rule and never passes through a defender's body.
 - **Unofficial and educational:**
   - no league, team, player or school names anywhere except the "famous usage" field, and the store build strips that field;
   - aliases stay generic;

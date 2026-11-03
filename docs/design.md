@@ -11,10 +11,11 @@
 
 | Module | Responsibility | Depends on |
 |------|------|------|
-| `engine.js` | Compiles a play definition into `t → position` functions: offense paths, ball flight, automatic defense, notation data | three (curve math) |
+| `engine.js` | Compiles a play definition into `t → position` functions: offense paths, ball flight, automatic defense (man and zone), notation data | three (curve math), zones |
+| `zones.js` | Zone tables at eight anchor ball spots and `zoneSpots(zone, ball)`, the blended spot of every zone defender for any ball spot. Pure, no DOM, no engine | — |
 | `court.js` | Half-court texture and hoop meshes | engine (rim position) |
 | `players.js` | Player model and poses, ball model | three |
-| `notation.js` | Turns notation data into floor ribbon meshes with per-step opacity | engine |
+| `notation.js` | Turns notation data into floor ribbon meshes with per-step opacity, plus the zone outline | engine |
 | `camera.js` | Camera presets, aspect-ratio fitting, ball follow | OrbitControls |
 | `clock.js` | Game clock, shot clock and score at time `t` for special-situation plays, and the score bug's view. Pure, no DOM | — |
 | `reads.js` | Turns a play plus a read id into an ordinary play (shared steps + that read's steps); read labels per language. Pure, no DOM | — |
@@ -45,6 +46,19 @@
 - Because everything is a function of `t`, timeline scrubbing and step jumps always land on exactly the same frame.
 - Every player stays inside what the default coach camera shows on a 16:10 desktop screen: the full court width up to z = 36 ft and the middle (|x| ≤ 12 ft) up to z = 38.5 ft (z = 40 ft minus a margin for the floor rings). Early offense therefore starts as the ball crosses about 6–9 ft past the arc, with players already running in, rather than at half court. Behind the end line the frame reaches z = −2.5 ft, and beyond the left sideline x = −26.6 ft up to z = 20 ft, for inbounders; the right sideline is cut off by the broadcast camera, which sits on that side, so nobody stands past it. `npm test` checks it for every play and read, from `t = 0`.
 
+## Zone defenses
+
+- A play in the defense section carries `defense: { zone, man? }`. Defenders in `ZONES[zone].members` play the zone, defenders named in `man` (and any other defender) play man-to-man. Plays without the block keep the man-to-man path untouched (`npm test` compares three man plays against positions recorded before zones existed).
+- **Tables (`zones.js`).** Each zone lists every member's spot and the ball defender at eight anchor ball spots: top (0, 27), wings (∓17, 21), corners (∓21.5, 3), high post (0, 17), blocks (∓6, 6). Tables give the top, the high post and the left side; the right side is mirrored, swapping the left and right defenders. Between anchors, spots and ball weights are blended by inverse-distance weighting (power 2), exact at the anchors.
+  - **2-3:** x1/x2 guards, x3/x4 back line, x5 middle. **3-2 (1-2-2):** x1 top, x2/x3 wings, x4/x5 back line; on a high-post catch x4 steps up and x1 drops behind it (the engine's ball pressure always sits between the holder and the rim, so the top man cannot pressure from behind).
+  - Back-line spots at the top sit just outside the lane line where the slide rules allow, so the three-second rule rarely has to move them.
+- **Position.** A zone defender's spot is the table at the ball's position (also while the ball is in the air), averaged over the last 0.6 s (an exact running average over a 1/60 s grid), read with the usual 0.28 s lag. The average keeps the zone moving on the pass without letting it jump at ball speed. The ball defender then closes out toward the holder by its ball weight; the receiver's weight ramps up until 0.6 s after the catch, so a long slide arrives as a closeout rather than a sprint.
+- **Steps.** A step's `path`, `guard` or `lag` override wins as before. `guard` makes a zone defender a man defender for that step only. Zone defenders that stay in the zone across a step boundary are not blended, because there is nothing to join.
+- **Rules.** The three-second step-out and the pass-lane step apply to zone defenders too. A zone defender only steps out past a lane line (it has no man to close on), so the middle of a 2-3 steps out and back in.
+- **Outline.** `cp.zone = { name, outline }`. `Notation#updateZone` draws one closed blue ribbon (0.14 ft, `#3a6fd8`, 60 % opacity) through the members in outline order, rewriting one buffer each frame, just above the floor and under the play notes. It shows only when both the notation and the defense toggles are on, and only in zone plays.
+- **UI.** Zone plays show a "Zone" legend item and head the counters list **How to beat it** (`h.beats`); the branch prompt asks where the offense attacks the zone. `guardOf` returns `null` for an off-ball zone defender, which then faces the ball.
+- **Checks.** `zoneDeviations` (in `npm test`, every zone play and read): whenever the holder has stood within 2 ft of an anchor for 0.8 s, each zone defender that is not stepping out, not stepping aside for a pass and not scripted in that step is within 3 ft of its spot, the ball defender within 4 ft of the holder, and each man defender within 7 ft of its man.
+
 ## Reads (defensive branches)
 
 - A play may carry a `reads` block: `at` (number of shared steps), a prompt, the base read (the play's own steps), and options that replace `steps[at..]`. `reads.js` builds the chosen read as a normal play object, so the engine and localization never see branches.
@@ -66,7 +80,7 @@ The section is complete with 12 plays: four baseline and three sideline out-of-b
 
 ## Library
 
-- `SECTIONS` in `js/plays/index.js` groups categories into offense sets, special situations and defensive schemes; empty sections are hidden.
+- `SECTIONS` in `js/plays/index.js` groups categories into offense sets, special situations and defensive schemes; empty sections are hidden. Defensive schemes have two categories: zone defenses and combination defenses.
 - Offense sets have five categories, in this order: on-ball screens, off-ball screens, motion & drive, early offense, and system offenses. Special situations have four: baseline out of bounds, sideline out of bounds, end of game, and after timeout.
 - System offenses (Flex, Princeton Chin, Delay, Sideline Triangle) show one representative cycle of their continuity with its reads, not the whole repeating loop.
 - Search matches Korean names, English names and `aliases` regardless of UI language, ignoring case, spaces and hyphens. Difficulty chips use the same dots as the list. Collapsed sections are remembered.

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { compilePlay, ballAir, OFF, DEF } from '../js/engine.js';
 import { PLAYS, SECTIONS } from '../js/plays/index.js';
 import { readIds, variant, branchTime } from '../js/reads.js';
-import { sampleMotion, peakDefenseSpeed, situationViolations, inCoachFrame, passLaneViolations, threeSecondViolations } from './helpers.mjs';
+import { sampleMotion, peakDefenseSpeed, situationViolations, inCoachFrame, passLaneViolations, threeSecondViolations, zoneDeviations } from './helpers.mjs';
 import { LANGS, hasLabel } from '../js/i18n.js';
 
 const ID = /^[a-z0-9-]+$/;
@@ -63,6 +63,8 @@ function assertPhysical(cp, label) {
   assert.deepEqual(situationViolations(cp.play, cp), [], `${label}: situation rules`);
   // 수비 3초: 레인 안에서 아무도 막지 않은 채 3초를 넘게 머물지 않는다 (모든 작전)
   assert.deepEqual(threeSecondViolations(cp), [], `${label}: three seconds`);
+  // 존 수비 작전: 존 수비는 표대로, 맨투맨 수비는 자기 선수 곁에
+  if (cp.zone) assert.deepEqual(zoneDeviations(cp), [], `${label}: zone`);
 }
 
 // ── 움직임 ──
