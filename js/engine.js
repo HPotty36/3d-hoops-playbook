@@ -285,8 +285,10 @@ export function compilePlay(play) {
   };
   // 반응 지연(lag)만큼 전의 존 자리에서, 공 담당 가중치만큼 공을 가진 선수 앞(온볼 자리)으로 다가선다.
   // 공 소유 가중치로 섞으므로 공 담당이 한 사람에서 다음 사람으로 넘어갈 때도 순간이동하지 않는다.
+  // 존 자리의 평균(ZONE_W)과 공 담당의 다가서기(ZONE_CLOSE)가 이미 반응 지연 노릇을 하므로 기본 지연은 더하지 않는다.
+  // 단계에서 지연을 더 준 만큼(lag − DEF_LAG)만 늦춘다. 그래야 존이 패스를 따라 움직인다.
   const zoneAt = (lag, t) => {
-    const tl = Math.max(0, t - lag);
+    const tl = Math.max(0, t - Math.max(0, lag - DEF_LAG));
     const Z = zoneSmooth(tl);
     let S = 0;
     const P = v2(0, 0);

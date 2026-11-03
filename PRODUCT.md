@@ -24,7 +24,7 @@ Success, as the owner defines it, is all of these:
 
 ## Positioning
 
-It is not a diagram sheet or a video clip. It is a 3D replay you can control, and it branches by defensive read: 122 reads across 36 plays. Coach-board notation is drawn on the floor, and a plain-language caption runs with every step. Plays are data (one file per play), so the library grows without new interface.
+It is not a diagram sheet or a video clip. It is a 3D replay you can control, and it branches by defensive read: 128 reads across 38 plays. Coach-board notation is drawn on the floor, and a plain-language caption runs with every step. Plays are data (one file per play), so the library grows without new interface.
 
 ## Operating Context
 
@@ -40,9 +40,10 @@ It is not a diagram sheet or a video clip. It is a 3D replay you can control, an
 
 ## Capabilities and Constraints
 
-- **Play library:** 36 plays.
+- **Play library:** 38 plays.
   - 24 offensive sets.
   - 12 special situations: baseline and sideline inbounds, after timeouts, and the end of the game. These show a broadcast-style score bug, and their clocks follow the real rules.
+  - 2 defensive schemes so far (the 2-3 and 3-2 zones). Here the defense is the subject: its reads are the ways the offense breaks the zone, and a blue outline on the floor shows the zone's shape.
   - The library can be searched by Korean or English name and common aliases, and filtered by difficulty.
 - **Viewing:**
   - five camera views plus free orbit;

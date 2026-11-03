@@ -44,7 +44,7 @@ export default {
       { title: 'Ball to the corner', text: '[4] runs the baseline from the right side to the left corner and catches the pass from [3]. [x4] comes out to the corner, [x5] crosses the lane to the ball-side block, [x2] sinks below the wing, and [x3] drops to the front of the rim.' },
       { title: 'Ball back to the top', text: 'The ball goes back through [3] to [1] at the top, and the zone slides back to the middle: [x1] comes up toward the ball, and [x4] and [x5] spread back to the two blocks. [2] has drifted to the right corner.' },
       { title: 'High-post catch', text: '[1] passes to [5] at the free-throw line. [x4] steps up from the left block to stop [5], and [x1] drops behind to cut off the pass back out. [4] slides in from the corner to the left block that [x4] just left.' },
-      { title: 'High-low', text: '[5] drops a bounce pass to [4] on the empty left block (the **high-low**). [x5] is on the far side of the lane and cannot get there. Layup.' },
+      { title: 'High-low', text: '[5] drops a bounce pass to [4] on the empty left block (the **high-low**). [x4], who stepped up, turns back too late, and [x5] is on the far side of the lane and cannot get there. Layup.' },
     ],
     reads: {
       prompt: 'Where does the offense attack this zone?',
@@ -60,7 +60,7 @@ export default {
         {
           label: 'Gap drive', why: 'With three defenders spread out front, there are two gaps. A drive into one draws two defenders, and the shooter outside them is open.',
           steps: [
-            { title: 'Drive the gap', text: '[1] attacks the gap between [x1] and [x2] with the dribble. [x2] has to leave the wing to help stop the drive, and [x1] chases from behind.' },
+            { title: 'Drive the gap', text: '[1] attacks the gap between [x1] and [x2] with the dribble. [x2], who was up on [3] at the wing, has to leave [3] and step in to help stop the drive.' },
             { title: 'Kick-out three', text: '[1] kicks it out to [3] on the left wing that [x2] just left, and [3] fires the three before [x2] can get back out.' },
           ],
         },
@@ -85,22 +85,22 @@ export default {
     },
     {
       title: '코너로',
-      dur: 2.8,
+      dur: 3.5,
       text: '[4]가 오른쪽에서 베이스라인을 따라 왼쪽 코너로 달려가 [3]의 패스를 받습니다. [x4]가 코너로 나가고, [x5]는 레인을 건너 공 쪽 블록을 지키며, [x2]는 윙 아래로 내려서고, [x3]는 림 앞까지 내려섭니다.',
       move: {
-        o4: { path: [[5, 2.6], [-8, 2.6], [-21.8, 4.2]], t: [0, 0.85] },
-        o2: { path: [[21.8, 9], [22.4, 4.4]], t: [0.3, 0.9] },
+        o4: { path: [[5, 2.6], [-8, 2.6], [-21.8, 4.2]], t: [0, 0.68] },
+        o2: { path: [[21.8, 9], [22.4, 4.4]], t: [0.25, 0.75] },
       },
-      ball: [{ type: 'pass', to: 'o4', at: 0.8 }],
+      ball: [{ type: 'pass', to: 'o4', at: 0.64 }],
     },
     {
       title: '다시 탑으로',
-      dur: 3.0,
+      dur: 3.4,
       text: '공이 [3]을 거쳐 탑의 [1]에게 돌아가고, 존도 가운데로 미끄러져 돌아옵니다. [x1]은 공 쪽으로 올라오고, [x4]·[x5]는 다시 양 블록으로 벌어집니다. [2]는 오른쪽 코너에 와 있습니다.',
       move: { o1: { path: [[-0.4, 28.2]], t: [0, 0.4] } },
       ball: [
-        { type: 'pass', to: 'o3', at: 0.36 },
-        { type: 'pass', to: 'o1', at: 0.74 },
+        { type: 'pass', to: 'o3', at: 0.3 },
+        { type: 'pass', to: 'o1', at: 0.58 },
       ],
     },
     {
@@ -113,11 +113,12 @@ export default {
     {
       title: '하이-로',
       dur: 1.8,
-      text: '[5]가 빈 왼쪽 블록의 [4]에게 바운스 패스를 떨어뜨립니다(**하이-로**). [x5]는 레인 반대쪽에 있어 닿지 못하고, [4]가 레이업합니다.',
+      text: '[5]가 빈 왼쪽 블록의 [4]에게 바운스 패스를 떨어뜨립니다(**하이-로**). 올라왔던 [x4]는 뒤늦게 돌아서고, [x5]는 레인 반대쪽에 있어 닿지 못합니다. [4]가 레이업합니다.',
       ball: [
         { type: 'bounce', to: 'o4', at: 0.12 },
         { type: 'shot', at: 0.55, pts: 2 },
       ],
+      def: { d4: { path: [[-1.6, 12.2], [-3.2, 9.8]], t: [0.15, 1] } },   // 올라왔던 [x4]는 뒤늦게 돌아선다
     },
   ],
 
@@ -150,6 +151,10 @@ export default {
               { type: 'pass', to: 'o2', at: 0.58 },
               { type: 'shot', at: 0.86, pts: 2 },
             ],
+            def: {
+              d4: { path: [[-17.6, 5.6]], t: [0.4, 1] },              // 코너의 [4]에게 나가 있던 [x4]는 그 자리에 남는다
+              d5: { path: [[-7.4, 6.4], [-5.6, 6.6]], t: [0.55, 1] },  // 공 쪽 블록의 [x5]는 뒤늦게 돌아선다
+            },
           },
         ],
       },
@@ -161,9 +166,9 @@ export default {
           {
             title: '갭 돌파',
             dur: 1.8,
-            text: '[1]이 [x1]과 [x2] 사이의 틈으로 드리블해 파고듭니다. 돌파를 막으려고 [x2]가 윙을 비우고 들어오고, [x1]은 뒤에서 쫓아옵니다.',
+            text: '[1]이 [x1]과 [x2] 사이의 틈으로 드리블해 파고듭니다. 윙의 [3] 곁에 있던 [x2]가 돌파를 막으려고 [3]을 비우고 안으로 들어옵니다.',
             move: { o1: { path: [[-3, 25.4], [-6.4, 20.6]], t: [0.1, 0.8] } },
-            def: { d2: { path: [[-10.2, 19.6]], t: [0.25, 0.8] } },
+            def: { d2: { path: [[-15.6, 20.9], [-9.8, 19.8]], t: [0, 0.85] } },   // 윙의 [3] 쪽에 붙어 있다가 돌파에 끌려 들어온다
           },
           {
             title: '킥아웃 3점',

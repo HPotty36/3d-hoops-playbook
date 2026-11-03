@@ -51,6 +51,16 @@ test('zone fixture: only the ball defender guards the holder', () => {
   assert.equal(cp.guardOf('d3', t), null);
 });
 
+// 존은 패스를 따라 움직인다: 공이 도착하고 0.5초 뒤에는 각 수비의 자리가 새 앵커의 표 자리까지 거의 다 와 있다
+test('zone fixture: the zone moves on the pass', () => {
+  const arrive = wingHold.t0, t = arrive + 0.5;
+  const table = ZONES['2-3'].at.wingR.spots;
+  for (const d of ['d1', 'd3', 'd4', 'd5']) {
+    const s = cp.zoneSpotAt(d, t), [x, z] = table[d];
+    assert.ok(Math.hypot(s.x - x, s.z - z) < 1.5, `${d} spot is ${Math.hypot(s.x - x, s.z - z).toFixed(2)} ft from its wing spot 0.5 s after the catch`);
+  }
+});
+
 test('zone fixture: a step guard override turns a zone defender into a man defender', () => {
   const g = compilePlay(zoneFixture({ zone: '2-3' }, { def: { d4: { guard: 'o4' } } }));
   const st = g.steps[2];
