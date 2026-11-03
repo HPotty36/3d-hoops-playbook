@@ -32,7 +32,7 @@ export function createReadsUI({ tabs, prompt, tr, fmt, onTab, onPick }) {
     // 먼저 보이게 한 뒤 내용을 채운다: 보이는 영역에 새로 들어온 내용이어야 스크린 리더가 읽는다
     prompt.hidden = false;
     prompt.innerHTML = `
-      <p class="bp-eyebrow">${esc(tr('branch.title'))}</p>
+      <p class="sr-only">${esc(tr('branch.title'))}</p>
       <p class="bp-q" id="bp-q">${fmt(meta.prompt)}</p>
       <div class="bp-options">${meta.reads.map((r) =>
         `<button type="button" data-read="${r.id}" class="${r.id === currentId ? 'current' : ''}">${esc(r.label)}</button>`).join('')}</div>

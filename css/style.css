@@ -95,6 +95,9 @@ body {
 }
 button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+::selection { background: rgba(238, 122, 58, 0.32); color: var(--text); }
+/* 스크롤 막대도 테마 색으로 (목록 · 설명 패널 · 모바일 페이지) */
+html, .lib-list, #info { scrollbar-width: thin; scrollbar-color: var(--diff) transparent; }
 kbd {
   font-family: var(--font); font-size: 11.5px; font-weight: 500;
   display: inline-block; min-width: 20px; padding: 0 6px; text-align: center; line-height: 20px;
@@ -153,7 +156,7 @@ kbd {
 .lib-search svg { width: 17px; height: 17px; flex: none; }
 .lib-search input {
   flex: 1; min-width: 0; height: 40px; border: 0; outline: 0; background: transparent;
-  color: var(--text); font: inherit; font-size: 14.5px;
+  color: var(--text); font: inherit; font-size: 14.5px; caret-color: var(--accent);
 }
 .lib-search input::placeholder { color: var(--text-3); }
 .lib-search input::-webkit-search-cancel-button { filter: grayscale(1); opacity: 0.6; }
@@ -175,10 +178,12 @@ kbd {
 .lib-empty { margin: 18px 12px; font-size: 13.5px; color: var(--text-3); }
 .lib-empty[hidden] { display: none; }
 .cat-title { margin: 12px 12px 4px; font-size: 12.5px; font-weight: 500; color: var(--text-3); }
+/* 읽기 수: 주황은 공격(선수 칩·재생 버튼)과 현재 상태에만 쓰므로 여기서는 조용한 숫자로 */
 .reads-badge {
-  flex: none; padding: 2px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text);
-  font-size: 11px; font-weight: 600; white-space: nowrap;
+  flex: none; font-size: 12px; font-weight: 500; color: var(--text-3);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
 }
+.play-item:hover .reads-badge, .play-item.active .reads-badge { color: var(--text-2); }
 .play-item {
   display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0 12px;
   border-radius: var(--r-lg); text-align: left; font-size: 15px; color: var(--text-sub);
@@ -187,9 +192,10 @@ kbd {
 .play-item:hover { background: var(--raised); color: var(--text); }
 .play-item.active { background: var(--raised-2); color: var(--text); font-weight: 600; }
 .play-item .nm { flex: 1; min-width: 0; line-height: 1.35; }
+/* 난이도: 채운 점과 빈 점(●○○)이라 목록과 필터에서 단계가 한눈에 갈린다 */
 .diff { display: flex; gap: 4px; flex: none; }
-.diff i { width: 6px; height: 6px; border-radius: 50%; background: var(--diff); }
-.diff i.on { background: var(--diff-on); }
+.diff i { width: 6px; height: 6px; border-radius: 50%; box-shadow: inset 0 0 0 1.25px var(--diff-on); }
+.diff i.on { background: var(--diff-on); box-shadow: none; }
 .play-item.active .diff i.on { background: var(--accent); }
 
 .side-foot { margin-top: 12px; }
@@ -210,7 +216,8 @@ kbd {
   padding: 0 4px 0 8px;
 }
 .play-head { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; }
-.play-meta { flex-basis: 100%; margin: 0; font-size: 13px; line-height: 1.4; color: var(--text-3); }
+/* 갈래 · 난이도: 제목 위 머리말이 아니라 제목 아래 한 줄 */
+.play-meta { order: 1; flex-basis: 100%; margin: 0; font-size: 13px; line-height: 1.4; color: var(--text-3); }
 .play-head h2 { min-width: 0; margin: 1px 0 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* 스코어 버그: 중계 화면의 알약 모양. 코트 위가 아니라 제목 옆에 둔다 */
@@ -249,9 +256,9 @@ kbd {
 
 #score-pop {
   position: absolute; left: 50%; top: 36%; transform: translate(-50%, -50%) scale(0.7);
-  font-weight: 700; font-size: 88px; line-height: 1; letter-spacing: -0.02em; color: var(--text);
+  font-weight: 600; font-size: 88px; line-height: 1; letter-spacing: -0.02em; color: var(--text);
   text-shadow: var(--pop-shadow); opacity: 0; pointer-events: none;
-  transition: opacity 200ms var(--ease), transform 400ms cubic-bezier(0.2, 1.5, 0.4, 1);
+  transition: opacity 200ms var(--ease), transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 #score-pop small { font-size: 0.26em; font-weight: 600; letter-spacing: 0.06em; color: var(--accent-text); display: block; text-align: center; margin-top: 4px; }
 #score-pop.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -376,10 +383,12 @@ kbd {
 
 .bullets { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; font-size: 14.5px; color: var(--text-sub); line-height: 1.75; }
 .bullets li { position: relative; padding-left: 18px; }
-.bullets li::before { content: ""; position: absolute; left: 0; top: 0.72em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.bullets li::before { content: ""; position: absolute; left: 2px; top: 0.75em; width: 5px; height: 5px; border-radius: 50%; background: var(--text-3); }
 
-.counters { margin: 0; display: grid; gap: 8px; }
-.counters div { padding: 12px 14px; border-radius: var(--r-lg); background: var(--raised); }
+/* 대응 목록: 패널 속 카드가 아니라 단축키 목록처럼 가는 선으로 나눈 줄 */
+.counters { margin: 0; display: grid; }
+.counters div { padding: 12px 0; border-top: 1px solid var(--line); }
+.counters div:first-child { padding-top: 2px; border-top: 0; }
 .counters dt { font-size: 14px; font-weight: 600; color: var(--text); }
 .counters dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.7; color: var(--text-2); }
 
@@ -387,10 +396,11 @@ kbd {
 .counters dt span { flex: 1; min-width: 0; }
 .counters .watch {
   display: inline-flex; align-items: center; gap: 5px; flex: none; min-height: 28px; padding: 0 11px 0 9px;
-  border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); font-size: 12.5px; font-weight: 600;
+  border-radius: 999px; background: var(--raised-2); color: var(--text-sub); font-size: 12.5px; font-weight: 600;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease);
 }
 .counters .watch svg { width: 12px; height: 12px; }
-.counters .watch:hover { background: var(--accent); color: var(--on-accent); }
+.counters .watch:hover { background: var(--seg-on); color: var(--text); }
 
 /* ───────── 수비 대응별 분기 ───────── */
 /* 읽기 탭: 타임라인 위 */
@@ -417,15 +427,20 @@ kbd {
 }
 .branch-prompt[hidden] { display: none; }
 @keyframes bp-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
-.bp-eyebrow { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--accent-text); }
-.bp-q { margin: 4px 0 12px; font-size: 16.5px; font-weight: 600; line-height: 1.5; }
+/* 질문 앞의 ◆는 타임라인의 분기점 표시와 같은 모양이다 (머리말 대신) */
+.bp-q { margin: 0 0 12px; font-size: 16.5px; font-weight: 600; line-height: 1.5; }
+.bp-q::before {
+  content: ""; display: inline-block; width: 9px; height: 9px; margin: 0 11px 0 3px; vertical-align: 0.1em;
+  border-radius: 2px; background: var(--accent); transform: rotate(45deg);
+}
 .bp-options { display: flex; flex-wrap: wrap; gap: 8px; }
 .bp-options button {
   flex: 1 1 auto; min-height: 42px; padding: 0 16px; border-radius: 999px; background: var(--raised-2);
   font-size: 14.5px; font-weight: 600; color: var(--text); transition: background-color 150ms var(--ease);
 }
 .bp-options button:hover { background: var(--seg-on); }
-.bp-options button.current { box-shadow: inset 0 0 0 2px var(--accent); }
+/* 지금 읽기(Enter로 계속할 선택지)는 반전된 알약. 주황 테두리는 키보드 포커스에만 쓴다 */
+.bp-options button.current { background: var(--text); color: var(--panel); }
 .bp-foot { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
 .bp-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
 .bp-bar[hidden] { display: none; }
@@ -441,7 +456,11 @@ kbd {
 /* 단계 목록의 분기 구분선 */
 #info-steps .branch-divider {
   display: flex; align-items: center; gap: 8px; margin: 6px 0 2px; padding: 0 12px;
-  font-size: 12.5px; font-weight: 600; color: var(--accent-text);
+  font-size: 12.5px; font-weight: 600; color: var(--text-2);
+}
+#info-steps .branch-divider::before {
+  content: ""; flex: none; width: 7px; height: 7px; margin: 0 2px; border-radius: 1.5px;
+  background: var(--accent); transform: rotate(45deg);
 }
 #info-steps .branch-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
