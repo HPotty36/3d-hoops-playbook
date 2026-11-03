@@ -39,6 +39,8 @@ import twoThreeZone from './two-three-zone.js';
 import threeTwoZone from './three-two-zone.js';
 import oneThreeOneZone from './one-three-one-zone.js';
 import matchupZone from './matchup-zone.js';
+import boxAndOne from './box-and-one.js';
+import triangleAndTwo from './triangle-and-two.js';
 
 // 작전 목록의 큰 갈래. 표시 이름은 i18n.js의 section.* / cat.* 키. 작전이 없는 갈래는 목록에서 숨긴다.
 export const SECTIONS = [
@@ -89,4 +91,6 @@ export const PLAYS = [
   threeTwoZone,
   oneThreeOneZone,
   matchupZone,
+  boxAndOne,
+  triangleAndTwo,
 ];
