@@ -170,6 +170,9 @@ function buildNote(note, grow) {
   return B.geometry();
 }
 
+// 존 모양 선: 존 수비수를 표의 순서대로 잇는 닫힌 고리. 바닥 바로 위, 전술판 표기보다 아래에 그린다
+const ZONE_W = 0.14, ZONE_Y = 0.045, ZONE_MAX = 5;
+
 export class Notation {
   constructor(scene) {
     this.group = new THREE.Group();
@@ -178,6 +181,45 @@ export class Notation {
     this.visible = true;
     this.cur = -1;
     this.fade = 0;   // 현재 단계 표기가 나타난 뒤 흐른 실제 시간(초)
+    // 매 프레임 같은 버퍼를 고쳐 쓴다(선수 다섯까지)
+    const g = new THREE.BufferGeometry();
+    this.zonePos = new Float32Array(ZONE_MAX * 2 * 3);
+    g.setAttribute('position', new THREE.BufferAttribute(this.zonePos, 3));
+    this.zone = new THREE.Mesh(g, new THREE.MeshBasicMaterial({
+      color: 0x3a6fd8, transparent: true, opacity: 0.6, depthWrite: false, side: THREE.DoubleSide,
+    }));
+    this.zone.renderOrder = 4;
+    this.zone.frustumCulled = false;
+    this.zone.visible = false;
+    this.zoneN = 0;
+    scene.add(this.zone);
+  }
+
+  // positions: { [수비 id]: {x, z} } 또는 null(숨김), outline: 잇는 순서
+  updateZone(positions, outline) {
+    if (!positions || !outline || outline.length < 3) { this.zone.visible = false; return; }
+    const n = outline.length;
+    if (n !== this.zoneN) {
+      const idx = [];
+      for (let i = 0; i < n; i++) {
+        const a = i * 2, b = ((i + 1) % n) * 2;
+        idx.push(a, a + 1, b, a + 1, b + 1, b);
+      }
+      this.zone.geometry.setIndex(idx);
+      this.zoneN = n;
+    }
+    for (let i = 0; i < n; i++) {
+      const p = positions[outline[i]], q = positions[outline[(i + n - 1) % n]], r = positions[outline[(i + 1) % n]];
+      const d0 = unit(sub(p, q)), d1 = unit(sub(r, p));
+      // 모서리는 두 변의 법선 평균 방향으로 벌린다(마이터). 아주 뾰족한 모서리는 두 배까지만
+      const m = unit({ x: -d0.z - d1.z, z: d0.x + d1.x });
+      const k = Math.min(2, 1 / Math.max(0.5, m.x * -d0.z + m.z * d0.x)) * (ZONE_W / 2);
+      const o = i * 6;
+      this.zonePos[o] = p.x + m.x * k; this.zonePos[o + 1] = ZONE_Y; this.zonePos[o + 2] = p.z + m.z * k;
+      this.zonePos[o + 3] = p.x - m.x * k; this.zonePos[o + 4] = ZONE_Y; this.zonePos[o + 5] = p.z - m.z * k;
+    }
+    this.zone.geometry.attributes.position.needsUpdate = true;
+    this.zone.visible = true;
   }
 
   build(cp) {

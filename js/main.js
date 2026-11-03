@@ -292,6 +292,11 @@ function renderInfo() {
   const p = state.cp.play;
   const c = content();
   $('#hud-cat').textContent = tr('hud.meta', { cat: tr(`cat.${p.category}`), level: tr(`level.${p.difficulty}`) });
+  // 존 수비 작전: 범례에 '존', 대응 목록 제목은 '공격은 어떻게 깨나'
+  $('[data-zone-only]').hidden = !state.cp.zone;
+  const hc = $('#h-counters');
+  hc.dataset.i18n = state.cp.zone ? 'h.beats' : 'h.counters';
+  hc.textContent = tr(hc.dataset.i18n);
   $('#hud-title').textContent = c.name;
   $('#info-summary').innerHTML = fmt(c.summary);
   $('#info-when').innerHTML = fmt(c.when);
@@ -571,6 +576,8 @@ function applyState(t, dt) {
     }
   }
   notation.update(t, cp, dt);
+  // 존 모양 선: 표기와 수비가 모두 보일 때만
+  notation.updateZone(cp.zone && notation.visible && state.showDef ? def : null, cp.zone?.outline);
 }
 
 // ── 득점 팝업 ─────────────────────────────────────────────────
@@ -895,7 +902,7 @@ async function init() {
 
   // 디버깅용: 탭이 백그라운드여도 특정 시점을 강제로 그려 볼 수 있다
   window.__playbook = {
-    state, rig, camera, selectPlay, selectRead, setCam, advance, readTime, toggleTheme,
+    state, rig, camera, notation, selectPlay, selectRead, setCam, advance, readTime, toggleTheme,
     renderNow(frames = 12) {
       for (let i = 0; i < frames; i++) { applyState(state.t, 1 / 30); rig.update(1 / 30, ball.position); }
       renderer.render(scene, camera);

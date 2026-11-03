@@ -40,7 +40,7 @@ import underASecond from './under-a-second.js';
 export const SECTIONS = [
   { id: 'offense', cats: ['onball', 'offball', 'motion', 'early', 'system'] },
   { id: 'situations', cats: ['blob', 'slob', 'late', 'ato'] },   // 특수 상황: 베이스라인·사이드라인 인바운드, 막판 작전, 타임아웃 후 작전
-  { id: 'defense', cats: [] },      // 수비 전술 (존, 매치업 존)
+  { id: 'defense', cats: ['zone', 'hybrid'] },   // 수비 전술: 존, 혼합 수비(매치업 존·박스 앤 원·트라이앵글 앤 투)
 ];
 export const CATEGORIES = SECTIONS.flatMap((s) => s.cats);
 
