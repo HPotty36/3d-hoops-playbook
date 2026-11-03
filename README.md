@@ -1,13 +1,13 @@
 <p align="center"><img src="assets/logo-mark.svg" width="72" alt="3D Hoops Playbook logo"></p>
 <h1 align="center">3D Hoops Playbook</h1>
 <p align="center">
-  24 offensive sets, 12 special-situation plays and 2 zone defenses from pro basketball, each with its counters, replayed step by step on a 3D half court.<br>
+  24 offensive sets, 12 special-situation plays and 4 defensive schemes from pro basketball, each with its counters, replayed step by step on a 3D half court.<br>
   <a href="https://hpotty36.github.io/3d-hoops-playbook/"><b>Live demo →</b></a>
 </p>
 
-An interactive playbook that replays **24 offensive sets, 12 special-situation plays and 2 zone defenses commonly seen in pro basketball** on a 3D half court, step by step.
+An interactive playbook that replays **24 offensive sets, 12 special-situation plays and 4 defensive schemes commonly seen in pro basketball** on a 3D half court, step by step.
 Players move at real game speed, coach-style diagram notation (cuts, dribbles, passes, screens) is drawn on the floor, and every step explains what is happening and why.
-Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 128 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
+Every play also branches by **defensive read** — drop, switch, blitz, top lock and more, 134 reads in all counting each play's base version — so you see not just the play but how to beat each way of guarding it.
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
@@ -65,12 +65,14 @@ Inbound plays and end-of-game sets. Each one shows a broadcast-style score bug n
 
 ### Defensive schemes
 
-Here the defense is the subject. Defenders guard areas instead of players: the shared steps show how the zone slides as the ball moves around, and each read is one way the offense breaks it. A thin blue line on the floor joins the zone defenders, so you can see the shape tilt and shrink toward the ball.
+Here the defense is the subject. Defenders guard areas instead of players (the matchup zone mixes in man-to-man inside each area): the shared steps show how the zone slides as the ball moves around, and each read is one way the offense breaks it. A thin blue line on the floor joins the zone defenders, so you can see the shape tilt and shrink toward the ball.
 
 | # | Play | Category | Difficulty | In one line | Attacks (reads) |
 |---|------|----------|:---:|------|------|
 | 37 | 2-3 Zone | Zone defenses | ●○○ | Two up top, three behind: the most common zone, strong at the rim | High post · Skip pass · Short corner |
 | 38 | 3-2 Zone (1-2-2) | Zone defenses | ●●○ | Three up front, two behind: covers the arc, thin at the high post and baseline | High-low · Baseline · Gap drive |
+| 39 | 1-3-1 Zone | Zone defenses | ●●○ | Traps the wing with two; one baseline defender for both corners | Corner · Short corner · Beat the trap |
+| 40 | Matchup Zone | Combination defenses | ●●● | Starts as a 2-3, then guards whoever enters each area like man-to-man | Cutter · Screen the zone · Ball screen |
 
 Each play comes with **step-by-step breakdown · when to use it · key teaching points · how defenses counter it · famous examples**.
 
@@ -273,9 +275,9 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 3D Hoops Playbook
 
-프로 농구에서 자주 쓰이는 공격 작전 24가지, 특수 상황 작전 12가지, 존 수비 2가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
+프로 농구에서 자주 쓰이는 공격 작전 24가지, 특수 상황 작전 12가지, 수비 전술 4가지를 **3D 코트 위에서 단계별로 재생하며** 배우는 인터랙티브 플레이북입니다.
 선수들이 실제로 움직이고, 코트 바닥에는 코치들이 쓰는 전술판 표기(컷·드리블·패스·스크린)가 그려지며, 단계마다 지금 무슨 일이 일어나는지 한국어로 설명합니다.
-작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 128가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
+작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 134가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
 
@@ -331,12 +333,14 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 
 ### 수비 전술
 
-여기서는 수비가 주인공입니다. 수비가 사람 대신 구역을 지키는 존 수비로, 공유 단계에서는 공이 돌 때 존이 어떻게 미끄러지는지를 보여 주고, 읽기마다 공격이 그 존을 깨는 방법 하나를 보여 줍니다. 바닥에 존 수비수들을 잇는 가는 파란 선이 그려져, 존 모양이 공 쪽으로 기울고 좁아지는 것이 보입니다.
+여기서는 수비가 주인공입니다. 수비가 사람 대신 구역을 지키는 존 수비(매치업 존은 구역 안에서 맨투맨을 섞는다)로, 공유 단계에서는 공이 돌 때 존이 어떻게 미끄러지는지를 보여 주고, 읽기마다 공격이 그 존을 깨는 방법 하나를 보여 줍니다. 바닥에 존 수비수들을 잇는 가는 파란 선이 그려져, 존 모양이 공 쪽으로 기울고 좁아지는 것이 보입니다.
 
 | # | 작전 | 분류 | 난이도 | 한 줄 요약 | 공격 방법(읽기) |
 |---|------|------|:---:|------|------|
 | 37 | 2-3 존 | 존 수비 | ●○○ | 앞에 둘, 뒤에 셋: 가장 흔한 존, 골밑이 단단하다 | 하이포스트 · 스킵 패스 · 숏코너 |
 | 38 | 3-2 존(1-2-2) | 존 수비 | ●●○ | 앞에 셋, 뒤에 둘: 3점 라인을 넓게 막지만 하이포스트와 베이스라인이 약하다 | 하이-로 · 베이스라인 · 갭 돌파 |
+| 39 | 1-3-1 존 | 존 수비 | ●●○ | 윙에서 둘이 덫을 놓고, 베이스라인 하나가 양쪽 코너를 맡는다 | 코너 · 숏코너 · 덫 탈출 |
+| 40 | 매치업 존 | 혼합 수비 | ●●● | 2-3 자리에서 출발해, 구역에 들어온 선수는 맨투맨처럼 막는다 | 컷 넘겨받기 · 존에 스크린 · 볼 스크린 |
 
 작전마다 **단계별 진행 · 이럴 때 쓴다 · 핵심 포인트 · 수비는 어떻게 막나 · 대표 사례**가 들어 있습니다.
 
