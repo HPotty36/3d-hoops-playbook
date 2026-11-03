@@ -40,7 +40,7 @@ export default {
       { name: 'Ball screen', desc: 'Use a ball screen to pull two defenders to the ball, then throw it to the far side.' },
     ],
     steps: [
-      { title: 'Ball to the wing', text: '[1] passes to [3] on the right wing. It looks like man-to-man: [x2] picks up [3], and [x1] steps up on [5] at the free-throw line because [5] is in its area.' },
+      { title: 'Ball to the wing', text: '[1] passes to [3] on the right wing. On the ball side it looks like man-to-man: [x2] picks up [3], and [x1] steps up on [5] at the free-throw line because [5] is in its area.' },
       { title: 'Into the overload', text: '[4] runs the baseline to the right short corner and [5] slides down into the right post, so four attackers are on the right. [x4] picks up [4] and [x5] picks up [5], each matching up with whoever is in its area, while [x3] stays home on the weak side.' },
       { title: 'Cut through the zone', text: '[2] cuts from the left wing through the middle of the lane. [x3] lets [2] go, expecting [x5] to take over, but [x5] is busy with [5] in the post. Nobody picks up [2] (the **hand-off** breaks down).' },
       { title: 'Layup', text: '[3] bounces it to [2] beside the rim, and [2] lays it in before [x3] can turn around.' },
@@ -74,7 +74,7 @@ export default {
     {
       title: '윙으로',
       dur: 2.6,
-      text: '[1]이 오른쪽 윙의 [3]에게 패스합니다. 겉으로는 맨투맨 같습니다. [x2]가 [3]을 맡고, 자유투 라인의 [5]가 자기 구역에 있으니 [x1]이 [5]에게 붙습니다.',
+      text: '[1]이 오른쪽 윙의 [3]에게 패스합니다. 공 쪽만 보면 맨투맨 같습니다. [x2]가 [3]을 맡고, 자유투 라인의 [5]가 자기 구역에 있으니 [x1]이 [5]에게 붙습니다.',
       ball: [{ type: 'pass', to: 'o3', at: 0.3 }],
     },
     {
@@ -133,7 +133,7 @@ export default {
               o4: { path: [[20, 4.6], [22.8, 4.8]], t: [0.35, 0.85] },
             },
             screens: [{ by: 'o5', face: [13.6, 7.6], hold: 1.6 }],
-            def: { d4: { path: [[13.6, 7.6]], t: [0.3, 0.7] } },   // [4]를 따라 나가려다 [5]의 스크린에 걸린다
+            def: { d4: { path: [[15.6, 6.4]], t: [0.45, 0.8] } },   // [4]를 따라 나가려다 [5]의 스크린에 걸린다
           },
           {
             title: '코너 3점',

@@ -53,6 +53,26 @@ for (const [name, z] of Object.entries(ZONES)) {
     assert.ok(worst.l <= 1.5, `${worst.d} moves ${worst.l.toFixed(2)} ft for a 0.5 ft ball move at ${worst.at}`);
   });
 
+  // 바닥에 그리는 존 모양은 어느 공 위치에서도 스스로 꼬이지 않는다(서로 이웃하지 않은 두 변이 교차하지 않는다)
+  test(`${name} zone: the outline never crosses itself`, () => {
+    const cross = (a, b, c, d) => {
+      const o = (p, q, r) => Math.sign((q.x - p.x) * (r.z - p.z) - (q.z - p.z) * (r.x - p.x));
+      return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
+    };
+    const n = z.outline.length;
+    for (let x = -24; x <= 24; x += 2) {
+      for (let zz = 0; zz <= 30; zz += 2) {
+        const sp = zoneSpots(name, { x, z: zz }).spots, P = z.outline.map((d) => sp[d]);
+        for (let i = 0; i < n; i++) {
+          for (let j = i + 2; j < n; j++) {
+            if (i === 0 && j === n - 1) continue;
+            assert.ok(!cross(P[i], P[(i + 1) % n], P[j], P[(j + 1) % n]), `edges ${z.outline[i]}-${z.outline[(i + 1) % n]} and ${z.outline[j]}-${z.outline[(j + 1) % n]} cross with the ball at (${x}, ${zz})`);
+          }
+        }
+      }
+    }
+  });
+
   test(`${name} zone: the outline names each member once`, () => {
     assert.deepEqual([...z.outline].sort(), [...z.members].sort());
   });

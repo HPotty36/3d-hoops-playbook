@@ -57,7 +57,7 @@ export default {
         {
           label: 'Short corner', why: 'A catch in the short corner pulls the baseline defender and the middle out, and nobody is left at the rim.',
           steps: [
-            { title: 'Short-corner catch', text: '[3] steps up from the corner into the short corner, and [1] bounces it in over the trap. [x4] comes out to the short corner, and [x5] steps over to help.' },
+            { title: 'Short-corner catch', text: '[3] steps up from the corner into the short corner, and [1] bounces it in past the trap. [x4] comes out to the short corner, and [x5] steps over to help.' },
             { title: 'Dump-off', text: '[5] dives from the free-throw line into the empty front of the rim. [3] dumps it off, and [x3], still near the far elbow from the wing trap, is too late. Layup.' },
           ],
         },
@@ -111,7 +111,7 @@ export default {
         { type: 'skip', to: 'o4', at: 0.1 },
         { type: 'shot', at: 0.6, pts: 3 },
       ],
-      def: { d4: { path: [[8, 6.2], [17.2, 5.2]], t: [0.3, 1] } },   // 림 앞에서 반대쪽 코너까지는 너무 멀다
+      def: { d4: { path: [[8, 6.2], [17.2, 5.2]], t: [0.2, 1] } },   // 림 앞에서 반대쪽 코너까지는 너무 멀다
     },
   ],
 
@@ -129,10 +129,13 @@ export default {
           {
             title: '숏코너 캐치',
             dur: 2.2,
-            text: '[3]이 코너에서 숏코너로 올라오고, [1]이 덫 너머로 바운스 패스를 넣습니다. [x4]가 숏코너로 나오고 [x5]도 도우러 붙습니다.',
+            text: '[3]이 코너에서 숏코너로 올라오고, [1]이 덫 옆으로 바운스 패스를 넣습니다. [x4]가 숏코너로 나오고 [x5]도 도우러 붙습니다.',
             move: { o3: { path: [[-13.4, 4.8]], t: [0, 0.45] } },
             ball: [{ type: 'bounce', to: 'o3', at: 0.45 }],
-            def: { d5: { path: [[-8.6, 9.4], [-9.4, 8]], t: [0.1, 1] } },   // 가운데가 숏코너 쪽으로 도우러 붙는다
+            def: {
+              d5: { path: [[-8.6, 9.4], [-9.4, 8]], t: [0.1, 1] },   // 가운데가 숏코너 쪽으로 도우러 붙는다
+              d3: { path: [[8.6, 17.8]], t: [0, 0.3] },             // 윙 덫 때의 자리(반대쪽 엘보 레인 밖)에 남아 있다
+            },
           },
           {
             title: '덤프오프',
@@ -146,6 +149,7 @@ export default {
             def: {
               d4: { path: [[-10.8, 5.6]], t: [0, 0.3] },
               d5: { path: [[-9.2, 8.4]], t: [0, 0.3] },
+              d3: { path: [[7.4, 14.2], [4.6, 10.4]], t: [0.35, 1] },   // 엘보에서 뒤늦게 내려온다
             },
           },
         ],
