@@ -122,33 +122,65 @@ export function sampleMotion(cp, dt = 1 / 120) {
   return { nan, maxOff, maxDef, whereDef, offGap, defGap, whereGap, attGap, whereAtt, shots, handoffs, offFrame };
 }
 
-// 패스 길: 날아가는 공이 수비(또는 같은 편) 몸통을 뚫고 지나가면 안 된다.
-// 패스하는 선수를 막는 수비는 빼고(공을 놓는 순간 바로 앞에 있다), 공이 8 ft 위로 넘어가는 롭·스킵 구간과
-// 손을 떠난 직후(12%)는 보지 않는다. 공의 중심이 몸통 안(0.9 ft)을 지나면 위반이다.
-// 받는 선수 곁의 수비가 1~1.5 ft까지 다가오는 것은 정상적인 견제라 잡지 않는다. 핸드오프는 손에서 손으로 건네므로 뺀다.
+// 수비 3초(프로 규칙): 레인(|x| ≤ 8, 0 ≤ z ≤ 19) 안에서 누구도 팔 길이(3.5 ft) 안에 두지 않은 채
+// 3.0초를 넘게 머물면 위반이다. 레인을 나가거나 누군가를 막으면 다시 센다. 첫 슛이 손을 떠나면 세지 않는다.
+const LANE_X = 8, LANE_Z = 19, GUARD = 3.5, D3S_LIMIT = 3;
+export const inLane = (p) => Math.abs(p.x) <= LANE_X && p.z >= 0 && p.z <= LANE_Z;
+export function threeSecondViolations(cp) {
+  const out = [];
+  const dt = 1 / 60;
+  const shot = cp.bsegs.find((b) => b.type === 'shot');
+  const stop = shot ? shot.t0 : cp.end;
+  const runs = Object.fromEntries(DEF.map((d) => [d, null]));
+  const close = (d) => {
+    const r = runs[d];
+    if (r && r.len > D3S_LIMIT) out.push(`${d} stays in the lane unguarded for ${r.len.toFixed(2)}s from ${r.t0.toFixed(2)}s`);
+    runs[d] = null;
+  };
+  for (let i = 0; i * dt < stop; i++) {
+    const t = i * dt, o = cp.offense(t), d = cp.defense(t);
+    for (const id of DEF) {
+      const p = d[id];
+      const guarding = OFF.some((k) => Math.hypot(o[k].x - p.x, o[k].z - p.z) <= GUARD);
+      if (!inLane(p) || guarding) { close(id); continue; }
+      if (!runs[id]) runs[id] = { t0: t, len: 0 };
+      runs[id].len = t - runs[id].t0;
+    }
+  }
+  for (const id of DEF) close(id);
+  return out;
+}
+
+// 패스 길: 날아가는 공이 수비 몸통(반경 1.4 ft)을 지나면 안 된다. 공이 7.5 ft 아래에 있는 동안,
+// 손을 떠나는 순간부터 받을 때까지 모두 본다. 패스하는 선수를 막는 수비도 포함한다(공은 그 옆으로 나가야 한다).
+// 같은 편 몸통은 예전 기준 그대로: 패스한 선수·받는 선수는 빼고, 손을 떠난 직후(12%)와 8 ft 위는 보지 않으며 0.9 ft.
+// 핸드오프는 손에서 손으로 건네므로 뺀다.
+const BODY = 1.4, CLEAR_Y = 7.5;
 export function passLaneViolations(cp) {
   const out = [];
   for (const b of cp.bsegs) {
     if (b.type !== 'flight' || b.kind === 'handoff') continue;
-    const guard = DEF.find((d) => cp.guardOf(d, b.t0) === b.who);
-    let near = { g: Infinity };
-    for (let u = 0.12; u <= 0.99; u += 0.01) {
+    let near = { g: Infinity }, mate = { g: Infinity };
+    for (let i = 0; i <= 100; i++) {
+      const u = i / 100;
       const t = b.t0 + u * (b.t1 - b.t0);
       const ball = ballAir(b, t);
-      if (ball.y > 8) continue;
-      const d = cp.defense(t);
-      for (const id of DEF) {
-        if (id === guard) continue;
-        const g = Math.hypot(d[id].x - ball.x, d[id].z - ball.z);
-        if (g < near.g) near = { g, id, t };
+      if (ball.y < CLEAR_Y) {
+        const d = cp.defense(t);
+        for (const id of DEF) {
+          const g = Math.hypot(d[id].x - ball.x, d[id].z - ball.z);
+          if (g < near.g) near = { g, id, t };
+        }
       }
+      if (u < 0.12 || u > 0.99 || ball.y > 8) continue;
       for (const id of OFF) {
         if (id === b.who || id === b.target) continue;
         const p = cp.offAt(id, t), g = Math.hypot(p.x - ball.x, p.z - ball.z);
-        if (g < near.g) near = { g, id, t };
+        if (g < mate.g) mate = { g, id, t };
       }
     }
-    if (near.g < 0.9) out.push(`${b.who}→${b.target} ${b.kind} passes ${near.g.toFixed(2)} ft from ${near.id} @ ${near.t.toFixed(2)}s`);
+    const hit = near.g < BODY ? near : mate.g < 0.9 ? mate : null;
+    if (hit) out.push(`${b.who}→${b.target} ${b.kind} passes ${hit.g.toFixed(2)} ft from ${hit.id} @ ${hit.t.toFixed(2)}s`);
   }
   return out;
 }
