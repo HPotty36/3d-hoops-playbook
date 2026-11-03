@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
-const TEXT = /\.(js|mjs|css|html|md|json|svg|txt)$|(^|\/)\.git(ignore|attributes)$/;
+const TEXT = /\.(js|mjs|css|html|md|json|webmanifest|svg|txt)$|(^|\/)\.git(ignore|attributes)$/;
 
 test('tracked text files use LF line endings', () => {
   const files = execSync('git ls-files', { encoding: 'utf8' }).split('\n').filter((f) => TEXT.test(f));

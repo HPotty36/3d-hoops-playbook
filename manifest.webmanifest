@@ -1,0 +1,19 @@
+{
+  "name": "3D Hoops Playbook",
+  "short_name": "Hoops Playbook",
+  "lang": "ko",
+  "description": "프로 농구 작전을 3D 코트에서 단계별로 재생하는 비공식 교육용 플레이북. An interactive 3D playbook of common pro-basketball plays.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#141311",
+  "theme_color": "#141311",
+  "categories": ["sports", "education"],
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

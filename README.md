@@ -11,6 +11,8 @@ Every play also branches by **defensive read** — drop, switch, blitz, top lock
 
 > The app is available in **English and Korean**. Use the `KO | EN` toggle at the top right, or open [`?lang=en`](https://hpotty36.github.io/3d-hoops-playbook/?lang=en) directly. A Korean version of this README is collapsed at the [bottom of the page](#korean).
 
+> **Install it as an app.** In Chrome or Edge, use *Install* in the address bar; on Android, choose *Add to Home screen*; on iPhone, open it in Safari and choose *Share → Add to Home Screen*. After one visit it also works offline.
+
 ![3D Hoops Playbook preview](docs/preview.jpg)
 
 ## Plays
@@ -142,6 +144,8 @@ npm test
 
 ```
 index.html            Layout and the Three.js import map
+manifest.webmanifest  App name, colors and icons for installing the site (PWA)
+sw.js                 Service worker: offline cache (network first, cached copy when offline)
 css/style.css         UI styles and light/dark theme tokens (3-column desktop / stacked mobile)
 js/main.js            Entry point: scene setup, playback loop, UI wiring
 js/engine.js          Compiles a play into a deterministic timeline (players, defense, ball)
@@ -153,9 +157,11 @@ js/i18n.js            UI strings (ko / en) and play-content localization
 js/reads.js           Defensive reads: builds a play for the chosen read (pure)
 js/reads-ui.js        Read tabs and the branch-point prompt
 js/library.js         Searchable, sectioned play list
+js/clock.js           Game clock, shot clock and score for special-situation plays (pure)
 js/plays/*.js         Play definitions (one file per play, Korean + English content)
 tests/                Play data and engine checks (npm test)
 assets/logo-mark.svg  Logo mark (also the favicon)
+assets/icon-*.png     Install icons (192/512, maskable, Apple touch icon)
 docs/design.md        Design notes
 ```
 
@@ -257,6 +263,8 @@ This is an unofficial, non-commercial educational project. It is **not affiliate
 작전마다 **수비 대응별 분기**(드롭, 스위치, 블리츠, 탑 락킹 등 기본 읽기를 포함해 모두 122가지)가 있어서, 작전 자체뿐 아니라 수비가 어떻게 나올 때 어떻게 풀어야 하는지까지 볼 수 있습니다.
 
 **▶ 바로 보기: https://hpotty36.github.io/3d-hoops-playbook/**
+
+**앱처럼 설치하기:** 크롬·엣지는 주소창의 *설치* 버튼, 안드로이드는 *홈 화면에 추가*, 아이폰은 사파리에서 *공유 → 홈 화면에 추가*를 누르세요. 한 번 열어 본 뒤에는 인터넷 없이도 작동합니다.
 
 ### 수록 작전
 

@@ -93,6 +93,16 @@ The section is complete with 12 plays: four baseline and three sideline out-of-b
 - Reading time is language-aware: Korean `1 + chars / 12`, English `1 + words / 4.5`, both clamped to 2.5–10 s.
 - Language priority: `?lang=` in the URL, then the saved choice, then the browser language.
 
+## Install and offline (PWA)
+
+- `manifest.webmanifest` and `sw.js` sit at the site root, so `start_url` and the service worker's scope (`./`) cover the GitHub Pages subpath. Icons are PNGs rendered from the logo mark: 192 and 512 for any purpose, a full-bleed 512 maskable icon with the mark inside the safe zone, and a 180 Apple touch icon.
+- The service worker is network-first: online, every request goes to the network and successful responses are stored, so a deploy shows up immediately; offline, the stored copy answers, and a page request with a query (`?read=…#play`) falls back to the main page. Besides the site's own files it caches the three CDN hosts the page uses (jsDelivr for Three.js and Pretendard, Google Fonts and gstatic for Rubik).
+- The first visit loads every play module, Three.js and the fonts, so one visit is enough for every play to work offline. Pretendard is split into character subsets, so text never shown online may fall back to a system font offline.
+- The two font stylesheets are requested with `crossorigin`, so their responses are ordinary (not opaque) and can be stored.
+- `CACHE` is versioned only for the precached shell (icons, manifest); content updates arrive through the network-first fetch.
+- The store app never uses it: the registration script skips `<html data-build="store">`, and the app's `build-www` removes the manifest and icon links.
+- `tests/pwa.test.mjs` checks the manifest fields and icon sizes, that the service worker covers every external host the page loads, the `crossorigin` stylesheets, and that registration skips the store build.
+
 ## Verification
 
 - `npm test` (Node's built-in runner, `three` as the only dev dependency) samples every play and every read at 1/120 s: no NaN, offense ≤ 25 ft/s, defense ≤ 38 ft/s, no defender inside an attacker (≥ 1.8 ft) or another defender (≥ 1.35 ft), no two attackers overlapping (≥ 1.35 ft), 3-pointers released at least half a foot outside the drawn 3-point line and 2-pointers inside it, every handoff made hand to hand (≤ 4 ft), every catch held at least 0.08 s before the next pass or shot, a screen that comes with a handoff drawn at the handoff spot, jumpers from 15 ft and out with no defender within 3.5 ft at release, and every player inside the coach camera's frame. Defenders are also sampled at 1/960 s (≤ 38 ft/s), defense positions must not depend on query order, and idling past the end must not grow the collision cache. It also checks KO/EN parity, read ids, counter links, sections, and that every read shares the opening with the base read.
