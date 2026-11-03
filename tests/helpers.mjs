@@ -204,7 +204,7 @@ export function peakDefenseSpeed(cp, dt) {
 // 존 수비가 표대로 움직이는지: 공을 가진 선수가 어느 앵커 2 ft 안에 0.8초 넘게 서 있는 동안,
 // 규칙(3초·패스 길) 때문에 비켜 서 있지 않고 그 단계에서 따로 지시받지 않은 수비만 본다.
 // 존 수비는 표의 자리 3 ft 안(매치업 존처럼 구역 안의 공격수에게 끌려가는 area 모드는 4 ft, 공 담당은 공을 가진 선수 4 ft 안),
-// 맨투맨 수비는 자기 선수 7 ft 안.
+// 맨투맨 수비는 자기 선수 8 ft 안(혼합 수비의 추격조가 스크린 두 개를 타는 에이스를 쫓으면 7 ft 남짓 뒤처진다).
 export function zoneDeviations(cp) {
   const out = [];
   if (!cp.zone) return out;
@@ -228,7 +228,8 @@ export function zoneDeviations(cp) {
       if (cp.adjusted(id, t) || cp.steps[k].def?.[id]) continue;
       const q = d[id];
       if (members.includes(id) && !man[id]) {
-        if (id === ballD) {
+        // 에이스가 공을 가지면 추격조가 막으므로, 표의 공 담당도 제자리를 지킨다
+        if (id === ballD && !Object.values(man).includes(h)) {
           const g = dist2(q, p);
           if (g > 4) once(`${id}-${a}-b`, `${id} is ${g.toFixed(1)} ft from the ball at ${a} @ ${t.toFixed(2)}s`);
         } else {
@@ -237,7 +238,7 @@ export function zoneDeviations(cp) {
         }
       } else {
         const m = cp.offAt(cp.guardOf(id, t), t), g = dist2(q, m);
-        if (g > 7) once(`${id}-${a}-m`, `${id} is ${g.toFixed(1)} ft from its man @ ${t.toFixed(2)}s`);
+        if (g > 8) once(`${id}-${a}-m`, `${id} is ${g.toFixed(1)} ft from its man @ ${t.toFixed(2)}s`);
       }
     }
   }

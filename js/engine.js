@@ -181,6 +181,7 @@ export function compilePlay(play) {
   const dz = play.defense?.zone ? play.defense : null;
   const zoneOf = dz ? ZONES[dz.zone] : null;
   const isZone = (d) => !!zoneOf && zoneOf.members.includes(d) && !dz.man?.[d];
+  const starred = new Set(Object.values(dz?.man ?? {}));
   const guards = [];
   let gmap = Object.fromEntries(DEF.map((d, i) => [d, isZone(d) ? null : dz?.man?.[d] ?? OFF[i]]));
   steps.forEach((st) => {
@@ -269,8 +270,9 @@ export function compilePlay(play) {
     });
     return { spots, ballW };
   };
-  // 존의 공 소유 가중치: ownW와 같되, 패스를 받는 쪽은 공이 도착하고 ZONE_CLOSE초 뒤에야 1이 된다.
-  // 공 담당이 윙에서 탑처럼 먼 곳으로 옮겨 갈 때 패스 시간(0.4초 남짓)만으로는 따라갈 수 없기 때문이다.
+  // 존의 공 소유 가중치: ownW와 같되, 패스를 받는 쪽은 공이 도착하고 ZONE_CLOSE초 뒤에야 1이 되고,
+  // 공을 놓은 쪽도 ZONE_CLOSE초에 걸쳐 풀린다. 공 담당이 윙에서 탑처럼 먼 곳으로 옮겨 갈 때
+  // 패스 시간(0.4초 남짓)만으로는 따라갈 수 없기 때문이다.
   const ownZ = (man, t) => {
     let w = 0;
     const ramp = (f, s) => smooth(clamp((s - f.t0) / (f.t1 + ZONE_CLOSE - f.t0), 0, 1));
@@ -279,7 +281,7 @@ export function compilePlay(play) {
       const inbound = f?.type === 'flight' && f.target === man;
       if (b.type === 'hold' && b.who === man) {
         if (t >= b.t0 && t < b.t1) w = Math.max(w, inbound ? ramp(f, t) : 1);
-        else if (t >= b.t1 && t < b.t1 + OWN_OUT) w = Math.max(w, (inbound ? ramp(f, b.t1) : 1) * (1 - smooth((t - b.t1) / OWN_OUT)));
+        else if (t >= b.t1 && t < b.t1 + ZONE_CLOSE) w = Math.max(w, (inbound ? ramp(f, b.t1) : 1) * (1 - smooth((t - b.t1) / ZONE_CLOSE)));
       } else if (b.type === 'flight' && b.target === man && t >= b.t0 && t < b.t1) {
         w = Math.max(w, ramp(b, t));
       }
@@ -296,6 +298,8 @@ export function compilePlay(play) {
     let S = 0;
     const P = v2(0, 0);
     for (const a of OFF) {
+      // 혼합 수비에서 추격조가 맡은 에이스는 추격조가 막는다. 존은 그 선수를 압박하러 나가지 않는다
+      if (starred.has(a)) continue;
       const w = ownZ(a, tl);
       if (w <= 0) continue;
       const m = offAt(a, tl);
@@ -335,7 +339,9 @@ export function compilePlay(play) {
     const spec = (st.def || {})[d] || {};
     if (defSegs[k][d]) return segAt(defSegs[k][d], t);
     const lag = spec.lag ?? DEF_LAG;
-    const raw = guards[k][d] === null ? zonePos(d, lag, t) : autoPos(guards[k][d], lag, t, spec.sag ?? 1);
+    // 혼합 수비의 추격조(defense.man)는 도움 수비로 처지지 않고 에이스에게 붙는다(기본 sag 0)
+    const sag = spec.sag ?? (dz?.man?.[d] ? 0 : 1);
+    const raw = guards[k][d] === null ? zonePos(d, lag, t) : autoPos(guards[k][d], lag, t, sag);
     if (k === 0 && !defStart[0]) return raw;
     // 앞 단계에서도 같은 존 자리를 따르던 수비는 이을 것이 없다 (섞으면 움직이는 존 자리를 늦게 쫓아 빨라진다)
     const prev = k > 0 ? (steps[k - 1].def || {})[d] || {} : null;

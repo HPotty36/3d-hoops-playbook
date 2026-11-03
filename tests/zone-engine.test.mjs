@@ -129,3 +129,51 @@ test('matchup fixture: a defender is drawn toward a cutter in its area', () => {
 test('matchup fixture: zone defenders follow the table (4 ft for area mode)', () => {
   assert.deepEqual(zoneDeviations(mx), []);
 });
+
+// ── 존 + 맨투맨(박스 앤 원, 트라이앵글 앤 투) ──
+// 에이스 [2]가 왼쪽 블록에서 [4]·[5]의 스크린 두 개를 타고 오른쪽 윙까지 올라가고, 탑의 [1]이 [2]에게 준다
+const comboFixture = (defense) => ({
+  id: 'fx-combo', category: 'hybrid', ball: 'o1', defense,
+  start: { o1: [0, 28], o2: [-7, 4.6], o3: [-18.6, 21.4], o4: [1.6, 9.6], o5: [10, 14.6] },
+  steps: [
+    { dur: 1.6 },
+    {
+      dur: 3.6,
+      move: { o2: { path: [[-2, 6.8], [5.6, 11.6], [12.4, 17.6], [18.6, 21.4]], t: [0.05, 0.85] } },
+      screens: [{ by: 'o4', face: [-1, 8.6], hold: 0.6 }, { by: 'o5', face: [8, 13], hold: 0.6 }],
+      ball: [{ type: 'pass', to: 'o2', at: 0.86 }],
+    },
+    { dur: 2.2, ball: [{ type: 'pass', to: 'o1', at: 0.5 }] },
+    { dur: 2.2, ball: [{ type: 'pass', to: 'o3', at: 0.5 }] },
+    { dur: 1.8 },
+  ],
+});
+const chasers = { box: { d1: 'o2' }, triangle: { d1: 'o1', d2: 'o2' } };
+for (const [zone, man] of Object.entries(chasers)) {
+  const c = compilePlay(comboFixture({ zone, man }));
+  test(`${zone} fixture: motion stays physical and the rules hold`, () => {
+    const m = sampleMotion(c);
+    assert.equal(m.nan, false);
+    assert.ok(m.maxDef <= 38, `defense ${m.maxDef.toFixed(1)} ft/s at ${m.whereDef}`);
+    assert.ok(m.offGap >= 1.8, `defender inside an attacker: ${m.offGap.toFixed(2)} ft (${m.whereGap})`);
+    assert.ok(m.defGap >= 1.35, `defenders overlap: ${m.defGap.toFixed(2)} ft`);
+    assert.deepEqual(threeSecondViolations(c), []);
+    assert.deepEqual(passLaneViolations(c), []);
+  });
+  test(`${zone} fixture: the chasers stay with their men`, () => {
+    for (let t = 0; t <= c.end; t += 1 / 30) {
+      const d = c.defense(t), o = c.offense(t);
+      for (const [id, a] of Object.entries(man)) {
+        if (c.adjusted(id, t)) continue;
+        assert.equal(c.guardOf(id, t), a, `${id} guards ${a}`);
+        const g = Math.hypot(d[id].x - o[a].x, d[id].z - o[a].z);
+        assert.ok(g <= 8, `${id} is ${g.toFixed(1)} ft from ${a} @ ${t.toFixed(2)}s`);
+      }
+    }
+  });
+  test(`${zone} fixture: the zone part follows its table and the outline leaves out the chasers`, () => {
+    assert.deepEqual(zoneDeviations(c), []);
+    assert.deepEqual(c.zone.outline, ZONES[zone].outline);
+    for (const id of Object.keys(man)) assert.ok(!c.zone.outline.includes(id), `${id} in the outline`);
+  });
+}

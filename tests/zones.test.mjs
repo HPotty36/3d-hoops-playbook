@@ -91,6 +91,9 @@ test('zone tables cover the 2-3, 3-2, 1-3-1 and matchup zones', () => {
   assert.ok(ZONES['2-3'] && ZONES['3-2'] && ZONES['1-3-1'] && ZONES.matchup);
   assert.equal(ZONES.matchup.mode, 'area');
   assert.deepEqual(ZONES['1-3-1'].members, ['d1', 'd2', 'd3', 'd4', 'd5']);
+  // 혼합 수비의 존 부분: 박스는 x2–x5, 트라이앵글은 x3–x5 (나머지는 맨투맨 추격조)
+  assert.deepEqual(ZONES.box.members, ['d2', 'd3', 'd4', 'd5']);
+  assert.deepEqual(ZONES.triangle.members, ['d3', 'd4', 'd5']);
   assert.deepEqual(ZONES['2-3'].members, ['d1', 'd2', 'd3', 'd4', 'd5']);
   assert.deepEqual(ZONES['3-2'].members, ['d1', 'd2', 'd3', 'd4', 'd5']);
 });
