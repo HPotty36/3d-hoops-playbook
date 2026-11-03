@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { compilePlay, ballAir, OFF, DEF } from '../js/engine.js';
 import { PLAYS, SECTIONS } from '../js/plays/index.js';
 import { readIds, variant, branchTime } from '../js/reads.js';
-import { sampleMotion, peakDefenseSpeed, situationViolations, inCoachFrame, passLaneViolations } from './helpers.mjs';
+import { sampleMotion, peakDefenseSpeed, situationViolations, inCoachFrame, passLaneViolations, threeSecondViolations } from './helpers.mjs';
 import { LANGS, hasLabel } from '../js/i18n.js';
 
 const ID = /^[a-z0-9-]+$/;
@@ -61,6 +61,8 @@ function assertPhysical(cp, label) {
   for (const s of m.shots) if (s.dist >= 15) assert.ok(s.near >= 3.5, `${label}: open jumper contested at ${s.near.toFixed(2)} ft @ ${s.at.toFixed(2)}s`);
   // 특수 상황 규칙(인바운드·코트 밖·버저·샷 클락): 상황이 없는 작전에도 코트 밖 규칙은 그대로다
   assert.deepEqual(situationViolations(cp.play, cp), [], `${label}: situation rules`);
+  // 수비 3초: 레인 안에서 아무도 막지 않은 채 3초를 넘게 머물지 않는다 (모든 작전)
+  assert.deepEqual(threeSecondViolations(cp), [], `${label}: three seconds`);
 }
 
 // ── 움직임 ──
@@ -92,6 +94,18 @@ for (const play of PLAYS) {
     }
   });
 }
+
+// 작전을 바꿀 때 휴대폰에서 멈칫하지 않도록, 컴파일(겹침·3초·패스 길 구간 계산 포함)은 300 ms 안에 끝난다
+test('every play and read compiles in under 300 ms', () => {
+  for (const play of PLAYS) {
+    for (const id of readIds(play).length ? readIds(play) : [null]) {
+      const t0 = performance.now();
+      compilePlay(variant(play, id));
+      const ms = performance.now() - t0;
+      assert.ok(ms < 300, `${play.id} [${id}]: ${ms.toFixed(0)} ms`);
+    }
+  }
+});
 
 // ── 특수 상황 규칙 ──
 // 규칙마다 지키는 작은 작전 하나와, 그 규칙 하나만 어기는 작전을 만들어 본다

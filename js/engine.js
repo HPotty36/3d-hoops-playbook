@@ -15,6 +15,15 @@ const R_DEF = 1.8;         // 수비-수비 충돌 반경
 const TAIL = 1.6;          // 마지막 단계 뒤 여유 시간
 const OWN_OUT = 0.45;      // 공을 놓은 수비 대상에게서 온볼 자세를 푸는 시간(초)
 
+// 수비 3초(프로 규칙): 레인 안에서 누구도 팔 길이 안에 두지 않은 채 3초를 넘게 머물 수 없다
+export const LANE_X = 8;          // 레인 폭의 절반(ft)
+export const LANE_Z = 19;         // 베이스라인 → 자유투 라인(ft)
+export const D3S_GUARD = 3.5;     // 이 거리 안에 공격수가 있으면 '막는 중'
+export const D3S_OUT_BY = 2.8;    // 세기가 이 시간(초)에 닿기 전에 레인 밖에 있어야 한다
+export const D3S_STEP = 0.6;      // 레인 선 밖으로 나가 서는 거리(ft)
+export const D3S_SPEED = 10;      // 나갔다 오는 속도(ft/s, 가볍게 뛰는 정도)
+const D3S_HOLD = 0.4;             // 밖에서 머무는 시간(초)
+
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const smooth = (t) => t * t * (3 - 2 * t);
 const easeSine = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t);
@@ -65,6 +74,7 @@ function flightTime(kind, d) {
 
 // ── 컴파일 ────────────────────────────────────────────────────
 export function compilePlay(play) {
+  const compileStart = performance.now();
   const steps = [];
   const tracks = Object.fromEntries(OFF.map((id) => [id, []]));
   const start = Object.fromEntries(OFF.map((id) => [id, toV(play.start[id])]));
@@ -208,9 +218,10 @@ export function compilePlay(play) {
 
   const defStart = [];
   const defSegs = [];
+  const SCAN = 1 / 60;
 
-  // 겹침 처리 전(raw) 수비 위치. 단계 사이 블렌딩도 이 값으로 이어야 겹침 처리가 두 번 적용되지 않는다.
-  const rawIn = (k, d, t) => {
+  // 규칙(3초·패스 길) 처리 전 수비 위치. 단계 사이 블렌딩도 이 값으로 잇는다.
+  const baseIn = (k, d, t) => {
     const st = steps[k];
     const spec = (st.def || {})[d] || {};
     if (defSegs[k][d]) return segAt(defSegs[k][d], t);
@@ -218,6 +229,25 @@ export function compilePlay(play) {
     if (k === 0 && !defStart[0]) return raw;
     const w = smooth(clamp((t - st.s0) / DEF_BLEND, 0, 1));
     return lerp2(defStart[k][d], raw, w);
+  };
+  const evalBase = (k, t) => Object.fromEntries(DEF.map((d) => [d, baseIn(k, d, t)]));
+
+  // ── 수비 3초: 레인 밖으로 잠깐 나갔다 오기 ──
+  // 원래 자리(base)에 더하는 어긋남(offset)을 1/60초 격자마다 미리 계산해 두고, 그 사이는 직선으로 잇는다.
+  // 어긋남은 1/60초에 D3S_SPEED만큼만 바뀌므로, 원래 움직임에 최대 10 ft/s만 더해지고 끊기지 않는다.
+  const outOff = Object.fromEntries(DEF.map((d) => [d, null]));
+  const shiftOf = (d, t) => {
+    const a = outOff[d];
+    if (!a || t <= 0) return v2(0, 0);
+    const f = t / SCAN, i = Math.floor(f);
+    if (i >= a.x.length - 1) return v2(a.x[a.x.length - 1], a.z[a.z.length - 1]);
+    const u = f - i;
+    return v2(a.x[i] + (a.x[i + 1] - a.x[i]) * u, a.z[i] + (a.z[i + 1] - a.z[i]) * u);
+  };
+  const rawIn = (k, d, t) => {
+    const p = baseIn(k, d, t);
+    const s = shiftOf(d, t);
+    return v2(p.x + s.x, p.z + s.z);
   };
   const evalRaw = (k, t) => Object.fromEntries(DEF.map((d) => [d, rawIn(k, d, t)]));
   const rawOf = (d, t) => rawIn(stepIndexAt(t), d, t);
@@ -227,7 +257,6 @@ export function compilePlay(play) {
   // 그래서 목표가 원 안에 머무는 구간(진입 te ~ 이탈 tx)을 찾아, 그동안 진입 방향에서
   // 이탈 방향으로 원둘레를 따라 돌아가게 한다. 위치는 여전히 t만의 함수다.
   // rel(s): 시각 s에서 원 중심 → 수비 목표 벡터. 반환값은 원둘레 위의 각도.
-  const SCAN = 1 / 60;
   // 찾은 겹침 구간은 쌍(key)마다 저장해 다시 쓴다. 위치가 t만의 함수라 결과는 어떤 순서로 물어도 같다.
   const windows = new Map();
   const angleIn = (w, t) => (w.open ? w.a0 : w.a0 + w.da * clamp((t - w.te) / (w.tx - w.te), 0, 1));
@@ -305,14 +334,100 @@ export function compilePlay(play) {
     defSegs[k] = {};
     if (k === 0) {
       defStart[0] = null;
-      defStart[0] = evalRaw(0, 0);
+      defStart[0] = evalBase(0, 0);
     } else {
-      defStart[k] = evalRaw(k - 1, steps[k - 1].s1 - 1e-6);
+      defStart[k] = evalBase(k - 1, steps[k - 1].s1 - 1e-6);
     }
     for (const [d, spec] of Object.entries(st.def || {})) {
       if (spec.path) defSegs[k][d] = makeSegment(defStart[k][d], spec.t ? { path: spec.path, t: spec.t } : spec.path, st.s0, st.dur);
     }
   });
+
+  // 레인 안에서 아무도 막지 않는 시간을 1/60초 격자로 센다. 지금 출발하면 언제 레인 밖에 서는지 앞으로 따라가 보고,
+  // 그때의 세기가 D3S_OUT_BY에 닿을 것 같으면 출발한다. 나가는 쪽(왼쪽·오른쪽 레인 선, 자유투 라인)은 원래 자리가
+  // 앞으로 0.6초 동안 가장 덜 멀어지는 쪽이고, 그 자리에 다른 수비나 공격수가 서 있으면(겹침 처리가 도로 밀어 넣는다)
+  // 다음 쪽을 쓴다. 선 0.6 ft 밖에서 D3S_HOLD초 머문 뒤 돌아오고, 원래 자리가 레인 밖이면 어긋남을 거둔다.
+  // 앞을 내다볼 때 분기점은 넘지 않는다. 그래서 분기점 앞의 움직임은 모든 읽기에서 같다. 첫 슛 뒤에는 세지 않는다.
+  const firstShot = bsegs.find((b) => b.type === 'shot')?.t0 ?? end;
+  const inLaneP = (p) => Math.abs(p.x) <= LANE_X && p.z >= 0 && p.z <= LANE_Z;
+  const nGrid = Math.floor(end / SCAN) + 1;
+  const splitIdx = splits.length ? Math.ceil(splits[0] / SCAN - 1e-9) : Infinity;
+  const limOf = (i) => (i < splitIdx ? Math.min(splitIdx, nGrid) - 1 : nGrid - 1);
+  const gridOf = (f) => Array.from({ length: nGrid }, (_, i) => f(i * SCAN));
+  const baseG = Object.fromEntries(DEF.map((d) => [d, gridOf((g) => baseIn(stepIndexAt(g), d, g))]));
+  const offG = Object.fromEntries(OFF.map((id) => [id, gridOf((g) => offAt(id, g))]));
+  const maxStep = D3S_SPEED * SCAN;
+  const sideVec = (side, gap) => (side === 'L' ? v2(-gap, 0) : side === 'R' ? v2(gap, 0) : v2(0, gap));
+  const gapsOf = (b) => ({ L: b.x + LANE_X + D3S_STEP, R: LANE_X + D3S_STEP - b.x, T: LANE_Z + D3S_STEP - b.z });
+  const exitSide = (d, i, cur, lim, posOf) => {
+    const b = baseG[d][i], now = gapsOf(b);
+    const score = { ...now };
+    for (let j = i + 6; j <= Math.min(i + 36, lim); j += 6) {
+      if (!inLaneP(baseG[d][j])) break;
+      const f = gapsOf(baseG[d][j]);
+      for (const k of Object.keys(score)) score[k] = Math.max(score[k], f[k]);
+    }
+    const spot = { L: v2(-LANE_X - D3S_STEP, b.z), R: v2(LANE_X + D3S_STEP, b.z), T: v2(b.x, LANE_Z + D3S_STEP) };
+    const later = Math.min(i + 24, lim);
+    const blocked = (k) => [i, later].some((j) => DEF.some((e) => e !== d && dist2(posOf(e, j), spot[k]) < R_DEF + 0.3)
+      || OFF.some((id) => dist2(offG[id][j], spot[k]) < R_OFF + 0.3));
+    const order = Object.keys(score).sort((x, y) => score[x] - score[y]);
+    let side = order.find((k) => !blocked(k)) ?? order[0];
+    if (cur && side !== cur && !blocked(cur) && score[cur] < score[side] + 1) side = cur;
+    return { side, gap: now[side] };
+  };
+  const stepToward = (o, want) => {
+    const l = dist2(o, want), m = Math.min(l, maxStep);
+    return l > 0 ? v2(o.x + ((want.x - o.x) / l) * m, o.z + ((want.z - o.z) / l) * m) : o;
+  };
+  for (const d of DEF) {
+    // 다른 수비의 자리: 먼저 계산한 수비는 어긋남까지, 아직이면 원래 자리
+    const posOf = (e, j) => {
+      const b = baseG[e][j], a = outOff[e];
+      return a ? v2(b.x + a.x[Math.min(j, a.x.length - 1)], b.z + a.z[Math.min(j, a.z.length - 1)]) : b;
+    };
+    // i에서 출발하면 몇 초 뒤 레인 밖에 서는지(겹침 처리 전). 1.5초 안에 못 나가면 Infinity
+    const timeToExit = (i, o0, side0) => {
+      let o = o0, side = side0;
+      const lim = limOf(i);
+      for (let j = i + 1; j <= i + 90; j++) {
+        const jc = Math.min(j, lim), b = baseG[d][jc];
+        let want = v2(0, 0);
+        if (inLaneP(b)) { const ex = exitSide(d, jc, side, lim, posOf); side = ex.side; want = sideVec(side, ex.gap); }
+        o = stepToward(o, want);
+        if (!inLaneP(v2(b.x + o.x, b.z + o.z))) return (j - i) * SCAN;
+      }
+      return Infinity;
+    };
+    const xs = [], zs = [];
+    let o = v2(0, 0), runStart = null, phase = 'idle', side = null, holdUntil = 0;
+    for (let i = 0; i < nGrid; i++) {
+      const g = i * SCAN;
+      xs.push(o.x); zs.push(o.z);
+      if (phase === 'idle' && g >= firstShot) break;
+      const b = baseG[d][i];
+      const p = v2(b.x + o.x, b.z + o.z);
+      if (g < firstShot) {
+        const guarding = OFF.some((id) => dist2(offG[id][i], p) <= D3S_GUARD);
+        if (!inLaneP(p) || guarding) runStart = null;
+        else if (runStart === null) runStart = g;
+        if (runStart !== null && g - runStart >= 0.5 && (phase === 'idle' || phase === 'back')
+          && g - runStart + timeToExit(i, o, null) >= D3S_OUT_BY - 0.15) phase = 'out';
+      }
+      let want = v2(0, 0);
+      if ((phase === 'out' || phase === 'hold') && inLaneP(b)) {
+        const ex = exitSide(d, i, side, limOf(i), posOf);
+        side = ex.side;
+        want = sideVec(side, ex.gap);
+      }
+      if (phase === 'out' && (!inLaneP(b) || dist2(o, want) < 1e-6)) { phase = 'hold'; holdUntil = g + D3S_HOLD; }
+      else if (phase === 'hold' && g >= holdUntil) phase = 'back';
+      const was = o;
+      o = stepToward(o, want);
+      if (phase === 'back' && was === o) { phase = 'idle'; side = null; }
+    }
+    if (xs.some((x, i) => x !== 0 || zs[i] !== 0)) outOff[d] = { x: xs, z: zs };
+  }
 
   // ── 전술판 표기(annotation) 데이터 ──
   const notes = steps.map((st, k) => {
@@ -363,7 +478,7 @@ export function compilePlay(play) {
     }
   });
 
-  return {
+  const cp = {
     play,
     steps,
     total,
@@ -378,6 +493,9 @@ export function compilePlay(play) {
     holderAt,
     ballSegAt,
     guardOf: (d, t) => guards[stepIndexAt(t)][d],
+    // 규칙(3초·패스 길) 때문에 자리를 옮기는 중인지
+    adjusted: (d, t) => { const s = shiftOf(d, t); return s.x !== 0 || s.z !== 0; },
+    compileMs: 0,
     offense(t) {
       return Object.fromEntries(OFF.map((id) => [id, offAt(id, t)]));
     },
@@ -406,6 +524,8 @@ export function compilePlay(play) {
       return jumps.some((j) => j.who === id && j.kind !== 'catch' && t >= j.t - 0.35 && t <= j.t + 0.35);
     },
   };
+  cp.compileMs = performance.now() - compileStart;
+  return cp;
 }
 
 // 공의 3D 위치: 손에 있을 때는 null(장면에서 손 위치로 계산), 공중이면 좌표 반환
