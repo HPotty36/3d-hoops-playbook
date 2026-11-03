@@ -76,6 +76,7 @@ The section is complete with 12 plays: four baseline and three sideline out-of-b
 
 - Direction: soft and warm rather than sharp. Rounded panels float on the page with 12 px gaps instead of a flush three-column grid split by hairlines; controls are pill-shaped; there are no "01" numbers, accent eyebrows, left accent bars, or dotted chips.
 - Orange means offense or the current state: offense chips, the play button, the jerseys, the current step and timeline segment. Read counts in the library, bullets and the counters' *Watch* buttons stay neutral; counters are rows split by hairlines, not cards inside the panel. Branch points carry one mark, a small orange ◆, on the timeline, in front of the branch card's question and on the step-list divider. Difficulty is filled and hollow dots (●○○) in both the list and the level filter. The category · difficulty line sits under the play title, never above it as a kicker.
+- Every segmented control marks its selected option the same way: a raised pill (lighter charcoal in dark, white with a soft shadow in light). The header's camera and language switches sit straight on the page, so in light their track is a gray well rather than a white panel.
 - Browser surfaces follow the theme: text selection is a soft orange, scrollbars are thin and tinted, the search caret is orange.
 - Two themes, switched with the sun/moon button in the toolbar or `T`:
   - Dark (default when the system is dark): warm charcoal page `#141311`, panels `#1d1b19`, ivory text `#ede8e1`.

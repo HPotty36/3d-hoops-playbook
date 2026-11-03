@@ -24,8 +24,7 @@
   --seg-on: #3a3632;
   --seg-on-text: #ede8e1;
   --seg-on-shadow: none;
-  --tseg-on: #3a3632;
-  --tseg-on-text: #ede8e1;
+  --tseg-track: var(--panel);   /* 상단 줄 세그먼트의 바탕: 페이지 위에 바로 놓이므로 패널색 */
   --track: #34302c;
   --track-done: #7c756d;
   --track-tail: #262421;
@@ -64,8 +63,7 @@
   --seg-on: #ffffff;
   --seg-on-text: #1e1d1b;
   --seg-on-shadow: 0 1px 2px rgba(30, 29, 27, 0.14);
-  --tseg-on: #1e1d1b;
-  --tseg-on-text: #ffffff;
+  --tseg-track: #e6e4e0;   /* 라이트: 다른 세그먼트처럼 회색 바탕 위 흰 알약이 선택 표시가 되도록 */
   --track: #e3e1dd;
   --track-done: #8e8a84;
   --track-tail: #eceae7;
@@ -241,9 +239,8 @@ kbd {
 .sb-shot { padding: 0 6px 0 2px; font-size: 11px; color: var(--text-3); }
 .sb-shot[hidden] { display: none; }
 .tool-right { display: flex; align-items: center; gap: 8px; }
-.toolbar .seg { padding: 4px; background: var(--panel); }
+.toolbar .seg { padding: 4px; background: var(--tseg-track); }
 .toolbar .seg button { min-height: 36px; min-width: 44px; padding: 0 12px; }
-.toolbar .seg button.on { background: var(--tseg-on); color: var(--tseg-on-text); box-shadow: none; }
 
 /* 3D 뷰 카드: 코트 위에는 아무 컨트롤도 올리지 않는다 (모서리 선수를 가리지 않도록) */
 .view {
