@@ -2,6 +2,7 @@
 // 좌표계: 피트(ft). x = 좌우(-25 왼쪽 사이드라인 ~ 25 오른쪽), z = 베이스라인 0 → 하프라인 47.
 // 공격 기준 왼쪽이 -x. 림 중심은 (0, 5.25), 높이 10ft.
 import * as THREE from 'three';
+import { ZONES, zoneSpots } from './zones.js';
 
 export const BASKET = { x: 0, z: 5.25 };
 export const RIM_Y = 10;
@@ -23,6 +24,8 @@ export const D3S_OUT_BY = 2.8;    // 세기가 이 시간(초)에 닿기 전에 
 export const D3S_STEP = 0.6;      // 레인 선 밖으로 나가 서는 거리(ft)
 export const D3S_SPEED = 10;      // 나갔다 오는 속도(ft/s, 가볍게 뛰는 정도)
 const D3S_HOLD = 0.4;             // 밖에서 머무는 시간(초)
+const ZONE_W = 0.6;               // 존 자리는 지난 0.6초 동안의 표 자리를 평균한다(패스를 따라 움직이되 공처럼 빠르지 않게)
+const ZONE_CLOSE = 0.6;          // 존의 공 담당은 공이 도착한 뒤 이만큼 더 걸려 다가선다(클로즈아웃)
 
 // 패스 길: 날아가는 공(7.5 ft 아래)은 수비 몸통(반경 BODY)을 지나지 않는다. 수비가 LANE_CLEAR만큼 비켜 선다
 export const BODY = 1.4;
@@ -169,12 +172,22 @@ export function compilePlay(play) {
     for (let k = 0; k < steps.length; k++) if (t < steps[k].s1) return k;
     return steps.length - 1;
   };
+  // 수비 방식: play.defense = { zone, man } 이면 그 존에 든 수비는 존(맡은 선수 없음 = null), man에 적힌 수비와
+  // 나머지는 맨투맨. 단계의 guard는 맨투맨 수비에게는 다음 단계까지 이어지고, 존 수비에게는 그 단계에서만 맨투맨이 된다.
+  const dz = play.defense?.zone ? play.defense : null;
+  const zoneOf = dz ? ZONES[dz.zone] : null;
+  const isZone = (d) => !!zoneOf && zoneOf.members.includes(d) && !dz.man?.[d];
   const guards = [];
-  let gmap = Object.fromEntries(DEF.map((d, i) => [d, OFF[i]]));
+  let gmap = Object.fromEntries(DEF.map((d, i) => [d, isZone(d) ? null : dz?.man?.[d] ?? OFF[i]]));
   steps.forEach((st) => {
     gmap = { ...gmap };
-    for (const [d, spec] of Object.entries(st.def || {})) if (spec.guard) gmap[d] = spec.guard;
-    guards.push(gmap);
+    const cur = { ...gmap };
+    for (const [d, spec] of Object.entries(st.def || {})) {
+      if (!spec.guard) continue;
+      cur[d] = spec.guard;
+      if (!isZone(d)) gmap[d] = spec.guard;
+    }
+    guards.push(cur);
   });
 
   // 공 소유 가중치: 공을 들고 있으면 1, 자기에게 오는 패스가 날아가는 동안 0→1,
@@ -222,17 +235,89 @@ export function compilePlay(play) {
     return w <= 0 ? off : lerp2(off, onBallSpot(m, toB, dm), w);
   };
 
+  const SCAN = 1 / 60;
+  // 존: 공 위치(날아가는 중에도)로 표에서 자리를 얻는다. 공은 패스 때 40 ft/s로 날아가므로 그대로 따라가면 수비가
+  // 순간이동한다. 그래서 1/60초 격자의 표 자리를 미리 구해 두고, 지난 ZONE_W초 동안의 평균(구간 적분)을 쓴다.
+  // 평균은 t에 대해 연속이고, 1초에 (지금 자리 − ZONE_W초 전 자리) / ZONE_W 이상 움직이지 않는다.
+  const zg = dz && (() => {
+    const n = Math.ceil((end + 1) / SCAN) + 1;
+    const vals = [], cum = [];
+    for (let i = 0; i < n; i++) {
+      const Z = zoneSpots(dz.zone, ballXZ(i * SCAN));
+      vals.push(zoneOf.members.flatMap((d) => [Z.spots[d].x, Z.spots[d].z, Z.ballW[d]]));
+      cum.push(i ? cum[i - 1].map((c, j) => c + ((vals[i - 1][j] + vals[i][j]) * SCAN) / 2) : vals[0].map(() => 0));
+    }
+    return { n, vals, cum };
+  })();
+  const zcum = (t, j) => {
+    if (t <= 0) return zg.vals[0][j] * t;
+    const f = t / SCAN, i = Math.floor(f);
+    if (i >= zg.n - 1) return zg.cum[zg.n - 1][j] + zg.vals[zg.n - 1][j] * (t - (zg.n - 1) * SCAN);
+    const u = f - i, a = zg.vals[i][j], b = zg.vals[i + 1][j];
+    return zg.cum[i][j] + (a * u + ((b - a) * u * u) / 2) * SCAN;
+  };
+  const zoneSmooth = (t) => {
+    const spots = {}, ballW = {};
+    zoneOf.members.forEach((d, m) => {
+      const f = (j) => (zcum(t, j) - zcum(t - ZONE_W, j)) / ZONE_W;
+      spots[d] = v2(f(3 * m), f(3 * m + 1));
+      ballW[d] = f(3 * m + 2);
+    });
+    return { spots, ballW };
+  };
+  // 존의 공 소유 가중치: ownW와 같되, 패스를 받는 쪽은 공이 도착하고 ZONE_CLOSE초 뒤에야 1이 된다.
+  // 공 담당이 윙에서 탑처럼 먼 곳으로 옮겨 갈 때 패스 시간(0.4초 남짓)만으로는 따라갈 수 없기 때문이다.
+  const ownZ = (man, t) => {
+    let w = 0;
+    const ramp = (f, s) => smooth(clamp((s - f.t0) / (f.t1 + ZONE_CLOSE - f.t0), 0, 1));
+    bsegs.forEach((b, i) => {
+      const f = bsegs[i - 1];
+      const inbound = f?.type === 'flight' && f.target === man;
+      if (b.type === 'hold' && b.who === man) {
+        if (t >= b.t0 && t < b.t1) w = Math.max(w, inbound ? ramp(f, t) : 1);
+        else if (t >= b.t1 && t < b.t1 + OWN_OUT) w = Math.max(w, (inbound ? ramp(f, b.t1) : 1) * (1 - smooth((t - b.t1) / OWN_OUT)));
+      } else if (b.type === 'flight' && b.target === man && t >= b.t0 && t < b.t1) {
+        w = Math.max(w, ramp(b, t));
+      }
+    });
+    return w;
+  };
+  // 반응 지연(lag)만큼 전의 존 자리에서, 공 담당 가중치만큼 공을 가진 선수 앞(온볼 자리)으로 다가선다.
+  // 공 소유 가중치로 섞으므로 공 담당이 한 사람에서 다음 사람으로 넘어갈 때도 순간이동하지 않는다.
+  const zoneAt = (lag, t) => {
+    const tl = Math.max(0, t - lag);
+    const Z = zoneSmooth(tl);
+    let S = 0;
+    const P = v2(0, 0);
+    for (const a of OFF) {
+      const w = ownZ(a, tl);
+      if (w <= 0) continue;
+      const m = offAt(a, tl);
+      const ob = onBallSpot(m, norm2(v2(BASKET.x - m.x, BASKET.z - m.z)), dist2(m, BASKET));
+      S += w; P.x += w * ob.x; P.z += w * ob.z;
+    }
+    return { Z, S, P };
+  };
+  const zonePos = (d, lag, t) => {
+    const { Z, S, P } = zoneAt(lag, t);
+    const s = Z.spots[d], k = Z.ballW[d] / Math.max(1, S);
+    return v2(s.x + (P.x - S * s.x) * k, s.z + (P.z - S * s.z) * k);
+  };
+
   const defStart = [];
   const defSegs = [];
-  const SCAN = 1 / 60;
 
   // 규칙(3초·패스 길) 처리 전 수비 위치. 단계 사이 블렌딩도 이 값으로 잇는다.
   const baseIn = (k, d, t) => {
     const st = steps[k];
     const spec = (st.def || {})[d] || {};
     if (defSegs[k][d]) return segAt(defSegs[k][d], t);
-    const raw = autoPos(guards[k][d], spec.lag ?? DEF_LAG, t, spec.sag ?? 1);
+    const lag = spec.lag ?? DEF_LAG;
+    const raw = guards[k][d] === null ? zonePos(d, lag, t) : autoPos(guards[k][d], lag, t, spec.sag ?? 1);
     if (k === 0 && !defStart[0]) return raw;
+    // 앞 단계에서도 같은 존 자리를 따르던 수비는 이을 것이 없다 (섞으면 움직이는 존 자리를 늦게 쫓아 빨라진다)
+    const prev = k > 0 ? (steps[k - 1].def || {})[d] || {} : null;
+    if (prev && guards[k][d] === null && guards[k - 1][d] === null && !defSegs[k - 1][d] && (prev.lag ?? DEF_LAG) === lag) return raw;
     const w = smooth(clamp((t - st.s0) / DEF_BLEND, 0, 1));
     return lerp2(defStart[k][d], raw, w);
   };
@@ -389,7 +474,9 @@ export function compilePlay(play) {
   const MAN_GAP = 3;   // 자기 선수에게 붙을 때의 거리(ft): 팔 길이(D3S_GUARD) 안, 겹침 반경(R_OFF) 밖
   // 원래 자리 b에서 각 갈 곳까지의 어긋남
   const wantsOf = (d, j) => {
-    const b = baseG[d][j], m = offG[guards[stepIndexAt(j * SCAN)][d]][j];
+    const b = baseG[d][j], g = guards[stepIndexAt(j * SCAN)][d];
+    // 존 수비는 맡은 선수가 없으니 가장 가까운 공격수에게 붙는다
+    const m = g ? offG[g][j] : OFF.map((id) => offG[id][j]).reduce((x, y) => (dist2(y, b) < dist2(x, b) ? y : x));
     const dm = dist2(b, m), k = dm > MAN_GAP ? (dm - MAN_GAP) / dm : 0;
     return {
       L: v2(-(b.x + LANE_X + D3S_STEP), 0), R: v2(LANE_X + D3S_STEP - b.x, 0), T: v2(0, LANE_Z + D3S_STEP - b.z),
@@ -594,7 +681,20 @@ export function compilePlay(play) {
     offAt,
     holderAt,
     ballSegAt,
-    guardOf: (d, t) => guards[stepIndexAt(t)][d],
+    // 맡은 선수. 존 수비는 공 담당으로 공을 가진 선수를 압박하는 동안(가중치 0.5 이상)만 그 선수, 아니면 null
+    guardOf: (d, t) => {
+      const k = stepIndexAt(t), g = guards[k][d];
+      if (g !== null || defSegs[k][d]) return g;
+      const { Z, S } = zoneAt((steps[k].def || {})[d]?.lag ?? DEF_LAG, t);
+      return Z.ballW[d] * Math.min(1, S) >= 0.5 ? holderAt(t) : null;
+    },
+    // 존 수비가 그 시각에 쓰는 표의 자리(경로를 따로 지시받았거나 맨투맨이면 null)
+    zoneSpotAt: (d, t) => {
+      const k = stepIndexAt(t);
+      if (guards[k][d] !== null || defSegs[k][d]) return null;
+      return zoneAt((steps[k].def || {})[d]?.lag ?? DEF_LAG, t).Z.spots[d];
+    },
+    zone: zoneOf ? { name: dz.zone, outline: zoneOf.outline } : null,
     // 규칙(3초·패스 길) 때문에 자리를 옮기는 중인지
     adjusted: (d, t) => {
       const s = shiftOf(d, t), l = laneShift(d, t);

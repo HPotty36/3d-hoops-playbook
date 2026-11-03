@@ -469,7 +469,8 @@ function snapHeadings() {
   }
   const def = state.cp.defense(0);
   for (const d of DEF) {
-    const m = off[state.cp.guardOf(d, 0)];
+    // 존 수비(맡은 선수 없음)는 공을 본다
+    const m = off[state.cp.guardOf(d, 0) ?? state.cp.holderAt(0)] ?? BASKET;
     players[d].heading = Math.atan2(m.x - def[d].x, m.z - def[d].z);
   }
 }
@@ -516,11 +517,16 @@ function applyState(t, dt) {
     const vx = (defB[d].x - defA[d].x) / (2 * H), vz = (defB[d].z - defA[d].z) / (2 * H);
     const speed = Math.hypot(vx, vz);
     const p = def[d];
-    const man = off[cp.guardOf(d, t)];
-    const onBall = holder === cp.guardOf(d, t) && dist2(p, man) < 7;
+    const g = cp.guardOf(d, t);
+    const man = g ? off[g] : null;
+    const onBall = !!g && holder === g && dist2(p, man) < 7;
     let heading;
     if (speed > 9) heading = Math.atan2(vx, vz);
-    else if (onBall || !ballXZ) heading = Math.atan2(man.x - p.x, man.z - p.z);
+    else if (!man) {
+      // 존 수비: 공을 본다. 공이 바로 옆(4 ft 안)을 날아가는 동안에는 림 쪽을 등지지 않도록 림을 본다
+      const look = !ballXZ || (!holder && dist2(p, ballXZ) < 4) ? BASKET : ballXZ;
+      heading = Math.atan2(look.x - p.x, look.z - p.z);
+    } else if (onBall || !ballXZ) heading = Math.atan2(man.x - p.x, man.z - p.z);
     else {
       const mx = (man.x + ballXZ.x) / 2, mz = (man.z + ballXZ.z) / 2;
       heading = Math.atan2(mx - p.x, mz - p.z);

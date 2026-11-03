@@ -1,6 +1,7 @@
 // 테스트 공용 도구: 컴파일된 작전을 일정 간격으로 샘플링해 움직임을 검사한다.
 import { OFF, DEF, BASKET, dist2, ballAir } from '../js/engine.js';
 import { isInbound, clockAt } from '../js/clock.js';
+import { ANCHORS, ZONES } from '../js/zones.js';
 
 const bad = (p) => !Number.isFinite(p.x) || !Number.isFinite(p.z);
 
@@ -198,4 +199,45 @@ export function peakDefenseSpeed(cp, dt) {
     prev = d;
   }
   return { v, where };
+}
+
+// 존 수비가 표대로 움직이는지: 공을 가진 선수가 어느 앵커 2 ft 안에 0.8초 넘게 서 있는 동안,
+// 규칙(3초·패스 길) 때문에 비켜 서 있지 않고 그 단계에서 따로 지시받지 않은 수비만 본다.
+// 존 수비는 표의 자리 3 ft 안(공 담당은 공을 가진 선수 4 ft 안), 맨투맨 수비는 자기 선수 7 ft 안.
+export function zoneDeviations(cp) {
+  const out = [];
+  if (!cp.zone) return out;
+  const seen = new Set();
+  const once = (key, msg) => { if (!seen.has(key)) { seen.add(key); out.push(msg); } };
+  const members = ZONES[cp.zone.name].members;
+  const man = cp.play.defense?.man ?? {};
+  let since = null, anchor = null;
+  for (let t = 0; t <= cp.end; t += 1 / 60) {
+    const h = cp.holderAt(t);
+    const p = h ? cp.offAt(h, t) : null;
+    const a = p && Object.entries(ANCHORS).find(([, [x, z]]) => Math.hypot(p.x - x, p.z - z) <= 2)?.[0];
+    if (!a) { since = null; anchor = null; continue; }
+    if (a !== anchor || since === null) { since = t; anchor = a; }
+    if (t - since < 0.8) continue;
+    const d = cp.defense(t);
+    const k = cp.stepIndexAt(t);
+    const ballD = ZONES[cp.zone.name].at[a].ball;
+    for (const id of DEF) {
+      if (cp.adjusted(id, t) || cp.steps[k].def?.[id]) continue;
+      const q = d[id];
+      if (members.includes(id) && !man[id]) {
+        if (id === ballD) {
+          const g = dist2(q, p);
+          if (g > 4) once(`${id}-${a}-b`, `${id} is ${g.toFixed(1)} ft from the ball at ${a} @ ${t.toFixed(2)}s`);
+        } else {
+          const s = cp.zoneSpotAt(id, t), g = dist2(q, s);
+          if (g > 3) once(`${id}-${a}`, `${id} is ${g.toFixed(1)} ft from its ${a} spot @ ${t.toFixed(2)}s`);
+        }
+      } else {
+        const m = cp.offAt(cp.guardOf(id, t), t), g = dist2(q, m);
+        if (g > 7) once(`${id}-${a}-m`, `${id} is ${g.toFixed(1)} ft from its man @ ${t.toFixed(2)}s`);
+      }
+    }
+  }
+  return out;
 }
