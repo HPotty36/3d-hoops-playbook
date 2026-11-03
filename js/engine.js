@@ -24,6 +24,12 @@ export const D3S_STEP = 0.6;      // 레인 선 밖으로 나가 서는 거리(f
 export const D3S_SPEED = 10;      // 나갔다 오는 속도(ft/s, 가볍게 뛰는 정도)
 const D3S_HOLD = 0.4;             // 밖에서 머무는 시간(초)
 
+// 패스 길: 날아가는 공(7.5 ft 아래)은 수비 몸통(반경 BODY)을 지나지 않는다. 수비가 LANE_CLEAR만큼 비켜 선다
+export const BODY = 1.4;
+export const LANE_CLEAR = 1.75;
+export const PASS_CLEAR_Y = 7.5;
+export const LANE_EASE = 0.25;    // 비켜 서고 돌아오는 시간(초)
+
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const smooth = (t) => t * t * (3 - 2 * t);
 const easeSine = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t);
@@ -244,9 +250,31 @@ export function compilePlay(play) {
     const u = f - i;
     return v2(a.x[i] + (a.x[i + 1] - a.x[i]) * u, a.z[i] + (a.z[i + 1] - a.z[i]) * u);
   };
-  const rawIn = (k, d, t) => {
+  // 패스 길: 구간마다 비켜 설 방향(vec)과, 0→1→0으로 오가는 시각(e0 → i0 ~ i1 → e1)
+  const laneWins = Object.fromEntries(DEF.map((d) => [d, []]));
+  const laneEnv = (w, t) => {
+    if (t <= w.e0 || t >= w.e1) return 0;
+    if (t < w.i0) return smooth((t - w.e0) / (w.i0 - w.e0));
+    if (t <= w.i1) return 1;
+    return 1 - smooth((t - w.i1) / (w.e1 - w.i1));
+  };
+  const laneShift = (d, t) => {
+    const s = v2(0, 0);
+    for (const w of laneWins[d]) {
+      const e = laneEnv(w, t);
+      if (e > 0) { s.x += w.vec.x * e; s.z += w.vec.z * e; }
+    }
+    return s;
+  };
+  // 3초 처리까지 한 자리 (패스 길 구간을 찾을 때 쓴다)
+  const stepOutIn = (k, d, t) => {
     const p = baseIn(k, d, t);
     const s = shiftOf(d, t);
+    return v2(p.x + s.x, p.z + s.z);
+  };
+  const rawIn = (k, d, t) => {
+    const p = stepOutIn(k, d, t);
+    const s = laneShift(d, t);
     return v2(p.x + s.x, p.z + s.z);
   };
   const evalRaw = (k, t) => Object.fromEntries(DEF.map((d) => [d, rawIn(k, d, t)]));
@@ -429,6 +457,56 @@ export function compilePlay(play) {
     if (xs.some((x, i) => x !== 0 || zs[i] !== 0)) outOff[d] = { x: xs, z: zs };
   }
 
+  // 패스마다(핸드오프 제외) 공이 7.5 ft 아래에서 수비의 LANE_CLEAR 안을 지나는 구간을 1/120초로 찾는다.
+  // 그 구간 동안 수비는 패스 선의 자기가 선 쪽으로, 공과의 거리가 LANE_CLEAR가 될 만큼 수직으로 비켜 선다.
+  // 구간 LANE_EASE초 전부터 비키기 시작해 LANE_EASE초 뒤 돌아온다. 분기점 뒤의 패스는 분기점 전에 움직이지 않는다.
+  for (const b of bsegs) {
+    if (b.type !== 'flight' || b.kind === 'handoff') continue;
+    const dir = norm2(v2(b.to.x - b.from.x, b.to.z - b.from.z));
+    const n = Math.max(2, Math.ceil((b.t1 - b.t0) * 120));
+    const floor = splits.find((sp) => b.t0 >= sp) ?? -Infinity;
+    for (const d of DEF) {
+      let cur = null;
+      const finish = () => {
+        const c = cur.near;
+        let cross = dir.x * c.r.z - dir.z * c.r.x;
+        if (Math.abs(cross) < 1e-6) cross = (c.q.x - BASKET.x) * -dir.z + (c.q.z - BASKET.z) * dir.x || 1;
+        // 선 쪽으로 비키되, 그러면 코트 밖(베이스라인·사이드라인)으로 나가면 반대쪽으로 비킨다
+        const side = cross > 0 ? v2(-dir.z, dir.x) : v2(dir.z, -dir.x);
+        const plan = (nv) => {
+          let need = 0;
+          for (const { r } of cur.samples) {
+            const a = r.x * dir.x + r.z * dir.z, pp = r.x * nv.x + r.z * nv.z;
+            if (Math.abs(a) < LANE_CLEAR) need = Math.max(need, Math.sqrt(LANE_CLEAR ** 2 - a * a) - pp);
+          }
+          const ok = cur.samples.every(({ q }) => q.z + nv.z * need >= 0.2 && Math.abs(q.x + nv.x * need) <= 24.8);
+          return { nv, need, ok };
+        };
+        let pl = plan(side);
+        if (!pl.ok) { const other = plan(v2(-side.x, -side.z)); if (other.ok) pl = other; }
+        const { nv, need } = pl;
+        if (need > 0) {
+          const e0 = Math.min(Math.max(cur.tIn - LANE_EASE, floor), cur.tIn - 0.05);
+          laneWins[d].push({ e0, i0: cur.tIn, i1: cur.tOut, e1: cur.tOut + LANE_EASE, vec: v2(nv.x * need, nv.z * need) });
+        }
+        cur = null;
+      };
+      for (let i = 0; i <= n; i++) {
+        const t = b.t0 + ((b.t1 - b.t0) * i) / n;
+        const ball = ballAir(b, t);
+        const q = stepOutIn(stepIndexAt(t), d, t);
+        const r = v2(q.x - ball.x, q.z - ball.z), g = Math.hypot(r.x, r.z);
+        if (ball.y < PASS_CLEAR_Y && g < LANE_CLEAR) {
+          if (!cur) cur = { tIn: t, samples: [], near: null };
+          cur.tOut = t;
+          cur.samples.push({ r, q });
+          if (!cur.near || g < cur.near.g) cur.near = { g, r, q };
+        } else if (cur) finish();
+      }
+      if (cur) finish();
+    }
+  }
+
   // ── 전술판 표기(annotation) 데이터 ──
   const notes = steps.map((st, k) => {
     const list = [];
@@ -494,7 +572,10 @@ export function compilePlay(play) {
     ballSegAt,
     guardOf: (d, t) => guards[stepIndexAt(t)][d],
     // 규칙(3초·패스 길) 때문에 자리를 옮기는 중인지
-    adjusted: (d, t) => { const s = shiftOf(d, t); return s.x !== 0 || s.z !== 0; },
+    adjusted: (d, t) => {
+      const s = shiftOf(d, t), l = laneShift(d, t);
+      return s.x !== 0 || s.z !== 0 || l.x !== 0 || l.z !== 0;
+    },
     compileMs: 0,
     offense(t) {
       return Object.fromEntries(OFF.map((id) => [id, offAt(id, t)]));

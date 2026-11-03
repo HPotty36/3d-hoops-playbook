@@ -304,12 +304,18 @@ test('every play belongs to a library section', () => {
   for (const p of PLAYS) assert.ok(cats.includes(p.category), `${p.id}: category ${p.category}`);
 });
 
-// 특수 상황 작전의 패스는 수비나 같은 편의 몸통을 뚫고 지나가지 않는다 (공격 세트의 오래된 사례는 엔진 과제로 미뤄 둠)
-for (const play of PLAYS.filter((p) => SECTIONS.find((s) => s.id === 'situations').cats.includes(p.category))) {
-  for (const id of readIds(play)) {
-    test(`${play.id} [${id}]: passes do not fly through a body`, { todo: 'strict pass lanes land in Task 3' }, () => {
+// 모든 작전의 패스는 수비 몸통(1.4 ft)이나 같은 편 몸통을 뚫고 지나가지 않는다
+for (const play of PLAYS) {
+  for (const id of readIds(play).length ? readIds(play) : [null]) {
+    test(`${play.id} [${id}]: passes do not fly through a body`, () => {
       assert.deepEqual(passLaneViolations(compilePlay(variant(play, id))), []);
     });
+  }
+}
+
+// 특수 상황 작전
+for (const play of PLAYS.filter((p) => SECTIONS.find((s) => s.id === 'situations').cats.includes(p.category))) {
+  for (const id of readIds(play)) {
     // 받아서 던지는 점프슛은 공을 잡고 0.3초 이상 지나서 손을 떠난다 (엔진은 점프를 슛 0.28초 전에 시작한다)
     test(`${play.id} [${id}]: a caught jumper is not rushed`, () => {
       const cp = compilePlay(variant(play, id));
