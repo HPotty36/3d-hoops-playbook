@@ -27,6 +27,9 @@ const D3S_HOLD = 0.4;             // 밖에서 머무는 시간(초)
 const D3S_CAP = 30;               // 원래 움직임과 합친 속도가 이보다 빨라지게는 비키지 않는다(ft/s)
 const ZONE_W = 0.6;               // 존 자리는 지난 0.6초 동안의 표 자리를 평균한다(패스를 따라 움직이되 공처럼 빠르지 않게)
 const ZONE_CLOSE = 0.6;          // 존의 공 담당은 공이 도착한 뒤 이만큼 더 걸려 다가선다(클로즈아웃)
+// 매치업 존(area 모드): 표 자리에서 AREA_R 안의 공격수 쪽으로, 가까울수록 세게(최대 AREA_PULL) 끌려간다
+export const AREA_R = 8;
+export const AREA_PULL = 0.85;
 
 // 패스 길: 날아가는 공(7.5 ft 아래)은 수비 몸통(반경 BODY)을 지나지 않는다. 수비가 LANE_CLEAR만큼 비켜 선다
 export const BODY = 1.4;
@@ -299,11 +302,27 @@ export function compilePlay(play) {
       const ob = onBallSpot(m, norm2(v2(BASKET.x - m.x, BASKET.z - m.z)), dist2(m, BASKET));
       S += w; P.x += w * ob.x; P.z += w * ob.z;
     }
-    return { Z, S, P };
+    return { Z, S, P, tl };
+  };
+  // area 모드: 구역 안 공격수마다 거리에 따라 매끄럽게 줄어드는 가중치로, 그 선수를 막는 맨투맨 자리(선수와 림 사이)
+  // 쪽으로 끌려간다. 가중치 합이 1을 넘으면 나눠 평균을 낸다. 누가 구역 안에 있는지가 갑자기 바뀌지 않는다.
+  const areaPull = (s, tl) => {
+    let W = 0;
+    const A = v2(0, 0);
+    for (const a of OFF) {
+      const m = offAt(a, tl);
+      const w = AREA_PULL * smooth(clamp(1 - dist2(m, s) / AREA_R, 0, 1));
+      if (w <= 0) continue;
+      const dm = dist2(m, BASKET), ms = helpSpot(m, norm2(v2(BASKET.x - m.x, BASKET.z - m.z)), dm, tl, 0);
+      W += w; A.x += w * (ms.x - s.x); A.z += w * (ms.z - s.z);
+    }
+    const k = 1 / Math.max(1, W);
+    return v2(s.x + A.x * k, s.z + A.z * k);
   };
   const zonePos = (d, lag, t) => {
-    const { Z, S, P } = zoneAt(lag, t);
-    const s = Z.spots[d], k = Z.ballW[d] / Math.max(1, S);
+    const { Z, S, P, tl } = zoneAt(lag, t);
+    const s = zoneOf.mode === 'area' ? areaPull(Z.spots[d], tl) : Z.spots[d];
+    const k = Z.ballW[d] / Math.max(1, S);
     return v2(s.x + (P.x - S * s.x) * k, s.z + (P.z - S * s.z) * k);
   };
 

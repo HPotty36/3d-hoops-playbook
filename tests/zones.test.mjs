@@ -67,8 +67,10 @@ for (const [name, z] of Object.entries(ZONES)) {
   });
 }
 
-test('zone tables cover the 2-3 and 3-2 zones', () => {
-  assert.ok(ZONES['2-3'] && ZONES['3-2']);
+test('zone tables cover the 2-3, 3-2, 1-3-1 and matchup zones', () => {
+  assert.ok(ZONES['2-3'] && ZONES['3-2'] && ZONES['1-3-1'] && ZONES.matchup);
+  assert.equal(ZONES.matchup.mode, 'area');
+  assert.deepEqual(ZONES['1-3-1'].members, ['d1', 'd2', 'd3', 'd4', 'd5']);
   assert.deepEqual(ZONES['2-3'].members, ['d1', 'd2', 'd3', 'd4', 'd5']);
   assert.deepEqual(ZONES['3-2'].members, ['d1', 'd2', 'd3', 'd4', 'd5']);
 });

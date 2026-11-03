@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { compilePlay, DEF } from '../js/engine.js';
+import { compilePlay, DEF, OFF, AREA_R, BASKET } from '../js/engine.js';
 import { ZONES } from '../js/zones.js';
 import { PLAYS } from '../js/plays/index.js';
 import { sampleMotion, threeSecondViolations, passLaneViolations, zoneDeviations } from './helpers.mjs';
@@ -83,4 +83,49 @@ test('man plays keep their defense positions', () => {
       for (const k of DEF) assert.ok(Math.hypot(d[k].x - def[k].x, d[k].z - def[k].z) < 1e-9, `${id} ${k} @ ${t}s`);
     }
   }
+});
+
+// ── 매치업 존(area 모드) ──
+// 같은 픽스처에 매치업 존을 세우고, 공이 탑으로 돌아오는 단계에서 [2]가 왼쪽 윙에서 뒷선 앞의 틈을 지나 오른쪽 아래 윙까지 컷한다
+const cutter = { move: { o2: { path: [[-7, 15], [4, 12.4], [14, 10], [18.6, 10.6]], t: [0.1, 0.9] } } };
+const mx = (() => {
+  const p = zoneFixture({ zone: 'matchup' });
+  p.steps[3] = { ...p.steps[3], ...cutter };
+  return compilePlay(p);
+})();
+
+test('matchup fixture: motion stays physical', () => {
+  const m = sampleMotion(mx);
+  assert.equal(m.nan, false);
+  assert.ok(m.maxDef <= 38, `defense ${m.maxDef.toFixed(1)} ft/s at ${m.whereDef}`);
+  assert.ok(m.offGap >= 1.8, `defender inside an attacker: ${m.offGap.toFixed(2)} ft (${m.whereGap})`);
+  assert.ok(m.defGap >= 1.35, `defenders overlap: ${m.defGap.toFixed(2)} ft`);
+  assert.deepEqual(threeSecondViolations(mx), []);
+  assert.deepEqual(passLaneViolations(mx), []);
+});
+
+// 컷하는 [2]가 어떤 수비의 구역(표 자리에서 AREA_R 안)에 혼자 들어와 있으면, 그 수비는 [2]를 막는 맨투맨 자리
+// ([2]와 림 사이, 엔진의 자동 수비와 같은 간격) 쪽으로 끌려가 있다: 표 자리보다 그 자리에 가깝다
+test('matchup fixture: a defender is drawn toward a cutter in its area', () => {
+  const st = mx.steps[3];
+  let checked = 0;
+  for (let t = st.s0 + 0.3; t < st.s1; t += 1 / 30) {
+    const o = mx.offense(t), d = mx.defense(t), c = o.o2;
+    for (const id of DEF) {
+      const s = mx.zoneSpotAt(id, t);
+      if (!s || mx.adjusted(id, t) || mx.guardOf(id, t)) continue;
+      const near = OFF.filter((a) => Math.hypot(o[a].x - s.x, o[a].z - s.z) < AREA_R);
+      const cs = Math.hypot(c.x - s.x, c.z - s.z);
+      if (near.length !== 1 || near[0] !== 'o2' || cs < 3 || cs > AREA_R - 2) continue;
+      checked++;
+      const dm = Math.hypot(c.x - BASKET.x, c.z - BASKET.z), gap = Math.min(6, Math.max(2.2, dm * 0.2));
+      const ms = { x: c.x + ((BASKET.x - c.x) / dm) * gap, z: c.z + ((BASKET.z - c.z) / dm) * gap };
+      assert.ok(Math.hypot(d[id].x - ms.x, d[id].z - ms.z) < Math.hypot(s.x - ms.x, s.z - ms.z) - 0.1, `${id} @ ${t.toFixed(2)}s is not drawn toward [2]`);
+    }
+  }
+  assert.ok(checked > 10, `only ${checked} samples had the cutter alone in an area`);
+});
+
+test('matchup fixture: zone defenders follow the table (4 ft for area mode)', () => {
+  assert.deepEqual(zoneDeviations(mx), []);
 });
