@@ -2,6 +2,14 @@
 // 재생 상태는 main.js가 갖고, 여기서는 그리기와 클릭 전달만 한다.
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+// 한국어 조사 '(으)로': 받침이 없거나 ㄹ 받침이면 '로', 그 밖의 받침이면 '으로'. 한글로 끝나지 않으면 '(으)로'
+export function josaRo(word) {
+  const c = String(word).trim().slice(-1).charCodeAt(0);
+  if (!(c >= 0xac00 && c <= 0xd7a3)) return '(으)로';
+  const jong = (c - 0xac00) % 28;
+  return jong === 0 || jong === 8 ? '로' : '으로';
+}
+
 // meta: reads.js의 readMeta() 결과(없으면 null). fmt: [1]/[x1]/**굵게** 표기를 HTML로 바꾸는 함수.
 export function createReadsUI({ tabs, prompt, tr, fmt, onTab, onPick }) {
   const bar = tabs.parentElement;
@@ -38,7 +46,7 @@ export function createReadsUI({ tabs, prompt, tr, fmt, onTab, onPick }) {
         `<button type="button" data-read="${r.id}" class="${r.id === currentId ? 'current' : ''}">${esc(r.label)}</button>`).join('')}</div>
       <div class="bp-foot">
         <span class="bp-bar" hidden><i></i></span>
-        <span class="bp-hint">${esc(tr('branch.continue', { label: cur.label }))} <kbd>Enter</kbd></span>
+        <span class="bp-hint">${esc(tr('branch.continue', { label: cur.label, ro: josaRo(cur.label) }))} <kbd>Enter</kbd></span>
       </div>`;
     prompt.querySelectorAll('.bp-options button').forEach((b) => b.addEventListener('click', () => onPick(b.dataset.read)));
   }

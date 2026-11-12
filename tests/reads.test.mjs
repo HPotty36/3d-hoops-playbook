@@ -62,3 +62,12 @@ test('readMeta localizes labels and prompt with Korean fallback', () => {
   const partial = { ...fixture, en: { name: 'Test' } };
   assert.equal(readMeta(partial, 'en').reads[1].label, '스위치');
 });
+
+test('the Korean particle after a read label follows the last syllable', async () => {
+  const { josaRo } = await import('../js/reads-ui.js');
+  assert.equal(josaRo('드롭'), '으로');
+  assert.equal(josaRo('스위치'), '로');
+  assert.equal(josaRo('헤지 / 쇼'), '로');
+  assert.equal(josaRo('블리츠 콜'), '로');   // ㄹ 받침
+  assert.equal(josaRo('ICE'), '(으)로');
+});

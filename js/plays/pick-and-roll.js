@@ -4,7 +4,7 @@ export default {
   name: '픽 앤 롤',
   category: 'onball',
   difficulty: 1,
-  aliases: ['PnR', 'high pick and roll', 'ball screen', '하이 픽앤롤', '볼 스크린'],
+  aliases: ['PnR', 'P&R', 'high pick and roll', 'ball screen', '하이 픽앤롤', '볼 스크린'],
   summary:
     '프로 농구에서 가장 많이 쓰는 2인 공격입니다. 빅맨이 볼 핸들러의 수비수에게 스크린을 걸고, 핸들러는 그 스크린을 타고 돌파하며, 스크리너는 림으로 굴러 들어갑니다. 수비 두 명이 공격 두 명을 동시에 막아야 하는 **2대2 딜레마**를 만드는 것이 핵심입니다.',
   when:
@@ -58,7 +58,7 @@ export default {
       base: { label: 'Drop', why: 'Drop sits back to guard the roll, but the moment the big steps up to the handler, the space behind the big opens.' },
       options: [
         {
-          label: 'Hedge', why: 'When the big jumps out high, the rim is empty. Get the ball out of the hedge and find the roller first.',
+          label: 'Hedge / Show', why: 'When the big jumps out high, the rim is empty. Get the ball out of the hedge and find the roller first.',
           steps: [
             { title: 'Hedge & retreat', text: '[x5] jumps out above the screen to stop [1] cold. [1] does not force it: a **retreat dribble** backs out of the trap and buys a passing angle, while [5] rolls hard into the paint that [x5] just left.' },
             { title: 'Hit the roller, play 4-on-3', text: '[1] passes over the hedge to [5]. [x4] has to leave [4] to stop [5] at the rim, so [5] kicks it out to [4] on the left wing for an open **three**. Two defenders on the ball means four attackers against three.' },
@@ -141,7 +141,7 @@ export default {
     options: [
       {
         id: 'hedge',
-        label: '헤지',
+        label: '헤지 / 쇼',
         why: '빅맨이 높이 튀어나오면 림이 빕니다. 함정에서 공을 빼 롤맨부터 살립니다.',
         steps: [
           {

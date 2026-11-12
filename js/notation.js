@@ -171,7 +171,7 @@ function buildNote(note, grow) {
 }
 
 // 존 모양 선: 존 수비수를 표의 순서대로 잇는 닫힌 고리. 바닥 바로 위, 전술판 표기보다 아래에 그린다
-const ZONE_W = 0.14, ZONE_Y = 0.045, ZONE_MAX = 5;
+const ZONE_W = 0.4, ZONE_Y = 0.045, ZONE_MAX = 5;
 
 export class Notation {
   constructor(scene) {
@@ -186,7 +186,7 @@ export class Notation {
     this.zonePos = new Float32Array(ZONE_MAX * 2 * 3);
     g.setAttribute('position', new THREE.BufferAttribute(this.zonePos, 3));
     this.zone = new THREE.Mesh(g, new THREE.MeshBasicMaterial({
-      color: 0x3a6fd8, transparent: true, opacity: 0.6, depthWrite: false, side: THREE.DoubleSide,
+      color: 0x3a6fd8, transparent: true, opacity: 0.75, depthWrite: false, side: THREE.DoubleSide, toneMapped: false,
     }));
     this.zone.renderOrder = 4;
     this.zone.frustumCulled = false;
@@ -230,11 +230,11 @@ export class Notation {
       const meshes = [];
       for (const note of list) {
         const outline = new THREE.Mesh(buildNote(note, 0.22),
-          new THREE.MeshBasicMaterial({ color: 0x05070a, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }));
+          new THREE.MeshBasicMaterial({ color: 0x05070a, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
         outline.renderOrder = 5;
         outline.userData.base = 0.45;
         const line = new THREE.Mesh(buildNote(note, 0),
-          new THREE.MeshBasicMaterial({ color: COLORS[note.kind], transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }));
+          new THREE.MeshBasicMaterial({ color: COLORS[note.kind], transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
         line.renderOrder = 6;
         line.userData.base = 1;
         meshes.push(outline, line);

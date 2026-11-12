@@ -101,7 +101,7 @@ export function createPlayer(id) {
   // 바닥 링 (팀 색) + 강조 링
   const ring = new THREE.Mesh(
     new THREE.RingGeometry(1.0, 1.28, 40),
-    new THREE.MeshBasicMaterial({ color: colors.jersey, transparent: true, opacity: 0.9, depthWrite: false })
+    new THREE.MeshBasicMaterial({ color: colors.jersey, transparent: true, opacity: 0.9, depthWrite: false, toneMapped: false })
   );
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = 0.07;
@@ -109,7 +109,7 @@ export function createPlayer(id) {
   root.add(ring);
   const focus = new THREE.Mesh(
     new THREE.RingGeometry(1.42, 1.62, 40),
-    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false })
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, toneMapped: false })
   );
   focus.rotation.x = -Math.PI / 2;
   focus.position.y = 0.075;
@@ -117,7 +117,7 @@ export function createPlayer(id) {
   root.add(focus);
 
   // 번호 라벨
-  const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture(id), depthTest: false, transparent: true }));
+  const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture(id), depthTest: false, transparent: true, toneMapped: false }));
   label.scale.set(1.9, 1.9, 1);
   label.position.y = 8.3;
   label.renderOrder = 20;
@@ -126,7 +126,7 @@ export function createPlayer(id) {
   // 스크린 '벽' (스크린을 거는 순간 반투명하게 표시)
   const wall = new THREE.Mesh(
     new THREE.PlaneGeometry(3.4, 6.6),
-    new THREE.MeshBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })
+    new THREE.MeshBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, toneMapped: false })
   );
   wall.renderOrder = 4;
 
@@ -173,6 +173,9 @@ export function posePlayer(p, s, dt) {
     p.armR.rotation.set(-0.55 + Math.abs(Math.sin(s.clock * Math.PI / 0.5)) * 0.25, 0, -0.25);
   }
   if (s.y > 0.05) { p.legL.rotation.x = -0.25; p.legR.rotation.x = 0.15; crouch = 0; }
+  // 웅크리면 몸 전체가 내려가므로, 그만큼 다리를 줄여 신발이 바닥 위에 남게 한다
+  const legScale = (3.3 - crouch) / 3.3;
+  p.legL.scale.y = legScale; p.legR.scale.y = legScale;
   p.body.position.y = s.y - crouch;
 
   // 강조 링

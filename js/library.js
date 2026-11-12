@@ -2,30 +2,56 @@
 // filterPlays·normalize는 DOM이 없는 순수 함수라 Node 테스트에서도 쓴다.
 import { readIds } from './reads.js';
 
-// 대소문자, 공백, 하이픈을 무시하고 비교한다 ('Pick-and Roll' → 'pickandroll')
+// 대소문자, 공백, 하이픈을 무시하고 &는 and로 읽는다 ('Pick-and Roll', 'pick & roll' → 'pickandroll')
 export function normalize(s) {
-  return String(s).toLowerCase().replace(/[\s-]+/g, '');
+  return String(s).toLowerCase().replace(/[&＆]/g, 'and').replace(/[\s-]+/g, '');
 }
 
-// 한국어 이름, 영어 이름, 별칭을 UI 언어와 상관없이 모두 찾는다. level 0 = 전체, 1~3 = 그 난이도만.
-export function filterPlays(plays, query, level) {
+// 갈래 이름으로도 찾는다 (두 언어의 갈래·큰 갈래 이름 + 흔히 쓰는 말). labelsFor(key) → [한국어, 영어]
+const CAT_EXTRA = { blob: ['inbound', 'inbounds', 'BLOB'], slob: ['inbound', 'inbounds', 'SLOB'], ato: ['ATO'] };
+export function categoryTerms(sections, labelsFor) {
+  const out = {};
+  for (const sec of sections) {
+    for (const cat of sec.cats) out[cat] = [...labelsFor(`cat.${cat}`), ...labelsFor(`section.${sec.id}`), ...(CAT_EXTRA[cat] || [])];
+  }
+  return out;
+}
+
+// BLOB·SLOB 같은 약어는 앞에서부터만 맞춘다 ('lob'이 BLOB에 걸리지 않게). 나머지는 어디든 포함되면 찾는다
+const ACRONYM = /\b[A-Z]{2,}\b/g;
+function matches(s, q) {
+  const n = normalize(s);
+  if (n.startsWith(q)) return true;
+  if (normalize(s.replace(ACRONYM, ' ')).includes(q)) return true;
+  return (s.match(ACRONYM) || []).some((a) => normalize(a).startsWith(q));
+}
+
+// 한국어 이름, 영어 이름, 별칭, 갈래 이름을 UI 언어와 상관없이 모두 찾는다. level 0 = 전체, 1~3 = 그 난이도만.
+export function filterPlays(plays, query, level, catTerms = {}) {
   const q = normalize(query);
   return plays.filter((p) => {
     if (level && p.difficulty !== level) return false;
     if (!q) return true;
-    return [p.name, p.en?.name, ...(p.aliases || [])].some((s) => s && normalize(s).includes(q));
+    return [p.name, p.en?.name, ...(p.aliases || []), ...(catTerms[p.category] || [])].some((s) => s && matches(String(s), q));
   });
 }
 
 // 조합 중인 검색어: 결과가 있으면 바로 쓰고, 중간 글자(혼ㅈ)로 0개가 되면 직전 검색어를 그대로 둔다
-export function composingQuery(plays, prev, next, level) {
-  return filterPlays(plays, next, level).length ? next : prev;
+export function composingQuery(plays, prev, next, level, catTerms = {}) {
+  return filterPlays(plays, next, level, catTerms).length ? next : prev;
+}
+
+// 목록에 보이는 순서(큰 갈래 → 갈래 → 등록 순서)로 정렬한 인덱스. 검색어와 난이도를 따른다
+export function listOrder(plays, sections, query, level, catTerms = {}) {
+  const hits = new Set(filterPlays(plays, query, level, catTerms));
+  return sections.flatMap((sec) => sec.cats.flatMap((cat) => plays
+    .map((p, i) => [p, i]).filter(([p]) => p.category === cat && hits.has(p)).map(([, i]) => i)));
 }
 
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // onSelect(index): plays 배열의 인덱스. collapsed: 접힌 갈래 id의 Set. onCollapse(ids): 저장용.
-export function createLibrary({ plays, sections, tr, localize, onSelect, collapsed, onCollapse }) {
+export function createLibrary({ plays, sections, tr, localize, onSelect, collapsed, onCollapse, catTerms = {} }) {
   const el = document.createElement('div');
   el.className = 'library';
   el.innerHTML = `
@@ -35,7 +61,7 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
     </label>
     <div class="seg lib-levels" role="group"></div>
     <nav class="lib-list"></nav>
-    <p class="lib-empty" hidden></p>`;
+    <p class="lib-empty" role="status" hidden></p>`;
   const input = el.querySelector('input');
   const levels = el.querySelector('.lib-levels');
   const list = el.querySelector('.lib-list');
@@ -46,7 +72,7 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
 
   // 조합 중(한글 음절, Gboard의 영어 단어)에도 바로 거르되, 빈 결과는 조합이 끝난 뒤에만 보여 준다
   input.addEventListener('input', (e) => {
-    query = e.isComposing ? composingQuery(plays, query, input.value, level) : input.value;
+    query = e.isComposing ? composingQuery(plays, query, input.value, level, catTerms) : input.value;
     renderList();
   });
   input.addEventListener('compositionend', () => { query = input.value; renderList(); });
@@ -82,7 +108,7 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
   }
 
   function renderList() {
-    const hits = new Set(filterPlays(plays, query, level));
+    const hits = new Set(filterPlays(plays, query, level, catTerms));
     const searching = normalize(query) !== '';
     let html = '';
     for (const sec of sections) {
@@ -102,6 +128,8 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
       html += '</div></section>';
     }
     list.innerHTML = html;
+    // 결과가 없으면 빈 목록 대신 안내 문구를 검색창 바로 아래에 둔다
+    list.hidden = hits.size === 0;
     empty.hidden = hits.size > 0;
     list.querySelectorAll('.play-item').forEach((b) => b.addEventListener('click', () => onSelect(+b.dataset.idx)));
     list.querySelectorAll('.sec-head').forEach((h) => h.addEventListener('click', () => {
@@ -135,5 +163,16 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
     renderList();
   }
 
-  return { el, render, setActive, focusSearch: () => { input.focus(); input.select(); } };
+  // ↑/↓로 옮겨 다닐 순서: 지금 검색어·난이도로 보이는 작전들 (접힌 갈래도 포함하고, 그 작전으로 가면 펼친다)
+  const order = () => listOrder(plays, sections, query, level, catTerms);
+  function reveal(id) {
+    const p = plays.find((x) => x.id === id);
+    const sec = p && sections.find((s) => s.cats.includes(p.category));
+    if (!sec || !collapsed.has(sec.id) || normalize(query)) return;
+    collapsed.delete(sec.id);
+    onCollapse([...collapsed]);
+    renderList();
+  }
+
+  return { el, render, setActive, order, reveal, focusSearch: () => { input.focus(); input.select(); } };
 }

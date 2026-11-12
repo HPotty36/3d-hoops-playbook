@@ -60,7 +60,7 @@ test('a half-court play runs the clock from t = 0', () => {
 test('the clock stops when the last shot reaches the rim and never goes below 0', () => {
   const play = halfCourt({ period: 4, clock: 30, shotClock: null, score: [90, 90] });
   const cp = compilePlay(play);
-  const stop = clockStop(cp);
+  const stop = clockStop(play, cp);
   near(stop, cp.scores.at(-1).t, 'stop = scoring time');
   const g = clockAt(play, cp, stop).game;
   near(clockAt(play, cp, stop + 0.5).game, g, 'frozen after the stop');
@@ -70,6 +70,21 @@ test('the clock stops when the last shot reaches the rim and never goes below 0'
   const cl = compilePlay(late);
   assert.equal(clockAt(late, cl, cl.end).game, 0);
   assert.equal(clockAt(late, cl, 2).game, 0);
+});
+
+// NBA·FIBA: 득점 뒤 시계가 멈추는 것은 4쿼터·연장의 마지막 2분뿐이다
+test('outside the last two minutes of the 4th quarter the game clock keeps running after a basket', () => {
+  const play = halfCourt({ period: 2, clock: 401, shotClock: 14, score: [48, 45] });
+  const cp = compilePlay(play);
+  const ts = cp.scores.at(-1).t;
+  assert.ok(cp.end > ts + 0.2, 'the play runs on after the basket');
+  assert.equal(clockStop(play, cp), cp.end);
+  assert.ok(clockAt(play, cp, cp.end).game < clockAt(play, cp, ts).game - 0.1, 'game clock still runs after the basket');
+  near(clockAt(play, cp, cp.end).shot, clockAt(play, cp, ts).shot, 'shot clock stops at the basket');
+
+  const early4 = halfCourt({ period: 4, clock: 300, shotClock: 14, score: [80, 80] });
+  const c4 = compilePlay(early4);
+  assert.equal(clockStop(early4, c4), c4.end, '4th quarter with more than 2:00 left keeps running');
 });
 
 test('the offense scores at the scoring time', () => {
@@ -88,8 +103,8 @@ test('the shot clock runs with the game clock, and hides when it is longer', () 
   near(clockAt(play, cp, 0).shot, 14, 'shot clock at the start');
   near(clockAt(play, cp, 2).shot, 12, 'two seconds in');
   near(clockAt(play, cp, 2).game, 398, 'game clock two seconds in');
-  const stop = clockStop(cp);
-  near(clockAt(play, cp, cp.end).shot, 14 - stop, 'frozen with the game clock');
+  const ts = cp.scores.at(-1).t;
+  near(clockAt(play, cp, cp.end).shot, 14 - ts, 'the shot clock stops at the basket');
 
   const short = halfCourt({ period: 4, clock: 8, shotClock: 24, score: [90, 90] });
   assert.equal(clockAt(short, compilePlay(short), 1).shot, null);
