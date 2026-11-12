@@ -1,7 +1,8 @@
 // library.js: 작전 목록 검색과 난이도 필터
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalize, filterPlays, composingQuery } from '../js/library.js';
+import { labelsFor } from '../js/i18n.js';
+import { normalize, filterPlays, composingQuery, categoryTerms, listOrder } from '../js/library.js';
 import { PLAYS } from '../js/plays/index.js';
 
 const ids = (list) => list.map((p) => p.id);
@@ -60,4 +61,33 @@ test('while composing, the difficulty filter counts when deciding', () => {
 // 영어 'drag'가 더블 드래그와 트레일러 팝을 함께 찾듯, 한국어 '드래그'도 둘 다 찾는다
 test('the Korean word for drag finds Trailer Pop too', () => {
   assert.ok(ids(filterPlays(PLAYS, '드래그', 0)).includes('trailer-pop'));
+});
+
+// 갈래 이름(두 언어)과 흔히 쓰는 말로도 찾는다. &는 and로 읽고, BLOB·SLOB 같은 약어는 앞에서부터만 맞춘다
+test('search finds plays by their category in either language', async () => {
+  const { SECTIONS } = await import('../js/plays/index.js');
+  const terms = categoryTerms(SECTIONS, labelsFor);
+  const find = (q) => ids(filterPlays(PLAYS, q, 0, terms));
+  const inbounds = PLAYS.filter((p) => p.category === 'blob' || p.category === 'slob').map((p) => p.id);
+  assert.ok(inbounds.length > 0);
+  for (const q of ['inbound', '인바운드']) assert.deepEqual(find(q).filter((id) => inbounds.includes(id)).sort(), [...inbounds].sort(), q);
+  const late = PLAYS.filter((p) => p.category === 'late').map((p) => p.id);
+  assert.deepEqual(find('end of game').sort(), [...late].sort());
+  assert.ok(find('zone').includes('two-three-zone'));
+  assert.ok(find('P&R').includes('pick-and-roll'));
+  assert.ok(find('pick & roll').includes('pick-and-roll'));
+  assert.ok(!find('lob').includes('box'), "'lob' does not match the BLOB alias");
+  assert.ok(find('lob').includes('sideline-lob'));
+  assert.ok(find('blob').includes('box'));
+});
+
+test('arrow-key order follows the play list (sections, then categories) and the active filters', async () => {
+  const { SECTIONS } = await import('../js/plays/index.js');
+  const order = listOrder(PLAYS, SECTIONS, '', 0);
+  assert.equal(order.length, PLAYS.length);
+  const cats = SECTIONS.flatMap((s) => s.cats);
+  const pos = order.map((i) => cats.indexOf(PLAYS[i].category));
+  assert.deepEqual(pos, [...pos].sort((a, b) => a - b), 'categories appear in list order');
+  const hard = listOrder(PLAYS, SECTIONS, '', 3);
+  assert.ok(hard.length > 0 && hard.every((i) => PLAYS[i].difficulty === 3));
 });

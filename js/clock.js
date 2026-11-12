@@ -13,20 +13,33 @@ export function clockStart(play, cp) {
   return f ? f.t1 : 0;
 }
 
-// 마지막 슛이 림에 닿으면 멈춘다
-export const clockStop = (cp) => (cp.scores.length ? cp.scores.at(-1).t : cp.end);
+// 득점(마지막 슛이 림에 닿는 순간) 뒤 경기 시계는 4쿼터·연장의 마지막 2분에만 멈춘다(NBA·FIBA 공통).
+// 그 밖에는 작전이 끝날 때까지 흐른다. 득점이 없으면 끝까지 흐른다
+export const lastScoreT = (cp) => (cp.scores.length ? cp.scores.at(-1).t : null);
+export function clockStop(play, cp) {
+  const ts = lastScoreT(cp);
+  if (ts == null) return cp.end;
+  const s = play.situation;
+  if (!s) return ts;
+  const left = s.clock - Math.max(0, ts - clockStart(play, cp));
+  return s.period >= 4 && left <= 120 ? ts : cp.end;
+}
 
 // t초의 경기 시계·샷 클락(숨기면 null)·점수 [공격, 수비]. situation이 없는 작전은 null
 export function clockAt(play, cp, t) {
   const s = play.situation;
   if (!s) return null;
-  const run = Math.max(0, Math.min(t, clockStop(cp)) - clockStart(play, cp));
+  const start = clockStart(play, cp);
+  const run = Math.max(0, Math.min(t, clockStop(play, cp)) - start);
+  // 득점하면 공격권이 넘어가므로 샷 클락은 그 순간에서 멈춘다
+  const ts = lastScoreT(cp);
+  const shotRun = ts == null ? run : Math.max(0, Math.min(t, ts, clockStop(play, cp)) - start);
   // 샷 클락이 경기 시계보다 길면 실제 경기처럼 끈다
   const shown = s.shotClock != null && s.shotClock <= s.clock;
   const pts = cp.scores.reduce((a, x) => (x.t <= t ? a + x.pts : a), 0);
   return {
     game: Math.max(0, s.clock - run),
-    shot: shown ? Math.max(0, s.shotClock - run) : null,
+    shot: shown ? Math.max(0, s.shotClock - shotRun) : null,
     score: [s.score[0] + pts, s.score[1]],
   };
 }

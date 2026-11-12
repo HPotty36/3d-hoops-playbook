@@ -27,7 +27,10 @@ const UI = {
     'aria.controls': '재생 컨트롤',
     'aria.timeline': '타임라인',
     'aria.scorebug': '경기 상황: {period}, 남은 시간 {clock}, 공격 {o} 대 수비 {d}',
-    'bug.period': '{n}Q',
+    'aria.scorebug.shot': ', 샷클락 {s}초',
+    'aria.timepos': '{cur}초 / {total}초, 단계 {k}: {title}',
+    'bug.period': '{n}Q', 'bug.shot': '샷클락',
+    'skip.player': '재생 컨트롤로 건너뛰기',
     'bug.ot': '연장',
     'aria.settings': '재생 설정',
     'aria.display': '표시 옵션',
@@ -69,9 +72,9 @@ const UI = {
     'level.1': '기초', 'level.2': '중급', 'level.3': '심화',
     'section.offense': '공격 세트', 'section.situations': '특수 상황', 'section.defense': '수비 전술',
     'lib.search': '작전 검색', 'lib.empty': '맞는 작전이 없습니다', 'lib.all': '전체', 'lib.filter': '난이도',
-    'lib.reads': '읽기 {n}', 'lib.open': '작전 목록 열기',
-    'branch.title': '분기점', 'branch.continue': '{label}(으)로 계속', 'branch.tabs': '수비 대응',
-    'branch.chip': '읽기 · {label}', 'branch.divider': '분기: {label}', 'branch.watch': '보기',
+    'lib.reads': '대응 {n}', 'lib.open': '작전 목록 열기',
+    'branch.title': '수비 대응 고르기', 'branch.continue': '{label}{ro} 계속', 'branch.tabs': '수비 대응', 'branch.tabs.zone': '공격 해법',
+    'branch.chip': '대응 · {label}', 'branch.divider': '대응: {label}', 'branch.watch': '보기',
     'hud.meta': '{cat} · 난이도 {level}',
     'step.now': '지금',
     'cap.step': '단계 {k} / {n}',
@@ -104,7 +107,10 @@ const UI = {
     'aria.controls': 'Playback controls',
     'aria.timeline': 'Timeline',
     'aria.scorebug': 'Game situation: {period}, {clock} left, offense {o}, defense {d}',
-    'bug.period': '{n}Q',
+    'aria.scorebug.shot': ', shot clock {s}',
+    'aria.timepos': '{cur} of {total} seconds, step {k}: {title}',
+    'bug.period': 'Q{n}', 'bug.shot': 'Shot clock',
+    'skip.player': 'Skip to the playback controls',
     'bug.ot': 'OT',
     'aria.settings': 'Playback settings',
     'aria.display': 'Display options',
@@ -147,7 +153,7 @@ const UI = {
     'section.offense': 'Offensive sets', 'section.situations': 'Special situations', 'section.defense': 'Defensive schemes',
     'lib.search': 'Search plays', 'lib.empty': 'No plays found', 'lib.all': 'All', 'lib.filter': 'Difficulty',
     'lib.reads': '{n} reads', 'lib.open': 'Open the play list',
-    'branch.title': 'Branch point', 'branch.continue': 'Continue with {label}', 'branch.tabs': 'Defensive reads',
+    'branch.title': 'Choose the defensive read', 'branch.continue': 'Continue with {label}', 'branch.tabs': 'Defensive reads', 'branch.tabs.zone': 'Ways to attack',
     'branch.chip': 'Read · {label}', 'branch.divider': 'Read: {label}', 'branch.watch': 'Watch',
     'hud.meta': '{cat} · {level}',
     'step.now': 'Now',
@@ -176,6 +182,9 @@ export function setLang(l) {
 
 // 그 언어 표에 문구가 직접 있는지 (t()는 없으면 한국어로 대신 보여 준다)
 export const hasLabel = (l, key) => Object.hasOwn(UI[l] || {}, key);
+
+// 두 언어의 문구를 모두 (검색처럼 UI 언어와 상관없이 찾을 때)
+export const labelsFor = (key) => LANGS.map((l) => UI[l][key]).filter(Boolean);
 
 export function t(key, vars) {
   let s = UI[lang][key] ?? UI.ko[key] ?? key;

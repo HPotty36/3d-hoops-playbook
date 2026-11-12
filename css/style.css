@@ -96,6 +96,14 @@ body {
 }
 button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* 라이트 테마에서는 밝은 주황이 배경과 3:1이 안 되므로 진한 주황으로 */
+:root[data-theme="light"] :focus-visible { outline-color: var(--accent-text); }
+/* 키보드 사용자를 위한 건너뛰기 링크: 포커스를 받을 때만 보인다 */
+.skip-link {
+  position: absolute; left: 12px; top: -64px; z-index: 50; padding: 10px 16px; border-radius: 999px;
+  background: var(--text); color: var(--bg); font-weight: 600; text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
 ::selection { background: rgba(238, 122, 58, 0.32); color: var(--text); }
 /* 스크롤 막대도 테마 색으로 (목록 · 설명 패널 · 모바일 페이지) */
 html, .lib-list, #info { scrollbar-width: thin; scrollbar-color: var(--diff) transparent; }
@@ -177,6 +185,7 @@ kbd {
 .sec-body { display: flex; flex-direction: column; gap: 2px; }
 .sec-body[hidden] { display: none; }
 .lib-empty { margin: 18px 12px; font-size: 13.5px; color: var(--text-3); }
+.lib-list[hidden] { display: none; }
 .lib-empty[hidden] { display: none; }
 .cat-title { margin: 12px 12px 4px; font-size: 12.5px; font-weight: 500; color: var(--text-3); }
 /* 읽기 수: 주황은 공격(선수 칩·재생 버튼)과 현재 상태에만 쓰므로 여기서는 조용한 숫자로 */
@@ -186,6 +195,7 @@ kbd {
 }
 .play-item:hover .reads-badge, .play-item.active .reads-badge { color: var(--text-2); }
 .play-item {
+  position: relative;   /* 안의 .sr-only(절대 위치)가 목록 밖으로 빠져 페이지 전체를 늘리지 않게 */
   display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0 12px;
   border-radius: var(--r-lg); text-align: left; font-size: 15px; color: var(--text-sub);
   transition: background-color 150ms var(--ease), color 150ms var(--ease);
@@ -243,6 +253,7 @@ kbd {
 .sb-o { background: var(--accent); color: var(--on-accent); }
 .sb-d { background: var(--def); color: #fff; }
 .sb-shot { font-size: 11px; color: var(--text-3); }
+.sb-shot::before { content: attr(data-label); margin-right: 4px; font-size: 9.5px; letter-spacing: 0.03em; opacity: 0.8; }
 .sb-shot[hidden] { display: none; }
 .tool-right { display: flex; align-items: center; gap: 8px; }
 .toolbar .seg { padding: 4px; background: var(--tseg-track); }
@@ -271,6 +282,10 @@ kbd {
   color: var(--text-3); font-size: 13px; transition: opacity 400ms var(--ease);
 }
 #loading.hide { opacity: 0; pointer-events: none; }
+#loading .ld-fail { display: none; max-width: 36ch; padding: 0 16px; text-align: center; line-height: 1.7; color: var(--text-2); }
+#loading.failed .ld-msg { display: none; }
+#loading.failed .ld-fail { display: block; }
+#loading .ld-fail button { display: block; margin: 12px auto 0; min-height: 40px; padding: 0 18px; border-radius: 999px; background: var(--seg); color: var(--text); font-weight: 600; }
 
 /* 설명(캡션) */
 #caption { padding: 14px 22px 16px; min-height: 112px; }
@@ -334,7 +349,9 @@ kbd {
   font-size: 12px; line-height: 1.4; color: var(--text-3);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.tl-seg.cur .tl-label { color: var(--text); font-weight: 500; }
+/* 지금 단계 이름은 자르지 않는다: 옆 단계 이름 위로 넘쳐도 패널 색 배경으로 덮어 읽히게 */
+.tl-seg.cur .tl-label { color: var(--text); font-weight: 500; overflow: visible; position: relative; z-index: 1; width: max-content; padding-right: 6px; background: var(--panel); }
+.tl-seg.wide + .tl-seg .tl-label { visibility: hidden; }
 .timeline:hover .tl-bar { transform: scaleY(1.25); }
 .tl-head {
   position: absolute; top: 10px; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%;
@@ -351,6 +368,13 @@ kbd {
   padding-top: 10px; border-top: 1px solid var(--line);
 }
 #settings .seg button { padding: 0 11px; }
+/* 속도: 한 개의 작은 선택 상자 (0.5× 0.75× 1× 1.5×) */
+.speed-wrap { position: relative; display: inline-flex; align-items: center; }
+.speed-wrap select {
+  appearance: none; -webkit-appearance: none; min-height: 34px; padding: 0 28px 0 13px; border: 0; border-radius: 999px;
+  background: var(--seg); color: var(--text); font: inherit; font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; cursor: pointer;
+}
+.speed-wrap svg { position: absolute; right: 11px; width: 13px; height: 13px; pointer-events: none; color: var(--text-2); }
 /* 표시 토글: 하나만 고르는 세그먼트가 아니라 각자 켜고 끄는 스위치라서, 한 트랙에 묶지 않고 따로 선 알약으로 */
 .seg.toggles { margin-left: auto; padding: 0; gap: 6px; background: transparent; }
 .toggles button[aria-pressed="true"] { background: var(--toggle-on); color: var(--text); box-shadow: var(--toggle-on-shadow); }
@@ -430,15 +454,11 @@ kbd {
   background: var(--accent); border: 2px solid var(--panel); transform: rotate(45deg); border-radius: 2px;
 }
 
-/* 분기점 선택지: 코트 위 카드 */
-.branch-prompt {
-  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 2;
-  width: min(520px, calc(100% - 24px)); padding: 16px 18px 14px; border-radius: var(--r-xl);
-  background: var(--panel); color: var(--text); box-shadow: var(--float-shadow);
-  animation: bp-in 220ms var(--ease);
-}
+/* 분기점 선택지: 코트를 가리지 않도록 캡션 자리에. 떠 있는 동안 캡션 본문 대신 보인다 */
+.branch-prompt { margin-top: 10px; animation: bp-in 200ms var(--ease); }
 .branch-prompt[hidden] { display: none; }
-@keyframes bp-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes bp-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+#caption.has-prompt #cap-text, #caption.has-prompt .cap-read { display: none; }
 /* 질문 앞의 ◆는 타임라인의 분기점 표시와 같은 모양이다 (머리말 대신) */
 .bp-q { margin: 0 0 12px; font-size: 16.5px; font-weight: 600; line-height: 1.5; }
 .bp-q::before {
@@ -538,6 +558,13 @@ kbd {
   .play-meta { display: none; }
   .play-head h2 { font-size: 22px; }
 }
+@media (max-width: 1440px) {
+  .toolbar.has-bug .play-meta { display: none; }
+  /* 설정 줄(읽기 모드 · 속도 · 표시 토글)이 노트북 폭에서도 한 줄에 들어가게 */
+  #settings { column-gap: 12px; }
+  .seg.toggles { gap: 4px; }
+  #settings .seg button, .seg.toggles button { padding: 0 10px; }
+}
 @media (max-width: 1100px) {
   #app { display: flex; flex-direction: column; height: auto; }
   #sidebar { background: transparent; padding: 4px 0 0; }
@@ -554,7 +581,6 @@ kbd {
 @media (max-width: 680px) {
   #app { gap: 10px; }
   .brand-sub { display: none; }
-  .brand-mark { width: 34px; height: 34px; }
   .toolbar { flex-wrap: wrap; }
   /* 제목 줄 옆에 언어·테마 버튼이 붙고, 스코어 버그는 그 아래 한 줄을 따로 쓴다 (버튼 밑으로 넘치지 않게) */
   .play-head { display: contents; }
@@ -565,6 +591,15 @@ kbd {
   .toolbar .cam-bar::-webkit-scrollbar { display: none; }
   .toolbar .cam-bar button { flex: 1 0 auto; padding: 0 10px; }
   .view { height: 52vh; min-height: 300px; border-radius: 18px; }
+  .brand-mark { width: 28px; height: 28px; }
+  .wordmark { font-size: 15px; }
+  /* 재생 줄을 코트 바로 아래로 올려 스크롤 없이 멈추고 넘길 수 있게 (그다음 설명, 읽기 탭, 설정) */
+  .controls { display: contents; }
+  .controls > * { background: var(--panel); border-radius: 18px; padding: 10px 14px; }
+  #transport { order: 2; }
+  #caption { order: 3; }
+  .read-bar { order: 4; }
+  #settings { order: 5; border-top: 0; }
   .toggles { margin-left: 0; }
   #caption { padding: 14px 16px 16px; border-radius: 18px; }
   #cap-title { font-size: 16.5px; }
@@ -580,11 +615,14 @@ kbd {
   #settings { gap: 10px 16px; }
   .set-group { width: 100%; justify-content: space-between; }
   #score-pop { font-size: 64px; }
-  .read-bar-label { display: none; }
-  .branch-prompt { bottom: 10px; padding: 14px 14px 12px; }
+
   .bp-q { font-size: 15.5px; }
   .bp-options button { min-height: 40px; padding: 0 12px; font-size: 14px; }
 }
+/* 터치 기기에는 없는 키 안내는 숨긴다 */
+@media (hover: none) and (pointer: coarse) {
+  .bp-hint kbd, #btn-skip kbd { display: none; }
+}
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
 }

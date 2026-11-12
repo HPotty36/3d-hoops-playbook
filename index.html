@@ -39,11 +39,18 @@
     // 설치와 오프라인(PWA)을 위한 서비스 워커. 스토어 앱 빌드(data-build="store")에서는 쓰지 않는다
     if ('serviceWorker' in navigator && document.documentElement.dataset.build !== 'store'
       && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-      window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').then(function () { return navigator.serviceWorker.ready; }).then(function (reg) {
+          // 첫 방문에 이미 불러온 파일(작전 모듈, Three.js, 글꼴)을 넘겨서, 한 번만 열어도 오프라인에서 돌게 한다
+          var urls = performance.getEntriesByType('resource').map(function (e) { return e.name; });
+          if (reg.active) reg.active.postMessage({ type: 'cache-urls', urls: urls });
+        }).catch(function () {});
+      });
     }
   </script>
 </head>
 <body>
+  <a class="skip-link" href="#transport" data-i18n="skip.player">재생 컨트롤로 건너뛰기</a>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <symbol id="i-mark" viewBox="0 0 48 48">
@@ -97,7 +104,7 @@
           <h2><button id="btn-library" class="title-btn" type="button" data-i18n-title="lib.open"><span id="hud-title"></span><svg class="chev" aria-hidden="true"><use href="#i-chevron" /></svg></button></h2>
           <!-- 특수 상황 작전의 중계식 스코어 버그: 쿼터 · 남은 시간 · 공격 – 수비 점수 · 샷 클락 -->
           <p id="score-bug" class="score-bug" hidden>
-            <span class="sb-vis" aria-hidden="true"><span id="sb-period"></span><i>·</i><span id="sb-clock" class="sb-clock"></span><i>·</i><b id="sb-o" class="sb-o"></b><i>–</i><b id="sb-d" class="sb-d"></b><span id="sb-shot" class="sb-shot" hidden></span></span>
+            <span class="sb-vis" aria-hidden="true"><span id="sb-period"></span><i>·</i><span id="sb-clock" class="sb-clock"></span><i>·</i><b id="sb-o" class="sb-o"></b><i>–</i><b id="sb-d" class="sb-d"></b><span id="sb-shot" class="sb-shot" data-label="SC" hidden></span></span>
             <span id="sb-sr" class="sr-only"></span>
           </p>
         </div>
@@ -120,8 +127,7 @@
       <div class="view">
         <div id="viewport">
           <div id="score-pop" aria-live="polite"></div>
-          <div id="branch-prompt" class="branch-prompt" role="group" aria-labelledby="bp-q" aria-live="polite" hidden></div>
-          <div id="loading" data-i18n="loading"></div>
+          <div id="loading"><span class="ld-msg" data-i18n="loading">코트를 준비하는 중</span><span class="ld-fail">3D 코트를 불러오지 못했습니다. 연결을 확인하고 다시 시도하세요.<br>Couldn't load the 3D court. Check your connection and try again.<button type="button" onclick="location.reload()">다시 시도 · Retry</button></span></div>
         </div>
       </div>
 
@@ -134,10 +140,11 @@
               <circle cx="10" cy="10" r="8" />
               <circle id="cap-ring-fill" cx="10" cy="10" r="8" transform="rotate(-90 10 10)" />
             </svg>
-            <span id="cap-status-text"></span>
+            <span id="cap-status-text" aria-hidden="true"></span>
             <button id="btn-skip" type="button"><span data-i18n="btn.skip"></span> <kbd>Enter</kbd></button>
           </div>
         </div>
+        <div id="branch-prompt" class="branch-prompt" role="group" aria-labelledby="bp-q" hidden></div>
         <p id="cap-read" class="cap-read" hidden><span class="chip"></span><span class="why"></span></p>
         <p id="cap-text"></p>
       </section>
@@ -172,15 +179,15 @@
               <button data-v="off" data-i18n="read.off" data-i18n-title="read.off.t"></button>
             </div>
           </div>
-          <div class="set-group">
-            <span class="set-label" data-i18n="set.speed"></span>
-            <div class="seg" id="speed" role="group" data-i18n-aria="set.speed">
-              <button data-v="0.5">0.5×</button>
-              <button data-v="0.75">0.75×</button>
-              <button data-v="1">1×</button>
-              <button data-v="1.5">1.5×</button>
-            </div>
-          </div>
+          <label class="speed-wrap">
+            <select id="speed" data-i18n-aria="set.speed" data-i18n-title="set.speed">
+              <option value="0.5">0.5×</option>
+              <option value="0.75">0.75×</option>
+              <option value="1">1×</option>
+              <option value="1.5">1.5×</option>
+            </select>
+            <svg aria-hidden="true"><use href="#i-chevron" /></svg>
+          </label>
           <div class="seg toggles" role="group" data-i18n-aria="aria.display">
             <button id="tg-def" aria-pressed="true" data-i18n="tg.def" data-i18n-title="tg.def.t"></button>
             <button id="tg-notes" aria-pressed="true" data-i18n="tg.notes" data-i18n-title="tg.notes.t"></button>
@@ -257,6 +264,6 @@
     </dl>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js" onerror="document.getElementById('loading').classList.add('failed')"></script>
 </body>
 </html>

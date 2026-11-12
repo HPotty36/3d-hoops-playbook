@@ -6,9 +6,9 @@ import { createPlayer, posePlayer, handPoint, createBall } from './players.js';
 import { Notation } from './notation.js';
 import { CameraRig } from './camera.js';
 import { PLAYS, SECTIONS } from './plays/index.js';
-import { t as tr, applyStatic, localize, initLang, setLang, getLang } from './i18n.js';
+import { t as tr, applyStatic, localize, initLang, setLang, getLang, labelsFor } from './i18n.js';
 import { scoreBugView } from './clock.js';
-import { createLibrary } from './library.js';
+import { createLibrary, categoryTerms } from './library.js';
 import { readIds, variant, branchTime, readMeta } from './reads.js';
 import { createReadsUI } from './reads-ui.js';
 import { keyBelongsToTarget } from './shortcuts.js';
@@ -33,7 +33,10 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(SCENE_THEMES.dark.bg);   // 실제 색은 applyTheme()에서 맞춘다
 scene.fog = new THREE.Fog(SCENE_THEMES.dark.bg, 120, 260);
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const room = new RoomEnvironment();
+scene.environment = pmrem.fromScene(room, 0.04).texture;
+pmrem.dispose();
+room.dispose?.();
 
 const camera = new THREE.PerspectiveCamera(42, 1, 0.5, 700);
 
@@ -79,6 +82,7 @@ const state = {
 };
 notation.visible = prefs.showNotes ?? true;
 initLang(prefs.lang);
+let langPref = prefs.lang;   // ?lang=로 연 언어는 저장하지 않는다. KO/EN을 직접 누를 때만 바뀐다
 const curPlay = () => PLAYS[state.idx];
 const content = () => localize(state.cp.play);   // 선택한 읽기의 단계까지 붙은 작전
 const meta = () => readMeta(curPlay(), getLang());
@@ -96,7 +100,7 @@ function savePrefs() {
   try {
     localStorage.setItem(PREF_KEY, JSON.stringify({
       speed: state.speed, loop: state.loop, showDef: state.showDef, showLabels: state.showLabels,
-      showNotes: notation.visible, readMode: state.readMode, lang: getLang(), theme: themePref || undefined,
+      showNotes: notation.visible, readMode: state.readMode, lang: langPref || undefined, theme: themePref || undefined,
       collapsed: [...collapsedSections],
     }));
   } catch { /* 저장소를 못 쓰는 환경이면 무시 */ }
@@ -201,7 +205,7 @@ function selectRead(id) {
   renderInfo();
   prevT = state.t;
   syncReadParam();
-  if (atBranch && state.playing) beginStep(play.reads.at);
+  if (atBranch) beginStep(play.reads.at);
   syncPlayBtn();
 }
 
@@ -213,6 +217,7 @@ function openPrompt() {
   state.hold = null;
   state.waiting = false;
   readsUI.showPrompt(m, state.read);
+  $('#caption').classList.add('has-prompt');
   if (state.readMode === 'step') {
     state.prompt = { wait: true };
     state.playing = false;
@@ -222,8 +227,11 @@ function openPrompt() {
       $('#branch-prompt .bp-options button.current')?.focus();
     }
   } else {
-    const total = readTime(m.prompt) * READ_FACTOR[state.readMode];
-    state.prompt = { remaining: total, total };
+    // 질문과 선택지를 모두 읽을 시간(최소 6초). 선택지 위에 마우스나 포커스가 있으면 카운트다운을 멈춘다
+    const words = [m.prompt, ...m.reads.map((r) => r.label)].join(' ');
+    const total = Math.max(6, readTime(words)) * READ_FACTOR[state.readMode];
+    const bp = $('#branch-prompt');
+    state.prompt = { remaining: total, total, held: bp.matches(':hover') || bp.contains(document.activeElement) };
   }
   syncPlayBtn();
 }
@@ -233,6 +241,7 @@ function closePrompt() {
   const hadFocus = $('#branch-prompt').contains(document.activeElement);
   state.prompt = null;
   readsUI.hidePrompt();
+  $('#caption').classList.remove('has-prompt');
   if (hadFocus) $('#btn-play').focus();
 }
 
@@ -243,6 +252,14 @@ function pickRead(id, auto = false) {
   state.playing = true;
   beginStep(curPlay().reads.at);
   syncPlayBtn();
+}
+
+// 주소의 검색 매개변수 하나를 바꾸거나(null이면) 지운다
+function setParam(key, value) {
+  const params = new URLSearchParams(location.search);
+  if (value == null) params.delete(key); else params.set(key, value);
+  const q = params.toString();
+  history.replaceState(null, '', `${location.pathname}${q ? `?${q}` : ''}${location.hash}`);
 }
 
 // ?read=switch 처럼 주소에 남긴다 (기본 읽기면 지운다)
@@ -265,7 +282,7 @@ function watchRead(id) {
 
 // ── 작전 목록 (js/library.js) ────────────────────────────────
 const library = createLibrary({
-  plays: PLAYS, sections: SECTIONS, tr, localize,
+  plays: PLAYS, sections: SECTIONS, tr, localize, catTerms: categoryTerms(SECTIONS, labelsFor),
   onSelect: (i) => { selectPlay(i, true); if (sheet.open) sheet.close(); },
   collapsed: collapsedSections,
   onCollapse: () => savePrefs(),
@@ -284,7 +301,10 @@ function mountLibrary() {
 function openLibrary() {
   if (!mobileMQ.matches) { library.focusSearch(); return; }
   sheet.showModal();
-  $('#library-sheet .play-item.active')?.scrollIntoView({ block: 'center' });
+  // 목록만 스크롤한다. scrollIntoView는 시트 자체까지 밀어 올려 손잡이와 닫기 버튼을 가린다
+  const item = $('#library-sheet .play-item.active');
+  const list = item?.closest('.lib-list');
+  if (item && list) list.scrollTop += item.getBoundingClientRect().top - list.getBoundingClientRect().top - (list.clientHeight - item.offsetHeight) / 2;
 }
 
 // ── 작전 설명 패널 ───────────────────────────────────────────
@@ -297,6 +317,12 @@ function renderInfo() {
   const hc = $('#h-counters');
   hc.dataset.i18n = state.cp.zone ? 'h.beats' : 'h.counters';
   hc.textContent = tr(hc.dataset.i18n);
+  const tabsKey = state.cp.zone ? 'branch.tabs.zone' : 'branch.tabs';
+  const rl = $('.read-bar-label');
+  rl.dataset.i18n = tabsKey;
+  rl.textContent = tr(tabsKey);
+  $('#read-tabs').dataset.i18nAria = tabsKey;
+  $('#read-tabs').setAttribute('aria-label', tr(tabsKey));
   $('#hud-title').textContent = c.name;
   $('#info-summary').innerHTML = fmt(c.summary);
   $('#info-when').innerHTML = fmt(c.when);
@@ -349,7 +375,7 @@ function showCaption(k) {
   if (showRead) {
     const r = m.reads.find((x) => x.id === state.read);
     $('#cap-read .chip').textContent = tr('branch.chip', { label: r.label });
-    $('#cap-read .why').textContent = r.why;
+    $('#cap-read .why').innerHTML = fmt(r.why);   // [x2] 같은 선수 표기를 칩으로
   }
   $$('#info-steps li:not(.branch-divider)').forEach((li, i) => {
     li.classList.toggle('active', i === k);
@@ -403,15 +429,26 @@ function updateTimeline(t) {
     const f = clamp((t - s0) / dur, 0, 1);
     el._fill.style.width = `${f * 100}%`;
     el.classList.toggle('done', f >= 1);
-    el.classList.toggle('cur', i === k && t < state.cp.total);
+    const cur = i === k && t < state.cp.total;
+    if (cur !== el.classList.contains('cur')) {
+      el.classList.toggle('cur', cur);
+      // 지금 단계 이름이 칸보다 길면 다음 칸 이름 위로 넘친다. 그 이름은 잠시 숨긴다
+      const lab = el.querySelector('.tl-label');
+      el.classList.toggle('wide', cur && !!lab && lab.scrollWidth > el.clientWidth);
+    }
     if (t >= s0 && (t < s0 + dur || i === segEls.length - 1)) headX = el.offsetLeft + f * el.offsetWidth;
   });
   $('#tl-head').style.left = `${headX}px`;
-  $('#timeline').setAttribute('aria-valuenow', Math.round((t / state.cp.end) * 100));
+  const tl = $('#timeline');
+  tl.setAttribute('aria-valuenow', Math.round((t / state.cp.end) * 100));
+  const step = content().steps[Math.min(k, state.cp.steps.length - 1)];
+  const vt = tr('aria.timepos', { cur: t.toFixed(1), total: state.cp.end.toFixed(1), k: Math.min(k, state.cp.steps.length - 1) + 1, title: step?.title ?? '' });
+  if (vt !== ui.timepos) { tl.setAttribute('aria-valuetext', vt); ui.timepos = vt; }
 }
 
 // ── 재생 제어 ─────────────────────────────────────────────────
-function selectPlay(i, autoplay) {
+// fromLink: 주소(?t=)로 연 첫 작전. 직접 고른 작전이면 다른 순간을 가리키는 ?t=를 지운다
+function selectPlay(i, autoplay, fromLink = false) {
   closePrompt();
   state.idx = i;
   state.read = readIds(PLAYS[i])[0] ?? null;
@@ -426,7 +463,8 @@ function selectPlay(i, autoplay) {
   snapHeadings();
   if (autoplay) beginStep(0);
   syncPlayBtn();
-  if (location.hash.slice(1) !== PLAYS[i].id) history.replaceState(null, '', `#${PLAYS[i].id}`);
+  if (location.hash.slice(1) !== PLAYS[i].id) history.replaceState(null, '', `${location.pathname}${location.search}#${PLAYS[i].id}`);
+  if (!fromLink) setParam('t', null);
   syncReadParam();
 }
 
@@ -459,6 +497,10 @@ function togglePlay() {
   if (!state.playing && state.t >= state.cp.end - 0.01) { restart(); return; }
   state.playing = !state.playing;
   syncPlayBtn();
+  // 자동 모드의 선택지에서 멈추면 키보드로 고를 수 있게 지금 읽기 버튼으로 포커스를 옮긴다
+  if (state.prompt && !state.playing && !document.activeElement?.closest('input, textarea, select')) {
+    $('#branch-prompt .bp-options button.current')?.focus();
+  }
 }
 
 function syncPlayBtn() {
@@ -611,12 +653,17 @@ function renderScoreBug(bug) {
   $('#sb-d').textContent = bug.score[1];
   $('#sb-shot').hidden = bug.shot == null;
   $('#sb-shot').textContent = bug.shot ?? '';
-  $('#sb-sr').textContent = tr('aria.scorebug', { period, clock: bug.clock, o: bug.score[0], d: bug.score[1] });
+  $('#sb-shot').title = tr('bug.shot');
+  $('#sb-sr').textContent = tr('aria.scorebug', { period, clock: bug.clock, o: bug.score[0], d: bug.score[1] })
+    + (bug.shot == null ? '' : tr('aria.scorebug.shot', { s: bug.shot }));
 }
 const RING = 2 * Math.PI * 8;   // 캡션 옆 원형 카운트다운의 둘레 (r = 8)
+// 화면에 그릴 시각. 분기점 선택지가 떠 있으면 분기 직전(마지막 공유 단계)을 보여 줘 기본 답을 미리 드러내지 않는다
+const viewT = () => (state.prompt ? Math.max(0, branchTime(curPlay()) - 1e-3) : state.t);
+
 function updateUI() {
   const cp = state.cp;
-  const t = Math.max(0, state.t);
+  const t = Math.max(0, viewT());
   // 분기점 선택지가 떠 있는 동안에는 답을 미리 보여 주지 않도록 마지막 공유 단계의 설명을 유지한다
   const k = state.prompt ? curPlay().reads.at - 1 : cp.stepIndexAt(Math.min(t, cp.total - 1e-6));
   if (k !== state.stepShown) { showCaption(k); state.stepShown = k; }
@@ -654,7 +701,7 @@ function updateUI() {
 function setLanguage(l) {
   setLang(l);
   applyStatic();
-  $$('.lang-bar button').forEach((b) => b.classList.toggle('on', b.dataset.lang === getLang()));
+  syncLangButtons();
   library.render(PLAYS[state.idx]?.id);
   renderInfo();
   if (state.prompt) readsUI.showPrompt(meta(), state.read);
@@ -669,12 +716,30 @@ function setLanguage(l) {
   savePrefs();
 }
 
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+function syncCamButtons(mode) {
+  $$('.cam-bar button').forEach((b) => {
+    b.classList.toggle('on', b.dataset.cam === mode);
+    b.setAttribute('aria-pressed', String(b.dataset.cam === mode));
+  });
+}
+function syncLangButtons() {
+  $$('.lang-bar button').forEach((b) => {
+    b.classList.toggle('on', b.dataset.lang === getLang());
+    b.setAttribute('aria-pressed', String(b.dataset.lang === getLang()));
+  });
+}
 function setCam(mode) {
-  rig.setMode(mode, ball.position);
-  $$('.cam-bar button').forEach((b) => b.classList.toggle('on', b.dataset.cam === mode));
+  if (reducedMotion.matches) rig.jump(mode);
+  else rig.setMode(mode, ball.position);
+  syncCamButtons(mode);
+  setParam('cam', mode === 'coach' ? null : mode);
 }
 function setSeg(sel, value) {
-  $$(`${sel} button`).forEach((b) => b.classList.toggle('on', b.dataset.v === String(value)));
+  $$(`${sel} button`).forEach((b) => {
+    b.classList.toggle('on', b.dataset.v === String(value));
+    b.setAttribute('aria-pressed', String(b.dataset.v === String(value)));
+  });
 }
 function setToggle(id, on) {
   $(id).setAttribute('aria-pressed', String(on));
@@ -687,12 +752,22 @@ function prevStep() {
   seekStep(state.t - state.cp.steps[k].s0 > 0.5 ? k : k - 1);
 }
 function nextStep() {
+  if (state.prompt) { pickRead(state.read); return; }
   const cp = state.cp;
   const k = currentStep();
   if (k >= cp.steps.length - 1) {
     closePrompt();
     state.t = cp.end; state.playing = false; state.hold = null; state.waiting = false; syncPlayBtn();
   } else seekStep(k + 1);
+}
+
+function stepPlay(dir) {
+  const order = library.order();
+  const list = order.length ? order : PLAYS.map((_, i) => i);
+  const at = list.indexOf(state.idx);
+  const next = at < 0 ? list[dir > 0 ? 0 : list.length - 1] : list[(at + dir + list.length) % list.length];
+  library.reveal(PLAYS[next].id);
+  selectPlay(next, true);
 }
 
 function bindUI() {
@@ -725,18 +800,24 @@ function bindUI() {
   tl.addEventListener('pointerup', endScrub);
   tl.addEventListener('pointercancel', endScrub);
 
-  $$('#speed button').forEach((b) => b.addEventListener('click', () => {
-    state.speed = +b.dataset.v; setSeg('#speed', state.speed); savePrefs();
-  }));
+  $('#speed').addEventListener('change', (e) => {
+    state.speed = +e.target.value; savePrefs();
+  });
   $$('#read-mode button').forEach((b) => b.addEventListener('click', () => {
     state.readMode = b.dataset.v;
     setSeg('#read-mode', state.readMode);
+    if (state.readMode === 'step' && state.hold) { state.waiting = true; state.playing = false; syncPlayBtn(); }
     if (state.readMode === 'off' || state.readMode === 'step') state.hold = null;
     if (state.readMode !== 'step' && state.waiting) skipWait();
     // 분기점 선택지가 열려 있으면: 끄기는 지금 탭으로 계속, 그 외에는 새 모드에 맞춰 다시 연다
     if (state.prompt) {
       if (state.readMode === 'off') pickRead(state.read, true);
-      else { openPrompt(); if (state.readMode !== 'step') { state.playing = true; syncPlayBtn(); } }
+      else {
+        // 단계별 모드에서 기다리던 선택지는 자동 모드로 바꾸면 카운트다운을 시작한다. 직접 멈춘 선택지는 멈춘 채로 둔다
+        const wasWaiting = state.prompt.wait, wasPlaying = state.playing;
+        openPrompt();
+        if (state.readMode !== 'step') { state.playing = wasWaiting || wasPlaying; syncPlayBtn(); }
+      }
     }
     savePrefs();
   }));
@@ -746,7 +827,22 @@ function bindUI() {
   bindToggle('#tg-loop', () => state.loop, (v) => { state.loop = v; });
   bindToggle('#tg-notes', () => notation.visible, (v) => { notation.visible = v; });
   $$('.cam-bar button').forEach((b) => b.addEventListener('click', () => setCam(b.dataset.cam)));
-  $$('.lang-bar button').forEach((b) => b.addEventListener('click', () => { if (b.dataset.lang !== getLang()) setLanguage(b.dataset.lang); }));
+  $$('.lang-bar button').forEach((b) => b.addEventListener('click', () => {
+    if (b.dataset.lang === getLang()) return;
+    langPref = b.dataset.lang;
+    setLanguage(b.dataset.lang);
+  }));
+  // 선택지 위에 마우스나 키보드 포커스가 있으면 자동 모드 카운트다운을 멈춘다
+  const bp = $('#branch-prompt');
+  const holdPrompt = (on) => { if (state.prompt) state.prompt.held = on; };
+  bp.addEventListener('pointerenter', () => holdPrompt(true));
+  bp.addEventListener('pointerleave', () => holdPrompt(bp.contains(document.activeElement)));
+  bp.addEventListener('focusin', () => holdPrompt(true));
+  bp.addEventListener('focusout', (e) => holdPrompt(bp.contains(e.relatedTarget) || bp.matches(':hover')));
+  // 단축키 안내가 열리면 그 안으로 포커스를 옮긴다(닫으면 브라우저가 돌려준다)
+  $('#keys-pop').addEventListener('toggle', (e) => { if (e.newState === 'open') $('#keys-pop .round-btn')?.focus(); });
+  // 건너뛰기 링크: 재생 버튼으로 바로
+  $('.skip-link')?.addEventListener('click', (e) => { e.preventDefault(); $('#btn-play').focus(); });
 
   window.addEventListener('keydown', (e) => {
     if (keyBelongsToTarget(e.target, e.key) || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -755,8 +851,8 @@ function bindUI() {
     else if (e.key === 'Enter') { e.preventDefault(); skipWait(); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); nextStep(); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); selectPlay((state.idx - 1 + PLAYS.length) % PLAYS.length, true); }
-    else if (e.key === 'ArrowDown') { e.preventDefault(); selectPlay((state.idx + 1) % PLAYS.length, true); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); stepPlay(-1); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); stepPlay(1); }
     else if (e.key === 'r' || e.key === 'R') restart();
     else if (e.key === 'd' || e.key === 'D') $('#tg-def').click();
     else if (e.key === 'n' || e.key === 'N') $('#tg-notes').click();
@@ -769,15 +865,18 @@ function bindUI() {
 
   window.addEventListener('hashchange', () => {
     const i = PLAYS.findIndex((p) => p.id === location.hash.slice(1));
-    if (i >= 0 && i !== state.idx) selectPlay(i, true);
+    if (i < 0) { history.replaceState(null, '', `${location.pathname}${location.search}#${PLAYS[state.idx].id}`); return; }
+    if (i !== state.idx) selectPlay(i, true);
   });
 
   new ResizeObserver(() => {
     const w = viewport.clientWidth, h = viewport.clientHeight;
     if (!w || !h) return;
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    rig.refit();
   }).observe(viewport);
 }
 
@@ -791,7 +890,7 @@ function advance(dt) {
   if (state.playing) {
     if (state.prompt) {
       // 분기점 선택지: 자동 모드면 읽는 시간이 지나 지금 탭으로 계속한다
-      if (!state.prompt.wait) {
+      if (!state.prompt.wait && !state.prompt.held) {
         state.prompt.remaining -= dt;
         if (state.prompt.remaining <= 0) pickRead(state.read, true);
       }
@@ -823,10 +922,30 @@ function frame(now) {
   advance(dt);
   checkScore(prevT, state.t);
   prevT = state.t;
-  applyState(state.t, dt);
+  // 다른 배율의 모니터로 옮기거나 확대하면 픽셀 비율이 바뀐다
+  const pr = Math.min(devicePixelRatio, 2);
+  if (pr !== renderer.getPixelRatio()) { renderer.setPixelRatio(pr); renderer.setSize(viewport.clientWidth, viewport.clientHeight, false); }
+  applyState(viewT(), dt);
   rig.update(dt, ball.position);
+  sizeLabels();
   renderer.render(scene, camera);
   updateUI();
+}
+
+// 번호 라벨은 멀어도(전술판, 휴대폰) 화면에서 LABEL_MIN_PX보다 작아지지 않게 키운다
+const LABEL_MIN_PX = 19;
+const labelPos = new THREE.Vector3();
+function sizeLabels() {
+  const h = renderer.domElement.clientHeight;
+  if (!h) return;
+  const perPx = (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / h;
+  for (const id of [...OFF, ...DEF]) {
+    const l = players[id]?.label;
+    if (!l?.visible) continue;
+    l.getWorldPosition(labelPos);
+    const s = Math.max(1.9, LABEL_MIN_PX * perPx * labelPos.distanceTo(camera.position));
+    l.scale.set(s, s, 1);
+  }
 }
 
 // 캔버스 텍스처(바닥 로고, 번호 라벨)에 쓰는 웹폰트가 실제로 로드될 때까지 기다린다.
@@ -858,7 +977,7 @@ async function init() {
   }
   applyStatic();
   applyTheme();
-  $$('.lang-bar button').forEach((b) => b.classList.toggle('on', b.dataset.lang === getLang()));
+  syncLangButtons();
   await waitForFonts();
   for (const id of [...OFF, ...DEF]) {
     const p = createPlayer(id);
@@ -870,7 +989,7 @@ async function init() {
   mobileMQ.addEventListener('change', mountLibrary);
   library.render(PLAYS[state.idx]?.id);
   bindUI();
-  setSeg('#speed', state.speed);
+  $('#speed').value = String(state.speed);
   setSeg('#read-mode', state.readMode);
   setToggle('#tg-def', state.showDef);
   setToggle('#tg-labels', state.showLabels);
@@ -885,17 +1004,22 @@ async function init() {
   const params = new URLSearchParams(location.search);
   const cam = params.get('cam');
   rig.jump('coach');
+  syncCamButtons('coach');
   if (cam && $(`.cam-bar [data-cam="${cam}"]`)) {
     rig.jump(cam);
-    $$('.cam-bar button').forEach((b) => b.classList.toggle('on', b.dataset.cam === cam));
+    syncCamButtons(cam);
   }
-  const fromHash = PLAYS.findIndex((p) => p.id === location.hash.slice(1));
-  selectPlay(fromHash >= 0 ? fromHash : 0, false);
+  const hashId = location.hash.slice(1);
+  const fromHash = PLAYS.findIndex((p) => p.id === hashId);
+  // 모르는 작전이면 첫 작전으로 열고, 그 작전을 위한 ?t=는 쓰지 않는다
+  const linkOk = !hashId || fromHash >= 0;
+  selectPlay(fromHash >= 0 ? fromHash : 0, false, true);
   // ?read=switch: 처음부터 그 읽기로 연다 (모르는 id면 기본)
   const read0 = params.get('read');
   if (read0 && readIds(curPlay()).slice(1).includes(read0)) selectRead(read0);
   const startT = parseFloat(params.get('t'));
-  if (startT >= 0) { state.t = Math.min(startT, state.cp.end); prevT = state.t; }
+  if (linkOk && startT >= 0) { state.t = Math.min(startT, state.cp.end); prevT = state.t; }
+  else if (!linkOk) setParam('t', null);
   requestAnimationFrame(frame);
   $('#loading').classList.add('hide');
   setTimeout(() => { if (state.t === 0 && !state.playing && !state.waiting) { state.playing = true; beginStep(0); syncPlayBtn(); } }, 900);

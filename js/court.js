@@ -134,7 +134,7 @@ function drawCourt(size, theme) {
     g.fillRect(X(-8.67), Z(z), 0.67 * k, w * k);
     g.fillRect(X(8), Z(z), 0.67 * k, w * k);
   }
-  // 베이스라인 밖 로고 (마크 + 워드마크)
+  // 베이스라인 밖 로고 (마크 + 워드마크). 골대 지지대(x = 0) 아래를 피해 왼쪽에 둔다
   const fs = 2.3 * k;
   g.textBaseline = 'middle';
   g.textAlign = 'left';
@@ -143,7 +143,7 @@ function drawCourt(size, theme) {
   g.font = `400 ${fs}px "Rubik", sans-serif`;
   const w2 = g.measureText('Playbook').width;
   const markS = 3.2 * k, gap = 1.0 * k;
-  const x0 = X(0) - (markS + gap + w1 + w2) / 2, cy = Z(-3.6);
+  const x0 = X(-13.5) - (markS + gap + w1 + w2) / 2, cy = Z(-3.6);
   drawMark(g, x0 + markS / 2, cy, markS);
   g.fillStyle = tc.ink;
   g.font = `600 ${fs}px "Rubik", sans-serif`;
@@ -167,7 +167,8 @@ export function buildCourt(scene, renderer, { hiRes = true, theme = 'dark' } = {
 
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(SPAN, SPAN),
-    new THREE.MeshStandardMaterial({ map: tex, roughness: 0.42, metalness: 0.0 })
+    // 너무 반짝이면 조명이 비쳐 코트와 에이프런이 하얗게 뜨고 바닥 표기가 묻힌다
+    new THREE.MeshStandardMaterial({ map: tex, roughness: 0.62, metalness: 0.0, envMapIntensity: 0.7 })
   );
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(X0 + SPAN / 2, 0, Z0 + SPAN / 2);

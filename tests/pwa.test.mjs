@@ -65,6 +65,15 @@ test('the service worker is registered on the web only, never in the store app',
   assert.match(reg[0], /dataset\.build/, 'skips the store build');
 });
 
+// 첫 방문의 파일은 서비스 워커가 페이지를 제어하기 전에 불러오므로, 페이지가 목록을 넘겨 캐시하게 해야 한 번 방문으로 오프라인이 된다
+test('the page hands the service worker the files it loaded before it took control', () => {
+  const reg = html.match(/<script>[^<]*serviceWorker[^<]*<\/script>/)[0];
+  assert.match(reg, /getEntriesByType\('resource'\)/);
+  assert.match(reg, /postMessage\(\{ type: 'cache-urls'/);
+  assert.match(sw, /addEventListener\('message'/);
+  assert.match(sw, /'cache-urls'/);
+});
+
 test('the service worker keeps the app shell and drops old caches', () => {
   for (const f of ["'./'", "'./manifest.webmanifest'"]) assert.ok(sw.includes(f), `precaches ${f}`);
   assert.match(sw, /caches\.delete/);
