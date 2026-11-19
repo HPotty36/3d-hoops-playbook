@@ -53,7 +53,7 @@ export default {
       base: { label: 'Help on the roller', why: 'If the shooter\'s defender drops to help on the roller, the shooter who set the back screen and popped is open.' },
       options: [
         {
-          label: 'Stay home', why: 'If the shooter is never left, nobody is left to stop the roller. Throw it up to the big rolling to the rim.',
+          label: 'Stay with the shooter', why: 'If the shooter is never left, nobody is left to stop the roller. Throw it up to the big rolling to the rim.',
           steps: [
             { title: 'Back screen', text: '[1] comes off the screen to the right and [2] sets the **back screen** on [x5]. This time [x2] does not help on the roller and stays attached to [2].' },
             { title: 'Roll & lob', text: '[x5] is stuck on the back screen and [x2] only follows [2], so nobody is in front of the rolling [5]. [1] throws a **lob** and [5] finishes with a dunk.' },

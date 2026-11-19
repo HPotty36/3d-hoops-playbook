@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { compilePlay, ballAir, OFF, DEF, BASKET, dist2 } from './engine.js';
 import { buildCourt, SCENE_THEMES } from './court.js';
-import { createPlayer, posePlayer, handPoint, createBall } from './players.js';
+import { createPlayer, posePlayer, handPoint, createBall, LABEL_SIZE } from './players.js';
 import { Notation } from './notation.js';
 import { CameraRig } from './camera.js';
 import { PLAYS, SECTIONS } from './plays/index.js';
@@ -11,7 +11,7 @@ import { scoreBugView } from './clock.js';
 import { createLibrary, categoryTerms } from './library.js';
 import { readIds, variant, branchTime, readMeta } from './reads.js';
 import { createReadsUI } from './reads-ui.js';
-import { keyBelongsToTarget } from './shortcuts.js';
+import { keyBelongsToTarget, roveIndex } from './shortcuts.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -20,7 +20,15 @@ const isSmall = Math.min(screen.width, screen.height) < 700;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 // ── 렌더러 / 장면 ─────────────────────────────────────────────
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+} catch (err) {
+  // WebGL을 못 쓰는 브라우저(그래픽 가속이 꺼졌거나 차단된 기기, 오래된 WebView): 다시 시도로는 안 되므로 그 이유를 보여 준다
+  $('#loading').dataset.reason = 'nogl';
+  document.documentElement.classList.add('app-failed');
+  throw err;
+}
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -169,7 +177,7 @@ function beginStep(k) {
 function skipWait() {
   if (state.prompt) { pickRead(state.read); return; }
   if (state.hold) state.hold = null;
-  else if (state.waiting) { state.waiting = false; state.playing = true; syncPlayBtn(); }
+  else if (state.waiting) { state.waiting = false; state.playing = true; state.userPaused = false; syncPlayBtn(); }
 }
 
 // ── 텍스트 포맷: [1] → 공격 칩, [x1] → 수비 칩, **굵게** ─────────
@@ -216,16 +224,15 @@ function openPrompt() {
   const m = meta();
   state.hold = null;
   state.waiting = false;
-  readsUI.showPrompt(m, state.read);
+  readsUI.showPrompt(m, state.read, !!state.cp.zone);
   $('#caption').classList.add('has-prompt');
+  $('#stage').classList.add('prompt-open');
   if (state.readMode === 'step') {
     state.prompt = { wait: true };
     state.playing = false;
     // 단계별 모드에서는 선택지가 기다리므로 지금 읽기 버튼으로 포커스를 옮긴다(스크린 리더가 질문을 읽도록).
     // 검색창 같은 입력란에 타이핑 중이면 포커스를 빼앗지 않는다
-    if (!document.activeElement?.closest('input, textarea, select')) {
-      $('#branch-prompt .bp-options button.current')?.focus();
-    }
+    if (!document.activeElement?.closest('input, textarea, select')) focusPrompt();
   } else {
     // 질문과 선택지를 모두 읽을 시간(최소 6초). 선택지 위에 마우스나 포커스가 있으면 카운트다운을 멈춘다
     const words = [m.prompt, ...m.reads.map((r) => r.label)].join(' ');
@@ -236,12 +243,24 @@ function openPrompt() {
   syncPlayBtn();
 }
 
+// 지금 읽기 버튼으로 포커스. 페이지를 크게 끌어 올려 코트를 밀어내지 않게, 선택지가 겨우 보일 만큼만 스크롤한다.
+// 터치로 조작 중이면 포커스를 옮기지 않는다 (휴대폰에서 화면이 선택지로 밀려 코트가 가려지지 않게. 질문은 캡션의 aria-live가 읽는다)
+let touchInput = false;
+window.addEventListener('pointerdown', (e) => { touchInput = e.pointerType === 'touch'; }, true);
+window.addEventListener('keydown', () => { touchInput = false; }, true);
+function focusPrompt() {
+  if (touchInput) return;
+  $('#branch-prompt .bp-options button.current')?.focus({ preventScroll: true });
+  $('#branch-prompt').scrollIntoView({ block: 'nearest' });
+}
+
 function closePrompt() {
   if (!state.prompt) return;
   const hadFocus = $('#branch-prompt').contains(document.activeElement);
   state.prompt = null;
   readsUI.hidePrompt();
   $('#caption').classList.remove('has-prompt');
+  $('#stage').classList.remove('prompt-open');
   if (hadFocus) $('#btn-play').focus();
 }
 
@@ -250,6 +269,7 @@ function pickRead(id, auto = false) {
   selectRead(id);
   if (auto) state.readChosen = false;
   state.playing = true;
+  state.userPaused = false;
   beginStep(curPlay().reads.at);
   syncPlayBtn();
 }
@@ -348,7 +368,7 @@ function renderInfo() {
       const div = document.createElement('li');
       div.className = 'branch-divider';
       div.setAttribute('aria-hidden', 'true');
-      div.textContent = tr('branch.divider', { label: m.reads.find((r) => r.id === state.read).label });
+      div.textContent = tr(state.cp.zone ? 'branch.divider.zone' : 'branch.divider', { label: m.reads.find((r) => r.id === state.read).label });
       ol.append(div);
     }
     const li = document.createElement('li');
@@ -361,6 +381,48 @@ function renderInfo() {
   library.setActive(PLAYS[state.idx].id);
   document.title = `${c.name} · 3D Hoops Playbook`;
   state.stepShown = -1;
+  fitCaption();
+}
+
+// 데스크톱: 캡션 높이를 이 작전에서 가장 긴 단계(읽는 시간 표시, 분기 직후 한 줄, 분기 선택지 포함)에 맞춰 둔다.
+// 단계마다 캡션 높이가 바뀌면 코트가 커졌다 작아졌다 하므로, 재생 중에는 코트 크기가 그대로 있게 한다
+const desktopMQ = window.matchMedia('(min-width: 1101px)');
+function fitCaption() {
+  const cap = $('#caption');
+  cap.style.minHeight = '';
+  if (!desktopMQ.matches || !state.cp || !cap.offsetWidth) return;
+  const probe = cap.cloneNode(true);
+  probe.removeAttribute('aria-live');
+  probe.setAttribute('aria-hidden', 'true');
+  probe.classList.remove('has-prompt');
+  Object.assign(probe.style, { position: 'absolute', visibility: 'hidden', left: '0', top: '0', width: `${cap.offsetWidth}px`, minHeight: '0' });
+  cap.after(probe);
+  const q = (s) => probe.querySelector(s);
+  q('#cap-status').hidden = false;
+  q('#branch-prompt').hidden = true;
+  const c = content(), m = meta();
+  let h = 0;
+  c.steps.forEach((st, k) => {
+    q('#cap-step').textContent = tr('cap.step', { k: k + 1, n: c.steps.length });
+    q('#cap-title').textContent = st.title;
+    q('#cap-text').innerHTML = fmt(st.text);
+    const showRead = !!m && k === m.at;
+    q('#cap-read').hidden = !showRead;
+    if (showRead) {
+      const r = m.reads.find((x) => x.id === state.read) || m.reads[0];
+      q('#cap-read .chip').textContent = tr(state.cp.zone ? 'branch.chip.zone' : 'branch.chip', { label: r.label });
+      q('#cap-read .why').innerHTML = fmt(r.why);
+    }
+    h = Math.max(h, probe.offsetHeight);
+  });
+  if (m) {
+    probe.classList.add('has-prompt');
+    q('#branch-prompt').hidden = false;
+    q('#branch-prompt').innerHTML = readsUI.promptHtml(m, state.read, !!state.cp.zone);
+    h = Math.max(h, probe.offsetHeight);
+  }
+  probe.remove();
+  cap.style.minHeight = `${Math.ceil(h)}px`;
 }
 
 function showCaption(k) {
@@ -374,7 +436,7 @@ function showCaption(k) {
   $('#cap-read').hidden = !showRead;
   if (showRead) {
     const r = m.reads.find((x) => x.id === state.read);
-    $('#cap-read .chip').textContent = tr('branch.chip', { label: r.label });
+    $('#cap-read .chip').textContent = tr(state.cp.zone ? 'branch.chip.zone' : 'branch.chip', { label: r.label });
     $('#cap-read .why').innerHTML = fmt(r.why);   // [x2] 같은 선수 표기를 칩으로
   }
   $$('#info-steps li:not(.branch-divider)').forEach((li, i) => {
@@ -458,6 +520,7 @@ function selectPlay(i, autoplay, fromLink = false) {
   state.hold = null;
   state.waiting = false;
   state.playing = !!autoplay;
+  state.userPaused = false;
   notation.build(state.cp);
   renderInfo();
   snapHeadings();
@@ -486,6 +549,7 @@ function restart() {
   closePrompt();
   state.t = 0;
   state.playing = true;
+  state.userPaused = false;
   beginStep(0);
   syncPlayBtn();
 }
@@ -496,11 +560,12 @@ function togglePlay() {
   if (state.waiting) { skipWait(); return; }
   if (!state.playing && state.t >= state.cp.end - 0.01) { restart(); return; }
   state.playing = !state.playing;
+  state.userPaused = !state.playing;
   syncPlayBtn();
+  // 다시 재생하면 카운트다운을 풀어 준다. Safari 등은 재생 버튼을 눌러도 포커스가 선택지에 남아 'focusout'이 오지 않는다
+  if (state.prompt && state.playing) state.prompt.held = $('#branch-prompt').matches(':hover');
   // 자동 모드의 선택지에서 멈추면 키보드로 고를 수 있게 지금 읽기 버튼으로 포커스를 옮긴다
-  if (state.prompt && !state.playing && !document.activeElement?.closest('input, textarea, select')) {
-    $('#branch-prompt .bp-options button.current')?.focus();
-  }
+  if (state.prompt && !state.playing && !document.activeElement?.closest('input, textarea, select')) focusPrompt();
 }
 
 function syncPlayBtn() {
@@ -654,11 +719,13 @@ function renderScoreBug(bug) {
   $('#sb-shot').hidden = bug.shot == null;
   $('#sb-shot').textContent = bug.shot ?? '';
   $('#sb-shot').title = tr('bug.shot');
+  $('#sb-shot').dataset.label = tr('bug.shotlabel');
   $('#sb-sr').textContent = tr('aria.scorebug', { period, clock: bug.clock, o: bug.score[0], d: bug.score[1] })
     + (bug.shot == null ? '' : tr('aria.scorebug.shot', { s: bug.shot }));
 }
 const RING = 2 * Math.PI * 8;   // 캡션 옆 원형 카운트다운의 둘레 (r = 8)
 // 화면에 그릴 시각. 분기점 선택지가 떠 있으면 분기 직전(마지막 공유 단계)을 보여 줘 기본 답을 미리 드러내지 않는다
+let promptOnScreen = true;   // 분기 선택지가 화면에 보이는지 (IntersectionObserver)
 const viewT = () => (state.prompt ? Math.max(0, branchTime(curPlay()) - 1e-3) : state.t);
 
 function updateUI() {
@@ -681,6 +748,7 @@ function updateUI() {
     status = 'wait';
     text = tr('status.wait');
   }
+  if (status === 'hold' && !state.playing) { status = null; text = ''; bar = 0; }   // 멈춰 있는 동안에는 흐르지 않는 카운트다운을 보이지 않는다
   if (status !== ui.status) {
     $('#cap-status').hidden = !status;
     $('#cap-status').classList.toggle('wait', status === 'wait');
@@ -704,7 +772,10 @@ function setLanguage(l) {
   syncLangButtons();
   library.render(PLAYS[state.idx]?.id);
   renderInfo();
-  if (state.prompt) readsUI.showPrompt(meta(), state.read);
+  if (state.prompt) {
+    readsUI.showPrompt(meta(), state.read, !!state.cp.zone);
+    state.prompt.held = $('#branch-prompt').matches(':hover');
+  }
   syncPlayBtn();
   syncThemeBtn();
   ui.statusText = null;
@@ -717,6 +788,8 @@ function setLanguage(l) {
 }
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+rig.reduceMotion = reducedMotion.matches;
+reducedMotion.addEventListener('change', (e) => { rig.reduceMotion = e.matches; });
 function syncCamButtons(mode) {
   $$('.cam-bar button').forEach((b) => {
     b.classList.toggle('on', b.dataset.cam === mode);
@@ -730,8 +803,8 @@ function syncLangButtons() {
   });
 }
 function setCam(mode) {
-  if (reducedMotion.matches) rig.jump(mode);
-  else rig.setMode(mode, ball.position);
+  rig.setMode(mode, ball.position);
+  court.fadeSupport(mode === 'baseline');
   syncCamButtons(mode);
   setParam('cam', mode === 'coach' ? null : mode);
 }
@@ -800,23 +873,34 @@ function bindUI() {
   tl.addEventListener('pointerup', endScrub);
   tl.addEventListener('pointercancel', endScrub);
 
+  let speedByPointer = false;
+  $('#speed').addEventListener('pointerdown', () => { speedByPointer = true; });
+  $('#speed').addEventListener('keydown', () => { speedByPointer = false; });
   $('#speed').addEventListener('change', (e) => {
     state.speed = +e.target.value; savePrefs();
+    if (speedByPointer) e.target.blur();
   });
   $$('#read-mode button').forEach((b) => b.addEventListener('click', () => {
+    if (b.dataset.v === state.readMode) return;   // 지금 모드를 다시 눌러도 카운트다운이 처음부터 시작하지 않는다
     state.readMode = b.dataset.v;
     setSeg('#read-mode', state.readMode);
     if (state.readMode === 'step' && state.hold) { state.waiting = true; state.playing = false; syncPlayBtn(); }
     if (state.readMode === 'off' || state.readMode === 'step') state.hold = null;
-    if (state.readMode !== 'step' && state.waiting) skipWait();
+    if (state.readMode !== 'step' && state.waiting) {
+      if (state.userPaused) state.waiting = false;   // 직접 멈춰 둔 재생은 모드를 바꿔도 다시 시작하지 않는다
+      else skipWait();
+    }
     // 분기점 선택지가 열려 있으면: 끄기는 지금 탭으로 계속, 그 외에는 새 모드에 맞춰 다시 연다
     if (state.prompt) {
-      if (state.readMode === 'off') pickRead(state.read, true);
-      else {
+      if (state.readMode === 'off') {
+        const paused = state.userPaused;
+        pickRead(state.read, true);
+        if (paused) { state.playing = false; state.userPaused = true; syncPlayBtn(); }   // 직접 멈춘 재생은 멈춘 채로
+      } else {
         // 단계별 모드에서 기다리던 선택지는 자동 모드로 바꾸면 카운트다운을 시작한다. 직접 멈춘 선택지는 멈춘 채로 둔다
         const wasWaiting = state.prompt.wait, wasPlaying = state.playing;
         openPrompt();
-        if (state.readMode !== 'step') { state.playing = wasWaiting || wasPlaying; syncPlayBtn(); }
+        if (state.readMode !== 'step') { state.playing = wasPlaying || (wasWaiting && !state.userPaused); syncPlayBtn(); }
       }
     }
     savePrefs();
@@ -832,6 +916,9 @@ function bindUI() {
     langPref = b.dataset.lang;
     setLanguage(b.dataset.lang);
   }));
+  // 선택지가 화면에 보일 때만 자동 모드 카운트다운이 흐른다 (휴대폰에서 화면 아래에 있으면 기다린다)
+  new IntersectionObserver((es) => { const e = es[es.length - 1]; promptOnScreen = e.isIntersecting && e.intersectionRatio >= 0.5; },
+    { threshold: [0, 0.5, 1] }).observe($('#branch-prompt'));
   // 선택지 위에 마우스나 키보드 포커스가 있으면 자동 모드 카운트다운을 멈춘다
   const bp = $('#branch-prompt');
   const holdPrompt = (on) => { if (state.prompt) state.prompt.held = on; };
@@ -841,18 +928,40 @@ function bindUI() {
   bp.addEventListener('focusout', (e) => holdPrompt(bp.contains(e.relatedTarget) || bp.matches(':hover')));
   // 단축키 안내가 열리면 그 안으로 포커스를 옮긴다(닫으면 브라우저가 돌려준다)
   $('#keys-pop').addEventListener('toggle', (e) => { if (e.newState === 'open') $('#keys-pop .round-btn')?.focus(); });
+  // 안내 창은 배경을 어둡게 덮으므로 Tab이 뒤쪽 페이지로 빠지지 않게 한다 (안에 있는 버튼은 닫기 하나)
+  $('#keys-pop').addEventListener('keydown', (e) => { if (e.key === 'Tab') { e.preventDefault(); $('#keys-pop .round-btn')?.focus(); } });
+  // 화면 높이가 낮은 노트북: 재생 설정 줄을 버튼 뒤로 접는다
+  const controls = $('.controls'), setBtn = $('#btn-settings');
+  const showSettings = (open) => { controls.classList.toggle('show-settings', open); setBtn.setAttribute('aria-expanded', String(open)); };
+  setBtn.addEventListener('click', () => showSettings(!controls.classList.contains('show-settings')));
+  document.addEventListener('pointerdown', (e) => { if (!e.target.closest('.controls')) showSettings(false); });
+  controls.addEventListener('keydown', (e) => { if (e.key === 'Escape' && controls.classList.contains('show-settings')) { showSettings(false); setBtn.focus(); } });
   // 건너뛰기 링크: 재생 버튼으로 바로
   $('.skip-link')?.addEventListener('click', (e) => { e.preventDefault(); $('#btn-play').focus(); });
 
   window.addEventListener('keydown', (e) => {
-    if (keyBelongsToTarget(e.target, e.key) || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    // 분기 선택지와 읽기 탭 안에서는 화살표가 버튼 사이를 옮겨 다닌다(작전이 바뀌지 않게).
+    // 선택지는 ←/→/↑/↓ 모두, 읽기 탭은 ↑/↓만 (←/→는 그대로 이전·다음 단계)
+    const group = typeof e.target?.closest === 'function' && e.target.closest('#branch-prompt .bp-options, #read-tabs');
+    if (group && e.target.closest('button')) {
+      const bs = [...group.querySelectorAll('button')];
+      const j = roveIndex(bs.length, bs.indexOf(e.target.closest('button')), e.key, group.id !== 'read-tabs');
+      if (j >= 0) { e.preventDefault(); bs[j].focus(); return; }
+    }
+    if (keyBelongsToTarget(e.target, e.key)) return;
     const cams = ['coach', 'broadcast', 'top', 'baseline', 'follow'];
     if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
     else if (e.key === 'Enter') { e.preventDefault(); skipWait(); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); nextStep(); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); stepPlay(-1); }
-    else if (e.key === 'ArrowDown') { e.preventDefault(); stepPlay(1); }
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      // 목록의 작전에 포커스가 있었으면 포커스도 새 작전으로 따라간다
+      const fromList = !!e.target.closest?.('.play-item');
+      stepPlay(e.key === 'ArrowUp' ? -1 : 1);
+      if (fromList) library.focusActive();
+    }
     else if (e.key === 'r' || e.key === 'R') restart();
     else if (e.key === 'd' || e.key === 'D') $('#tg-def').click();
     else if (e.key === 'n' || e.key === 'N') $('#tg-notes').click();
@@ -864,7 +973,7 @@ function bindUI() {
   });
 
   window.addEventListener('hashchange', () => {
-    const i = PLAYS.findIndex((p) => p.id === location.hash.slice(1));
+    const i = PLAYS.findIndex((p) => p.id === location.hash.slice(1).toLowerCase());
     if (i < 0) { history.replaceState(null, '', `${location.pathname}${location.search}#${PLAYS[state.idx].id}`); return; }
     if (i !== state.idx) selectPlay(i, true);
   });
@@ -876,8 +985,12 @@ function bindUI() {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    // 코트가 잘리거나 눈에 띄게 작아졌을 때만 부드럽게 다시 맞춘다 (rig.refit)
     rig.refit();
   }).observe(viewport);
+  let capW = 0;
+  new ResizeObserver(() => { const w = $('#caption').offsetWidth; if (w && w !== capW) { capW = w; fitCaption(); } }).observe($('#caption'));
+  desktopMQ.addEventListener('change', fitCaption);
 }
 
 // ── 시작 ─────────────────────────────────────────────────────
@@ -890,7 +1003,7 @@ function advance(dt) {
   if (state.playing) {
     if (state.prompt) {
       // 분기점 선택지: 자동 모드면 읽는 시간이 지나 지금 탭으로 계속한다
-      if (!state.prompt.wait && !state.prompt.held) {
+      if (!state.prompt.wait && !state.prompt.held && promptOnScreen) {
         state.prompt.remaining -= dt;
         if (state.prompt.remaining <= 0) pickRead(state.read, true);
       }
@@ -932,18 +1045,20 @@ function frame(now) {
   updateUI();
 }
 
-// 번호 라벨은 멀어도(전술판, 휴대폰) 화면에서 LABEL_MIN_PX보다 작아지지 않게 키운다
-const LABEL_MIN_PX = 19;
+// 번호 라벨은 멀어도(전술판, 휴대폰) 화면에서 일정 크기보다 작아지지 않게 키운다.
+// 전술판에서는 번호를 읽는 것이 목적이라 크게, 비스듬한 카메라에서는 겹치지 않게 조금 작게 둔다
+const LABEL_MIN_PX = { top: 20, other: 14 };
 const labelPos = new THREE.Vector3();
 function sizeLabels() {
   const h = renderer.domElement.clientHeight;
   if (!h) return;
   const perPx = (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / h;
+  const minPx = rig.mode === 'top' ? LABEL_MIN_PX.top : LABEL_MIN_PX.other;
   for (const id of [...OFF, ...DEF]) {
     const l = players[id]?.label;
     if (!l?.visible) continue;
     l.getWorldPosition(labelPos);
-    const s = Math.max(1.9, LABEL_MIN_PX * perPx * labelPos.distanceTo(camera.position));
+    const s = Math.max(LABEL_SIZE, minPx * perPx * labelPos.distanceTo(camera.position));
     l.scale.set(s, s, 1);
   }
 }
@@ -1006,10 +1121,12 @@ async function init() {
   rig.jump('coach');
   syncCamButtons('coach');
   if (cam && $(`.cam-bar [data-cam="${cam}"]`)) {
-    rig.jump(cam);
+    rig.jump(cam, ball.position);
     syncCamButtons(cam);
-  }
-  const hashId = location.hash.slice(1);
+  } else if (params.has('cam')) setParam('cam', null);   // 모르는 카메라는 주소에서 지운다 (공유되지 않게)
+  if (params.has('lang') && params.get('lang') !== getLang()) setParam('lang', null);
+  court.fadeSupport(rig.mode === 'baseline');
+  const hashId = location.hash.slice(1).toLowerCase();   // #Hammer도 해머로 연다 (selectPlay가 주소를 #hammer로 고친다)
   const fromHash = PLAYS.findIndex((p) => p.id === hashId);
   // 모르는 작전이면 첫 작전으로 열고, 그 작전을 위한 ?t=는 쓰지 않는다
   const linkOk = !hashId || fromHash >= 0;
@@ -1019,7 +1136,7 @@ async function init() {
   if (read0 && readIds(curPlay()).slice(1).includes(read0)) selectRead(read0);
   const startT = parseFloat(params.get('t'));
   if (linkOk && startT >= 0) { state.t = Math.min(startT, state.cp.end); prevT = state.t; }
-  else if (!linkOk) setParam('t', null);
+  else if (params.has('t')) setParam('t', null);   // 모르는 작전이거나 숫자가 아닌 시각(?t=abc, ?t=-3)
   requestAnimationFrame(frame);
   $('#loading').classList.add('hide');
   setTimeout(() => { if (state.t === 0 && !state.playing && !state.waiting) { state.playing = true; beginStep(0); syncPlayBtn(); } }, 900);

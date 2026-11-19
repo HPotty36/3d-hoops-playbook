@@ -367,3 +367,19 @@ for (const p of PLAYS) {
     });
   });
 }
+
+// 작전 노트의 대응 이름과 그 대응의 읽기 탭 이름이 같아야 '보기'를 눌렀을 때 같은 탭이 켜진 것을 알아본다
+for (const p of PLAYS) {
+  if (!p.reads) continue;
+  test(`${p.id}: a counter linked to a read has the read's name`, () => {
+    const ko = [p.reads.base, ...p.reads.options];
+    const en = [p.en.reads.base, ...p.en.reads.options];
+    p.counters.forEach((c, i) => {
+      if (!c.read) return;
+      const j = ko.findIndex((r) => r.id === c.read);
+      assert.ok(j >= 0, c.read);
+      assert.equal(c.name, ko[j].label, `ko ${c.read}`);
+      assert.equal(p.en.counters[i].name, en[j].label, `en ${c.read}`);
+    });
+  });
+}

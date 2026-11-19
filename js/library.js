@@ -17,11 +17,14 @@ export function categoryTerms(sections, labelsFor) {
   return out;
 }
 
-// BLOB·SLOB 같은 약어는 앞에서부터만 맞춘다 ('lob'이 BLOB에 걸리지 않게). 나머지는 어디든 포함되면 찾는다
+// BLOB·SLOB 같은 약어는 앞에서부터만 맞춘다 ('lob'이 BLOB에 걸리지 않게). 나머지는 어디든 포함되면 찾는다.
+// 세 글자 이하의 로마자 검색어(ato, lob, pop)는 낱말 첫머리에서만 맞춘다 ('ato'가 Elevator에 걸리지 않게)
 const ACRONYM = /\b[A-Z]{2,}\b/g;
+const WORD = /[\s\-–—/&,.()·]+/;
 function matches(s, q) {
   const n = normalize(s);
   if (n.startsWith(q)) return true;
+  if (/^[a-z]{1,3}$/.test(q)) return s.split(WORD).some((w) => normalize(w).startsWith(q));
   if (normalize(s.replace(ACRONYM, ' ')).includes(q)) return true;
   return (s.match(ACRONYM) || []).some((a) => normalize(a).startsWith(q));
 }
@@ -78,6 +81,14 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
   input.addEventListener('compositionend', () => { query = input.value; renderList(); });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && input.value) { e.preventDefault(); input.value = ''; query = ''; renderList(); }
+    // Enter: 첫 결과를 연다. ↓: 첫 결과를 열고 목록으로 들어간다 (그다음 ↑/↓는 결과 사이를 옮겨 다닌다)
+    if ((e.key === 'Enter' || e.key === 'ArrowDown') && !e.isComposing) {
+      const first = [...list.querySelectorAll('.play-item')].find((b) => !b.closest('[hidden]'));
+      if (!first) return;
+      e.preventDefault();
+      if (first.dataset.id !== activeId) onSelect(+first.dataset.idx);
+      if (e.key === 'ArrowDown') list.querySelector(`.play-item[data-id="${first.dataset.id}"]`)?.focus({ preventScroll: true });
+    }
   });
 
   const dotsHtml = (n) => [1, 2, 3].map((d) => `<i class="${d <= n ? 'on' : ''}"></i>`).join('');
@@ -101,7 +112,7 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
     const i = plays.indexOf(p);
     const diff = tr('diff', { n: p.difficulty });
     const n = readIds(p).length;
-    const reads = n ? `<span class="reads-badge">${esc(tr('lib.reads', { n }))}</span>` : '';
+    const reads = n ? `<span class="reads-badge">${esc(tr(p.defense?.zone ? 'lib.reads.zone' : 'lib.reads', { n }))}</span>` : '';
     return `<button type="button" class="play-item" data-idx="${i}" data-id="${p.id}">
       <span class="nm">${esc(localize(p).name)}</span>${reads}
       <span class="diff" title="${diff}">${dotsHtml(p.difficulty)}<span class="sr-only">${diff}</span></span></button>`;
@@ -150,6 +161,13 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
       if (on) b.setAttribute('aria-current', 'true');
       else b.removeAttribute('aria-current');
     });
+    // 주소로 연 작전이나 ↑/↓로 고른 작전이 목록 밖에 있으면 목록만 스크롤해 보이게 한다 (페이지는 움직이지 않는다)
+    const it = list.querySelector('.play-item.active');
+    if (it && list.offsetParent) {
+      const lr = list.getBoundingClientRect(), r = it.getBoundingClientRect();
+      if (r.top < lr.top) list.scrollTop -= lr.top - r.top + 8;
+      else if (r.bottom > lr.bottom) list.scrollTop += r.bottom - lr.bottom + 8;
+    }
   }
 
   // 언어가 바뀌면 문구까지 다시 그린다 (검색어와 필터는 유지)
@@ -174,5 +192,6 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
     renderList();
   }
 
-  return { el, render, setActive, order, reveal, focusSearch: () => { input.focus(); input.select(); } };
+  const focusActive = () => list.querySelector('.play-item.active')?.focus({ preventScroll: true });
+  return { el, render, setActive, order, reveal, focusActive, focusSearch: () => { input.focus(); input.select(); } };
 }

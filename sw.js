@@ -2,7 +2,7 @@
 // 온라인이면 늘 네트워크에서 새로 받아 캐시에 넣고(그래서 배포하면 바로 반영된다), 오프라인이면 캐시를 쓴다.
 // 첫 화면에서 모든 작전 모듈과 Three.js, 글꼴을 불러오므로, 한 번 열어 보면 모든 작전이 오프라인에서 돈다.
 // 아래 SHELL 파일(아이콘·매니페스트)이나 캐시 방식이 바뀌면 CACHE 버전을 올린다(옛 캐시는 activate에서 지운다).
-const CACHE = 'hoops-playbook-v2';
+const CACHE = 'hoops-playbook-v3';
 const SHELL = [
   './',
   './manifest.webmanifest',
@@ -32,7 +32,10 @@ self.addEventListener('message', (e) => {
   if (e.data?.type !== 'cache-urls' || !Array.isArray(e.data.urls)) return;
   const urls = [...new Set(e.data.urls.filter((u) => typeof u === 'string' && cacheable(u)))];
   e.waitUntil(caches.open(CACHE).then((c) => Promise.all(urls.map((u) => c.match(u).then((hit) => hit
-    || fetch(u).then((res) => (res.status === 200 ? c.put(u, res) : null)).catch(() => null))))));
+    || fetch(u).then((res) => (res.status === 200 ? c.put(u, res) : null)).catch(() => null)))))
+    // 배포 직후 옛 워커가 아직 옛 캐시에 쓰고 있었다면 그 캐시를 다시 지운다
+    .then(() => caches.keys())
+    .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))));
 });
 
 self.addEventListener('fetch', (e) => {
@@ -41,16 +44,20 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   const own = url.origin === self.location.origin;
   if (!own && !CDN.includes(url.hostname)) return;
-  // 페이지는 주소(?t= ?read= ?lang=)가 달라도 같은 파일이므로 './' 하나로 저장한다 (딥 링크마다 사본이 쌓이지 않게)
-  const nav = req.mode === 'navigate';
+  // 앱 페이지는 주소(?t= ?read= ?lang=)가 달라도 같은 파일이므로 './' 하나로 저장한다 (딥 링크마다 사본이 쌓이지 않게).
+  // 같은 범위의 다른 문서(README.md 등)를 열었을 때 그 내용이 앱 페이지 자리를 차지하지 않게, 앱 주소의 HTML만 './'로 둔다
+  const scope = new URL(self.registration.scope);
+  const app = req.mode === 'navigate' && (url.pathname === scope.pathname || url.pathname === `${scope.pathname}index.html`);
   e.respondWith(
     fetch(req).then((res) => {
-      if (res.status === 200) {
+      const html = (res.headers.get('content-type') || '').includes('text/html');
+      if (res.status === 200 && (!app || html)) {
         const copy = res.clone();
-        e.waitUntil(caches.open(CACHE).then((c) => c.put(nav ? './' : req, copy)).catch(() => {}));
+        e.waitUntil(caches.open(CACHE).then((c) => c.put(app ? './' : req, copy)).catch(() => {}));
       }
       return res;
-    }).catch(() => (nav ? caches.match('./') : caches.match(req, { ignoreSearch: own }))
+    }).catch(() => caches.open(CACHE)   // 이 버전의 캐시만 본다 (옛 버전 캐시가 남아 있어도 섞이지 않게)
+      .then((c) => (app ? c.match('./') : c.match(req, { ignoreSearch: own })))
       .then((hit) => hit || Response.error())),
   );
 });

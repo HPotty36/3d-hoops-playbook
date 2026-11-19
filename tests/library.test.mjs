@@ -78,6 +78,8 @@ test('search finds plays by their category in either language', async () => {
   assert.ok(find('pick & roll').includes('pick-and-roll'));
   assert.ok(!find('lob').includes('box'), "'lob' does not match the BLOB alias");
   assert.ok(find('lob').includes('sideline-lob'));
+  assert.ok(!find('ATO').includes('elevator-doors'), "'ATO' does not match the middle of Elevator");
+  assert.ok(find('ATO').length > 0);
   assert.ok(find('blob').includes('box'));
 });
 
