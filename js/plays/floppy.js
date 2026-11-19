@@ -38,7 +38,7 @@ export default {
     counters: [
       { name: 'Trail', desc: 'Stay on the shooter\'s hip and go through the screens together. It takes away the three but can give up a curl to the rim.' },
       { name: 'Switch', desc: 'The screener\'s defender takes the shooter, leaving a big chasing a shooter.' },
-      { name: 'Top-lock', desc: 'Take away the high route the shooter wants and force a backdoor cut or a curl.' },
+      { name: 'Top lock', desc: 'Take away the high route the shooter wants and force a backdoor cut or a curl.' },
     ],
     famous:
       'A staple for movement shooters like Richard Hamilton (Detroit Pistons), Ray Allen, and Reggie Miller. Today it is often run for shooters like Klay Thompson and Duncan Robinson.',

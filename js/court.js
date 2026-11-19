@@ -17,7 +17,7 @@ export const SCENE_THEMES = {
     ink: 'rgba(241, 236, 229, 1)', inkSoft: 'rgba(241, 236, 229, 0.62)',
   },
   light: {
-    bg: '#e4e1dc', apron: '#cfcac3', outer: '#bdb8b1',
+    bg: '#e4e1dc', apron: '#bdb7af', outer: '#b6b0a8', edge: 'rgba(42, 39, 36, 0.55)',
     ink: 'rgba(42, 39, 36, 0.92)', inkSoft: 'rgba(42, 39, 36, 0.58)',
   },
 };
@@ -107,7 +107,14 @@ function drawCourt(size, theme) {
     g.beginPath(); g.arc(X(cx), Z(cz), r * k, a0, a1, false); g.stroke();
     g.setLineDash([]);
   };
-  // 경계
+  // 경계 (밝은 테마에서는 흰 라인이 밝은 에이프런에 묻히지 않게 양옆에 어두운 테를 두른다)
+  if (tc.edge) {
+    g.save();
+    g.strokeStyle = tc.edge;
+    g.lineWidth = lw + (2 / 12) * k;
+    g.strokeRect(X(-25), Z(0), 50 * k, 47 * k);
+    g.restore();
+  }
   g.strokeRect(X(-25), Z(0), 50 * k, 47 * k);
   // 페인트
   g.strokeRect(X(-8), Z(0), 16 * k, 19 * k);
@@ -261,5 +268,19 @@ function buildHoop(scene) {
   hoop.add(backPlate);
 
   scene.add(hoop);
-  return { rim, net, hoop };
+
+  // 엔드라인 카메라에서는 지지대가 페인트존 선수를 가리므로 흐리게 그린다(그림자도 끈다)
+  let faded = false;
+  const fadeSupport = (on) => {
+    if (on === faded) return;
+    faded = on;
+    for (const m of [pad, steel]) {
+      m.transparent = on;
+      m.opacity = on ? 0.16 : 1;
+      m.depthWrite = !on;
+      m.needsUpdate = true;
+    }
+    post.castShadow = base.castShadow = !on;
+  };
+  return { rim, net, hoop, fadeSupport };
 }

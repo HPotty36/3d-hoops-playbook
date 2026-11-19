@@ -45,7 +45,7 @@ export default {
       { title: 'Triangle and two', text: '[1] passes to [5] on the right wing. [x3] goes out to the ball, [x5] drops toward the short corner and [x4] slides across the lane. [x1] stays on [1] and [x2] stays on [2] on the left wing, away from the ball.' },
       { title: 'Ball back to the star', text: '[5] passes back to [1] at the top. The triangle resets: [x3] at the free-throw line, [x4] and [x5] at the blocks. [x1] guards [1]; the triangle does not come out.' },
       { title: 'Two-star screen', text: '[2] comes up from the left wing and sets a ball screen for [1]. Both chasers go with the ball: [x1] stays on [1] and [x2] jumps out to trap.' },
-      { title: 'Roll & finish', text: '[2] rolls down the lane with nobody on it. [1] passes over the trap, and [2] lays it in before [x4] can come over from the block.' },
+      { title: 'Roll & finish', text: '[x3] steps up from the free-throw line to stop [1] coming off the screen, and the lane behind him is empty. [2] rolls down it, [1] passes over the trap, and [2] lays it in before [x4] can come over from the block.' },
     ],
     reads: {
       prompt: 'Where does the offense attack this zone?',
@@ -99,7 +99,7 @@ export default {
     {
       title: '롤 & 마무리',
       dur: 2.0,
-      text: '[2]가 아무도 없는 레인으로 굴러 내려갑니다. [1]이 덫 너머로 패스하고, 블록의 [x4]가 건너오기 전에 [2]가 레이업합니다.',
+      text: '스크린을 돌아 나오는 [1]을 막으려고 [x3]가 자유투 라인에서 올라오자 그 뒤 레인이 빕니다. [2]가 그 레인으로 굴러 내려가고, [1]이 덫 너머로 패스해 블록의 [x4]가 건너오기 전에 [2]가 레이업합니다.',
       move: { o2: { path: [[-2.6, 18], [-0.6, 8.4]], t: [0, 0.6] } },
       ball: [
         { type: 'lob', to: 'o2', at: 0.4 },
@@ -107,6 +107,7 @@ export default {
       ],
       def: {
         d2: { path: [[4.2, 23.6]], t: [0, 0.3] },
+        d3: { path: [[2.6, 21.8]], t: [0, 0.35] },                 // 꼭대기는 공을 막으러 올라와 레인을 비운다
         d4: { path: [[-6.6, 7.2], [-4.4, 7.6]], t: [0.65, 1] },   // 공이 [2]에게 닿은 뒤에야 블록에서 건너온다
       },
     },

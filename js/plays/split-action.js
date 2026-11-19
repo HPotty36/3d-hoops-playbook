@@ -37,7 +37,7 @@ export default {
     ],
     counters: [
       { name: 'Switch', desc: 'The two defenders trade assignments immediately. One beat late, and both get away.' },
-      { name: 'Stay home', desc: 'Never leave the shooter who screens; the defenders near the post handle the cutter.' },
+      { name: 'Stay with the screener', desc: 'Never leave the shooter who screens; the defenders near the post handle the cutter.' },
       { name: 'No post help', desc: 'Never double the post, which cuts down the kick-out chances.' },
     ],
     famous:

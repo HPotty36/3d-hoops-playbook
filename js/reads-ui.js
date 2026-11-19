@@ -34,13 +34,11 @@ export function createReadsUI({ tabs, prompt, tr, fmt, onTab, onPick }) {
     prompt.querySelectorAll('.bp-options button').forEach((b) => b.classList.toggle('current', b.dataset.read === id));
   }
 
-  function showPrompt(meta, currentId) {
-    current = currentId;
+  // zone: 존 수비 작전이면 '공격 해법 고르기'
+  function promptHtml(meta, currentId, zone = false) {
     const cur = meta.reads.find((r) => r.id === currentId) || meta.reads[0];
-    // 먼저 보이게 한 뒤 내용을 채운다: 보이는 영역에 새로 들어온 내용이어야 스크린 리더가 읽는다
-    prompt.hidden = false;
-    prompt.innerHTML = `
-      <p class="sr-only">${esc(tr('branch.title'))}</p>
+    return `
+      <p class="sr-only">${esc(tr(zone ? 'branch.title.zone' : 'branch.title'))}</p>
       <p class="bp-q" id="bp-q">${fmt(meta.prompt)}</p>
       <div class="bp-options">${meta.reads.map((r) =>
         `<button type="button" data-read="${r.id}" class="${r.id === currentId ? 'current' : ''}">${esc(r.label)}</button>`).join('')}</div>
@@ -48,6 +46,13 @@ export function createReadsUI({ tabs, prompt, tr, fmt, onTab, onPick }) {
         <span class="bp-bar" hidden><i></i></span>
         <span class="bp-hint">${esc(tr('branch.continue', { label: cur.label, ro: josaRo(cur.label) }))} <kbd>Enter</kbd></span>
       </div>`;
+  }
+
+  function showPrompt(meta, currentId, zone = false) {
+    current = currentId;
+    // 먼저 보이게 한 뒤 내용을 채운다: 보이는 영역에 새로 들어온 내용이어야 스크린 리더가 읽는다
+    prompt.hidden = false;
+    prompt.innerHTML = promptHtml(meta, currentId, zone);
     prompt.querySelectorAll('.bp-options button').forEach((b) => b.addEventListener('click', () => onPick(b.dataset.read)));
   }
 
@@ -64,5 +69,5 @@ export function createReadsUI({ tabs, prompt, tr, fmt, onTab, onPick }) {
     if (f != null) b.firstElementChild.style.width = `${Math.round(f * 1000) / 10}%`;
   }
 
-  return { render, setCurrent, showPrompt, hidePrompt, setPromptProgress, get current() { return current; } };
+  return { render, setCurrent, showPrompt, hidePrompt, setPromptProgress, promptHtml, get current() { return current; } };
 }

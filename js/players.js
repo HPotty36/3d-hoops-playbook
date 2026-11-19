@@ -9,6 +9,9 @@ const MANNEQUIN = 0x4a4f57;   // 그래파이트 톤 마네킹
 const SHOE = 0x111214;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
+// 번호 배지의 기본 크기 (ft). 배지는 텍스처를 가득 채운다
+export const LABEL_SIZE = 1.65;
+
 function labelTexture(id) {
   const c = document.createElement('canvas');
   c.width = c.height = 128;
@@ -19,14 +22,14 @@ function labelTexture(id) {
   g.strokeStyle = '#1d1b19';
   g.lineWidth = 6;
   g.beginPath();
-  if (off) g.arc(64, 64, 52, 0, Math.PI * 2);
-  else g.roundRect(14, 14, 100, 100, 30);
+  if (off) g.arc(64, 64, 60, 0, Math.PI * 2);
+  else g.roundRect(4, 4, 120, 120, 34);
   g.fill();
   g.stroke();
   g.fillStyle = team.text;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.font = `600 ${off ? 68 : 50}px "Rubik", sans-serif`;
+  g.font = `600 ${off ? 78 : 60}px "Rubik", sans-serif`;
   g.fillText(off ? id[1] : `X${id[1]}`, 64, 67);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -118,7 +121,7 @@ export function createPlayer(id) {
 
   // 번호 라벨
   const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture(id), depthTest: false, transparent: true, toneMapped: false }));
-  label.scale.set(1.9, 1.9, 1);
+  label.scale.set(LABEL_SIZE, LABEL_SIZE, 1);
   label.position.y = 8.3;
   label.renderOrder = 20;
   root.add(label);

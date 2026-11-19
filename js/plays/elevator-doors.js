@@ -52,7 +52,7 @@ export default {
       base: { label: 'Chase through', why: 'Chasing right behind runs straight into the closing doors. Catch and shoot the moment you are through.' },
       options: [
         {
-          label: 'Go around', why: 'If the defender is already waiting at the top, the rim behind the shooter is open. Change direction and cut to it.',
+          label: 'Go around the doors', why: 'If the defender is already waiting at the top, the rim behind the shooter is open. Change direction and cut to it.',
           steps: [
             { title: 'Go around the doors', text: '[x2] does not try to get through the doors. [x2] goes around them from the start and waits for [2] at the top, so closing the doors stops nobody.' },
             { title: 'Back cut', text: 'With the top taken away, [2] stops in front of the doors and cuts right back to the rim (the **back cut**), catching the bounce pass from [1] for the layup.' },
