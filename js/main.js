@@ -398,23 +398,29 @@ function fitCaption() {
   Object.assign(probe.style, { position: 'absolute', visibility: 'hidden', left: '0', top: '0', width: `${cap.offsetWidth}px`, minHeight: '0' });
   cap.after(probe);
   const q = (s) => probe.querySelector(s);
+  // 읽기 상태 줄(읽는 시간·기다림)은 가장 긴 문구로 잰다
   q('#cap-status').hidden = false;
+  q('#cap-status-text').textContent = [tr('status.hold', { n: 10 }), tr('status.wait')].reduce((a, b) => (b.length > a.length ? b : a));
   q('#branch-prompt').hidden = true;
-  const c = content(), m = meta();
+  const play = curPlay(), m = meta();
   let h = 0;
-  c.steps.forEach((st, k) => {
-    q('#cap-step').textContent = tr('cap.step', { k: k + 1, n: c.steps.length });
-    q('#cap-title').textContent = st.title;
-    q('#cap-text').innerHTML = fmt(st.text);
-    const showRead = !!m && k === m.at;
-    q('#cap-read').hidden = !showRead;
-    if (showRead) {
-      const r = m.reads.find((x) => x.id === state.read) || m.reads[0];
-      q('#cap-read .chip').textContent = tr(state.cp.zone ? 'branch.chip.zone' : 'branch.chip', { label: r.label });
-      q('#cap-read .why').innerHTML = fmt(r.why);
-    }
-    h = Math.max(h, probe.offsetHeight);
-  });
+  // 지금 읽기만이 아니라 모든 읽기의 단계를 잰다: 분기점에서 다른 읽기를 골라도 코트 크기가 바뀌지 않게
+  for (const id of m ? readIds(play) : [null]) {
+    const c = localize(variant(play, id));
+    const r = m && (m.reads.find((x) => x.id === id) || m.reads[0]);
+    c.steps.forEach((st, k) => {
+      q('#cap-step').textContent = tr('cap.step', { k: k + 1, n: c.steps.length });
+      q('#cap-title').textContent = st.title;
+      q('#cap-text').innerHTML = fmt(st.text);
+      const showRead = !!m && k === m.at;
+      q('#cap-read').hidden = !showRead;
+      if (showRead) {
+        q('#cap-read .chip').textContent = tr(state.cp.zone ? 'branch.chip.zone' : 'branch.chip', { label: r.label });
+        q('#cap-read .why').innerHTML = fmt(r.why);
+      }
+      h = Math.max(h, probe.offsetHeight);
+    });
+  }
   if (m) {
     probe.classList.add('has-prompt');
     q('#branch-prompt').hidden = false;
@@ -536,7 +542,10 @@ function seekStep(k, play) {
   closePrompt();
   k = clamp(k, 0, cp.steps.length - 1);
   state.t = cp.steps[k].s0 + 0.001;
-  if (play !== undefined) state.playing = play;
+  if (play !== undefined) {
+    state.playing = play;
+    if (play) state.userPaused = false;   // 단계 목록·'보기'로 다시 재생하면 멈춰 둔 상태가 아니다
+  }
   state.hold = null;
   state.waiting = false;
   // 아직 읽기를 고르지 않았다면 분기 단계로 건너뛸 때도 선택지를 먼저 보여 준다
@@ -862,6 +871,7 @@ function bindUI() {
     closePrompt();
     state.scrubbing = true;
     state.playing = false;
+    state.userPaused = true;   // 타임라인을 끌면 재생이 멈춘 채로 남는다 (읽기 모드를 바꿔도 다시 시작하지 않게)
     state.hold = null;
     state.waiting = false;
     syncPlayBtn();
@@ -973,8 +983,10 @@ function bindUI() {
   });
 
   window.addEventListener('hashchange', () => {
-    const i = PLAYS.findIndex((p) => p.id === location.hash.slice(1).toLowerCase());
+    const raw = location.hash.slice(1);
+    const i = PLAYS.findIndex((p) => p.id === raw.toLowerCase());
     if (i < 0) { history.replaceState(null, '', `${location.pathname}${location.search}#${PLAYS[state.idx].id}`); return; }
+    if (raw !== PLAYS[i].id) history.replaceState(null, '', `${location.pathname}${location.search}#${PLAYS[i].id}`);
     if (i !== state.idx) selectPlay(i, true);
   });
 
@@ -1047,7 +1059,7 @@ function frame(now) {
 
 // 번호 라벨은 멀어도(전술판, 휴대폰) 화면에서 일정 크기보다 작아지지 않게 키운다.
 // 전술판에서는 번호를 읽는 것이 목적이라 크게, 비스듬한 카메라에서는 겹치지 않게 조금 작게 둔다
-const LABEL_MIN_PX = { top: 20, other: 14 };
+const LABEL_MIN_PX = { top: 20, other: 16 };
 const labelPos = new THREE.Vector3();
 function sizeLabels() {
   const h = renderer.domElement.clientHeight;
@@ -1150,6 +1162,11 @@ async function init() {
       updateUI();
     },
   };
+  document.documentElement.classList.remove('app-failed');   // 다 준비됐으면 앞서 난 엉뚱한 오류로 화면을 숨기지 않는다
 }
 
-init();
+// init은 비동기라 그 안의 오류는 'error'가 아니라 거부된 프로미스로 온다. 로딩 화면에 실패 안내를 띄운다
+init().catch((err) => {
+  document.documentElement.classList.add('app-failed');
+  console.error(err);
+});

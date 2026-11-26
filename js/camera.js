@@ -54,11 +54,16 @@ export class CameraRig {
     this.fitCam = new THREE.PerspectiveCamera();
     this.fitAspect = 0;
     this.userMoved = false;
-    // 한 번 누르기(탭)만으로는 사용자가 카메라를 옮긴 것으로 치지 않는다. 실제로 끌어서 카메라가 움직였을 때만
+    // 한 번 누르기(탭)만으로는 사용자가 카메라를 옮긴 것으로 치지 않는다. 실제로 끌거나 휠·핀치로 카메라가 움직였을 때만.
+    // OrbitControls는 끌기·휠 이벤트 안에서 바로 update()를 불러 'change'를 낸다. 전환(tween)이나 공 추적 중에는
+    // 이 리그가 매 프레임 부르는 update()도 'change'를 내므로, 그때 나는 'change'는 사용자 조작으로 치지 않는다
     let dragging = false;
+    this.selfUpdate = false;
     this.controls.addEventListener('start', () => { dragging = true; });
     this.controls.addEventListener('end', () => { dragging = false; });
-    this.controls.addEventListener('change', () => { if (dragging) { this.tween = null; this.userMoved = true; } });
+    this.controls.addEventListener('change', () => {
+      if (dragging && !this.selfUpdate) { this.tween = null; this.userMoved = true; }
+    });
   }
 
   // dir 방향에서 FIT 상자가 화면 안에 들어오는 가장 가까운 거리
@@ -84,9 +89,10 @@ export class CameraRig {
     const c = this.fitCam;
     const t = target.clone();
     const v = new THREE.Vector3();
-    let d = 0;
+    let d = 0, stale = true;
     for (let i = 0; i < 8; i++) {
       d = this.fitDistance(dir, t, points);
+      stale = false;
       c.position.copy(t).addScaledVector(dir, d);
       c.lookAt(t);
       c.updateMatrixWorld();
@@ -103,7 +109,9 @@ export class CameraRig {
       const nx = clamp(hit.x, ...TARGET_BOX.x), nz = clamp(hit.z, ...TARGET_BOX.z);
       if (Math.abs(nx - t.x) < 0.01 && Math.abs(nz - t.z) < 0.01) break;
       t.x = nx; t.z = nz;
+      stale = true;
     }
+    if (stale) d = this.fitDistance(dir, t, points);   // 마지막에 조준점을 옮겼으면 그 자리에 맞는 거리로
     return { pos: t.clone().addScaledVector(dir, d), target: t };
   }
 
@@ -193,7 +201,9 @@ export class CameraRig {
       this.controls.target.add(delta);
       this.camera.position.add(delta);
     }
+    this.selfUpdate = true;
     this.controls.update();
+    this.selfUpdate = false;
     // 끌어서 옮기거나 돌려도 코트를 잃지 않게: 회전 중심은 코트 둘레 상자 안, 카메라는 바닥 위
     const t = this.controls.target, c = this.camera.position;
     const tx = clamp(t.x, ...TARGET_BOX.x), ty = clamp(t.y, ...TARGET_BOX.y), tz = clamp(t.z, ...TARGET_BOX.z);

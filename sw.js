@@ -3,6 +3,9 @@
 // 첫 화면에서 모든 작전 모듈과 Three.js, 글꼴을 불러오므로, 한 번 열어 보면 모든 작전이 오프라인에서 돈다.
 // 아래 SHELL 파일(아이콘·매니페스트)이나 캐시 방식이 바뀌면 CACHE 버전을 올린다(옛 캐시는 activate에서 지운다).
 const CACHE = 'hoops-playbook-v3';
+// 지울 캐시: 이 앱이 만든 캐시 가운데 지금 버전이 아닌 것. GitHub Pages에서는 한 사용자의 모든 프로젝트 사이트가
+// 같은 출처(캐시 저장소)를 쓰므로, 다른 사이트의 캐시는 건드리지 않는다
+const stale = (k) => k.startsWith('hoops-playbook-') && k !== CACHE;
 const SHELL = [
   './',
   './manifest.webmanifest',
@@ -21,7 +24,7 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys()
-    .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+    .then((keys) => Promise.all(keys.filter(stale).map((k) => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 
@@ -35,7 +38,7 @@ self.addEventListener('message', (e) => {
     || fetch(u).then((res) => (res.status === 200 ? c.put(u, res) : null)).catch(() => null)))))
     // 배포 직후 옛 워커가 아직 옛 캐시에 쓰고 있었다면 그 캐시를 다시 지운다
     .then(() => caches.keys())
-    .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))));
+    .then((keys) => Promise.all(keys.filter(stale).map((k) => caches.delete(k)))));
 });
 
 self.addEventListener('fetch', (e) => {
