@@ -93,3 +93,10 @@ test('arrow-key order follows the play list (sections, then categories) and the 
   const hard = listOrder(PLAYS, SECTIONS, '', 3);
   assert.ok(hard.length > 0 && hard.every((i) => PLAYS[i].difficulty === 3));
 });
+
+// 짧은 검색어는 낱말 첫머리에서만 맞추지만, '&'도 낱말로 본다 (&는 and로 읽는다)
+test("'and' and '&' both find a name written with '&'", () => {
+  const plays = [{ id: 'amp', name: 'Pick & Pop', difficulty: 1 }, { id: 'mid', name: 'Grandstand', difficulty: 1 }];
+  assert.deepEqual(ids(filterPlays(plays, 'and', 0)), ['amp']);
+  assert.deepEqual(ids(filterPlays(plays, '&', 0)), ['amp']);
+});

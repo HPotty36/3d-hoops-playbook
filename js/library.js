@@ -20,7 +20,7 @@ export function categoryTerms(sections, labelsFor) {
 // BLOB·SLOB 같은 약어는 앞에서부터만 맞춘다 ('lob'이 BLOB에 걸리지 않게). 나머지는 어디든 포함되면 찾는다.
 // 세 글자 이하의 로마자 검색어(ato, lob, pop)는 낱말 첫머리에서만 맞춘다 ('ato'가 Elevator에 걸리지 않게)
 const ACRONYM = /\b[A-Z]{2,}\b/g;
-const WORD = /[\s\-–—/&,.()·]+/;
+const WORD = /[\s\-–—/,.()·]+/;
 function matches(s, q) {
   const n = normalize(s);
   if (n.startsWith(q)) return true;
@@ -81,9 +81,15 @@ export function createLibrary({ plays, sections, tr, localize, onSelect, collaps
   input.addEventListener('compositionend', () => { query = input.value; renderList(); });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && input.value) { e.preventDefault(); input.value = ''; query = ''; renderList(); }
-    // Enter: 첫 결과를 연다. ↓: 첫 결과를 열고 목록으로 들어간다 (그다음 ↑/↓는 결과 사이를 옮겨 다닌다)
+    // Enter: 첫 결과를 연다. ↓: 첫 결과를 열고 목록으로 들어간다 (그다음 ↑/↓는 결과 사이를 옮겨 다닌다).
+    // 검색어가 없으면 작전을 바꾸지 않는다: ↓는 지금 작전으로 포커스만 옮기고 Enter는 아무 일도 하지 않는다
     if ((e.key === 'Enter' || e.key === 'ArrowDown') && !e.isComposing) {
-      const first = [...list.querySelectorAll('.play-item')].find((b) => !b.closest('[hidden]'));
+      const visible = [...list.querySelectorAll('.play-item')].filter((b) => !b.closest('[hidden]'));
+      if (!normalize(input.value)) {
+        if (e.key === 'ArrowDown') { e.preventDefault(); (visible.find((b) => b.dataset.id === activeId) || visible[0])?.focus({ preventScroll: true }); }
+        return;
+      }
+      const first = visible[0];
       if (!first) return;
       e.preventDefault();
       if (first.dataset.id !== activeId) onSelect(+first.dataset.idx);
